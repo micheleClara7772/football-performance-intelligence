@@ -40,3 +40,9 @@ src/fpi/
   ui/{dashboard,tactics,video,assistant,training}.py
 tests/
 ```
+
+## Environnement de développement et transfert
+
+**Préférence obligatoire :** exécuter les installations et les tests dans un environnement **distant**, si compatible avec Cursor et sans facturation non autorisée. La configuration attendue est `.devcontainer/devcontainer.json` (Python 3.11) avec dépendances Python installées dans un `.venv/` interne à l'environnement et fichiers de dépendances reproductibles. Pour un développement local ultérieur, le `.venv` reste isolé mais **ne supprime pas** la nécessité d'une installation Python de base ; un conteneur local nécessiterait Docker ou équivalent. La portabilité résulte des manifestes versionnés et de la reconstruction sur une autre machine : ne pas transférer le dossier `.venv`.
+
+En cas d'incompatibilité Cursor / hébergement distant ou de dépassement des quotas gratuits, **bloquer la mise en place et demander une décision** : ne pas installer automatiquement de composants sur le poste de travail et ne pas engager de frais.
