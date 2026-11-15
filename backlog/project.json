@@ -26,5 +26,16 @@
     "Demo"
   ],
   "date_field": "Target date",
-  "initial_status": "Backlog"
+  "initial_status": "See each issue's current status",
+  "url": "https://github.com/users/micheleClara7772/projects/1/views/1",
+  "project_creation": "Project URL provided by owner; project access/settings not independently inspectable through this GitHub connector",
+  "github_project_configuration": "Pending: add issues to Project, confirm private visibility, configure columns and custom fields in GitHub UI",
+  "issue_label_mapping": {
+    "Backlog": "status:backlog",
+    "Ready": "status:ready",
+    "In Progress": "status:in-progress",
+    "In Review": "status:in-review",
+    "Blocked": "status:blocked",
+    "Done": "status:done"
+  }
 }
