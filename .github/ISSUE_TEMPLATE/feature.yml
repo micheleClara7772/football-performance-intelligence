@@ -1,0 +1,36 @@
+name: Fonctionnalité FPI
+description: Travail fonctionnel lié à un parcours démontrable
+labels: ["type:feature"]
+body:
+  - type: input
+    id: objectif
+    attributes:
+      label: Objectif utilisateur
+      placeholder: En tant que staff technique, je veux…
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      options: [Foundation, Data, Dashboard, Tactics, Video, AI, Training, Quality, Demo]
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      options: [P0, P1, P2]
+    validations:
+      required: true
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Critères d'acceptation vérifiables
+      description: Inclure source, méthode et test lorsque pertinent
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: Dépendances et risques

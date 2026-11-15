@@ -1,0 +1,352 @@
+[
+  {
+    "id": "FPI-I01",
+    "title": "Créer le dépôt privé FPI et publier les fondations",
+    "module": "Foundation",
+    "priority": "P0",
+    "type": "task",
+    "target_date": "2026-11-15",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [],
+    "objective": "Déployer les fondations",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I02",
+    "title": "Créer le Project privé et alimenter Issues, labels et jalons",
+    "module": "Foundation",
+    "priority": "P0",
+    "type": "task",
+    "target_date": "2026-11-15",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I01"
+    ],
+    "objective": "Configurer le pilotage",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I03",
+    "title": "Vérifier StatsBomb, match et conditions de réutilisation",
+    "module": "Data",
+    "priority": "P0",
+    "type": "task",
+    "target_date": "2026-11-16",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I01"
+    ],
+    "objective": "Vérifier la provenance et les droits",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I04",
+    "title": "Initialiser le projet Python et l’application Streamlit",
+    "module": "Foundation",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-16",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I01"
+    ],
+    "objective": "Mettre en place l'ossature testable",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I05",
+    "title": "Ingérer et valider les événements du match de référence",
+    "module": "Data",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-16",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I03",
+      "FPI-I04"
+    ],
+    "objective": "Ingérer sans inventer d'événements",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I06",
+    "title": "Définir et tester les métriques match et mi-temps",
+    "module": "Tactics",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-17",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I05"
+    ],
+    "objective": "Tester des mesures déterministes",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I07",
+    "title": "Construire un dashboard collectif fondé sur des données réelles",
+    "module": "Dashboard",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-17",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I05"
+    ],
+    "objective": "Afficher des données réelles",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I08",
+    "title": "Créer comparaison tactique et cartes spatiales",
+    "module": "Tactics",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-17",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I06"
+    ],
+    "objective": "Comparer les périodes",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I09",
+    "title": "Arbitrer la stratégie vidéo, droits et synchronisation",
+    "module": "Video",
+    "priority": "P0",
+    "type": "decision",
+    "target_date": "2026-11-16",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I03"
+    ],
+    "objective": "Obtenir une décision datée, droits vérifiés",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I10",
+    "title": "Implémenter le lecteur vidéo selon l’option approuvée",
+    "module": "Video",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-18",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I04",
+      "FPI-I09"
+    ],
+    "objective": "Naviguer dans des clips autorisés",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I11",
+    "title": "Relier annotations tactiques aux séquences vérifiées",
+    "module": "Video",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-18",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I05",
+      "FPI-I08",
+      "FPI-I10"
+    ],
+    "objective": "Tester les annotations et timestamps",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I12",
+    "title": "Intégrer assistant IA contextualisé en français",
+    "module": "AI",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-18",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I06",
+      "FPI-I08"
+    ],
+    "objective": "Répondre avec preuves et limites",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I13",
+    "title": "Créer générateur modifiable de séances",
+    "module": "Training",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-18",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I08"
+    ],
+    "objective": "Exercices éditables et validation humaine",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I14",
+    "title": "Intégrer le parcours vertical des 5 modules",
+    "module": "Quality",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-18",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I07",
+      "FPI-I08",
+      "FPI-I11",
+      "FPI-I12",
+      "FPI-I13"
+    ],
+    "objective": "Relier 7 étapes du parcours",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I15",
+    "title": "Tests fonctionnels, sécurité et stabilisation",
+    "module": "Quality",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-19",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I14"
+    ],
+    "objective": "Tests, sécurité et blocages corrigés",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I16",
+    "title": "Répétition démo et plan de secours",
+    "module": "Demo",
+    "priority": "P0",
+    "type": "feature",
+    "target_date": "2026-11-19",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I15"
+    ],
+    "objective": "Parcours chronométré 7–10 minutes",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I17",
+    "title": "Étendre l’analyse avec vues 360 si elles sont adaptées",
+    "module": "Tactics",
+    "priority": "P2",
+    "type": "feature",
+    "target_date": "2026-11-19",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I03",
+      "FPI-I08"
+    ],
+    "objective": "Décrire les limites des snapshots 360",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  },
+  {
+    "id": "FPI-I18",
+    "title": "Préparer synthèse des retours et piste post-MVP",
+    "module": "Demo",
+    "priority": "P1",
+    "type": "feature",
+    "target_date": "2026-11-20",
+    "estimate_hours": 2,
+    "pilot": "Tech lead / décision métier",
+    "depends_on": [
+      "FPI-I16"
+    ],
+    "objective": "Consigner les retours",
+    "acceptance": [
+      "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
+      "Aucun résultat déclaré livré sans test ou preuve vérifiable"
+    ],
+    "status": "Backlog"
+  }
+]

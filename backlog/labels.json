@@ -1,0 +1,82 @@
+[
+  {
+    "name": "priority:P0",
+    "color": "b60205",
+    "description": "priority:P0"
+  },
+  {
+    "name": "priority:P1",
+    "color": "fbca04",
+    "description": "priority:P1"
+  },
+  {
+    "name": "priority:P2",
+    "color": "0e8a16",
+    "description": "priority:P2"
+  },
+  {
+    "name": "module:foundation",
+    "color": "c2e0c6",
+    "description": "module:foundation"
+  },
+  {
+    "name": "module:data",
+    "color": "c2e0c6",
+    "description": "module:data"
+  },
+  {
+    "name": "module:dashboard",
+    "color": "c2e0c6",
+    "description": "module:dashboard"
+  },
+  {
+    "name": "module:tactics",
+    "color": "c2e0c6",
+    "description": "module:tactics"
+  },
+  {
+    "name": "module:video",
+    "color": "c2e0c6",
+    "description": "module:video"
+  },
+  {
+    "name": "module:ai",
+    "color": "c2e0c6",
+    "description": "module:ai"
+  },
+  {
+    "name": "module:training",
+    "color": "c2e0c6",
+    "description": "module:training"
+  },
+  {
+    "name": "module:quality",
+    "color": "c2e0c6",
+    "description": "module:quality"
+  },
+  {
+    "name": "module:demo",
+    "color": "c2e0c6",
+    "description": "module:demo"
+  },
+  {
+    "name": "type:feature",
+    "color": "d4c5f9",
+    "description": "type:feature"
+  },
+  {
+    "name": "type:task",
+    "color": "d4c5f9",
+    "description": "type:task"
+  },
+  {
+    "name": "type:bug",
+    "color": "d4c5f9",
+    "description": "type:bug"
+  },
+  {
+    "name": "type:decision",
+    "color": "d4c5f9",
+    "description": "type:decision"
+  }
+]

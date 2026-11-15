@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+.pyenv/
+build/
+dist/
+*.egg-info/
+# Local secrets and IDE
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.vscode/
+.idea/
+# Datasets, licensed media and outputs (not redistribution-approved by default)
+data/raw/
+data/processed/
+media/
+outputs/
+*.mp4
+*.mov
+*.mkv
+# OS
+.DS_Store
+Thumbs.db
