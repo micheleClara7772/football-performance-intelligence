@@ -1,4 +1,4 @@
-name: Scaffold and backlog validation
+name: FPI CI - Scaffold and Python tests
 on:
   push:
     branches: [main]
@@ -14,5 +14,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Validate project scaffold
-        run: python scripts/verify_scaffold.py
+      - name: Install isolated Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e '.[dev]'
+      - name: Validate original project scaffold
+        run: .venv/bin/python scripts/verify_scaffold.py
+      - name: Run product unit and UI smoke tests
+        run: .venv/bin/python -m pytest
+      - name: Import application and compile Python sources
+        run: |
+          .venv/bin/python -m compileall -q src app.py
+          .venv/bin/python -c "import fpi.ui.app; print('Application imports correctly')"

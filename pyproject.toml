@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69,<81", "wheel>=0.42,<1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "football-performance-intelligence"
+version = "0.1.0"
+description = "FPI - analyse collective de football, MVP de démonstration"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.50,<2",
+    "pandas>=2.2,<4",
+    "plotly>=6.0,<7",
+    "requests>=2.31,<3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
