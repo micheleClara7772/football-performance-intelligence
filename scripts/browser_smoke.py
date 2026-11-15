@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import os
+import time
+from urllib.error import URLError
+from urllib.request import urlopen
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -11,7 +14,23 @@ OUT = Path(os.environ.get("FPI_SCREENSHOT_DIR", "outputs/browser-proof"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 
+def wait_for_server(timeout: int = 90) -> None:
+    """Attendre la santé de Streamlit avant toute connexion navigateur."""
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            with urlopen(BASE + "/_stcore/health", timeout=3) as response:
+                if response.status == 200:
+                    return
+        except (OSError, URLError) as exc:
+            last_error = exc
+        time.sleep(1)
+    raise RuntimeError(f"Streamlit inaccessible après {timeout}s : {last_error}")
+
+
 def main() -> None:
+    wait_for_server()
     with sync_playwright() as tool:
         browser = tool.chromium.launch(headless=True, args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1)
