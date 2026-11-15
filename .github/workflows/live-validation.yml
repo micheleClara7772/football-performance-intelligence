@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      FPI_DATA_DIR: ${{ runner.temp }}/fpi-real-match
-      FPI_SCREENSHOT_DIR: ${{ runner.temp }}/fpi-browser-proof
+      FPI_DATA_DIR: data/raw
+      FPI_SCREENSHOT_DIR: outputs/browser-proof
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,6 +50,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fpi-browser-proof
-          path: ${{ runner.temp }}/fpi-browser-proof/*.png
+          path: outputs/browser-proof/*.png
           if-no-files-found: warn
           retention-days: 7
