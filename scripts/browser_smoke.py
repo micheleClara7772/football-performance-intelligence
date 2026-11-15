@@ -18,7 +18,7 @@ def main() -> None:
         page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
         page.get_by_role("heading", name="Dashboard collectif").wait_for(timeout=90_000)
         page.get_by_text("Événements validés").first.wait_for(timeout=60_000)
-        assert page.locator('[data-testid="stPlotlyChart"]').count() >= 1
+        page.locator('[data-testid="stPlotlyChart"]').first.wait_for(timeout=45_000)
         assert not page.get_by_text("Aucune donnée vérifiée en cache.").count()
         page.screenshot(path=str(OUT / "01-dashboard.png"), full_page=True)
 
