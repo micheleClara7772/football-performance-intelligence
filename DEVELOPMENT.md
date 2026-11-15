@@ -54,3 +54,9 @@ Match de référence **Maroc 1–0 Portugal (10 décembre 2022)**. Catalogue Sta
 - Vidéo : stratégie à déterminer.
 - Assistant IA : non configuré.
 - Séances : en préparation.
+
+## Lot 02 — exploration tactique et séances (branche de revue)
+
+La vue Analyse tactique propose une comparaison des mi-temps, une chronologie d'événements et des positions dans le repère StatsBomb. Le module Séances propose un brouillon modifiable sur choix explicite du thème par l'entraîneur. L'onglet Assistant IA n'effectue **aucun appel de modèle** : il répond provisoirement à des questions factuelles prédéfinies. La vidéo reste à arbitrer.
+
+Définitions et limites : `docs/tactical-metrics.md`. Ne pas confondre une variation descriptive avec sa cause tactique.

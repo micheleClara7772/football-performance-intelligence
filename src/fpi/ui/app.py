@@ -1,14 +1,20 @@
-"""FPI Streamlit UI: five sections and observed-data-only visualisations."""
+"""FPI Streamlit interface: a vertical-slice MVP with honest module states."""
 from __future__ import annotations
 
 import plotly.express as px
 import streamlit as st
 
 from fpi.data.statsbomb import (
-    DataUnavailableError, DataValidationError, DownloadError,
-    download_reference_match, load_reference_match,
+    DataUnavailableError,
+    DataValidationError,
+    DownloadError,
+    download_reference_match,
+    load_reference_match,
 )
-from fpi.metrics.collective import metrics_by_period, shot_locations
+from fpi.metrics.collective import metrics_by_period
+from fpi.ui.tactical import render_tactical
+from fpi.ui.assistant import render_assistant
+from fpi.ui.training import render_training
 
 PAGES = ("Dashboard", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
 
@@ -22,8 +28,8 @@ def _banner() -> None:
 
 def _source_panel(metadata: dict | None) -> None:
     st.sidebar.divider()
-    st.sidebar.caption("Source : [StatsBomb Open Data](https://github.com/hudl/open-data)")
-    st.sidebar.caption("Attribution StatsBomb obligatoire pour publication/partage ; droits de démonstration commerciale à confirmer.")
+    st.sidebar.caption("Source prévue : [StatsBomb Open Data](https://github.com/hudl/open-data)")
+    st.sidebar.caption("Attribution StatsBomb obligatoire pour toute publication/partage ; droits de démonstration commerciale à confirmer.")
     if metadata:
         st.sidebar.success(f"Événements contrôlés : {metadata['validated_events']:,}")
         st.sidebar.caption(f"Chargement : {metadata['retrieved_utc']}")
@@ -33,12 +39,14 @@ def _import_panel() -> None:
     st.sidebar.subheader("Données du match")
     st.sidebar.caption("L'import utilise une requête externe seulement après clic ; aucun téléchargement automatique.")
     if st.sidebar.button("Importer depuis StatsBomb", type="primary", use_container_width=True):
-        with st.sidebar.spinner("Téléchargement et validation…"):
+        with st.sidebar.status("Téléchargement et validation…", expanded=False) as status:
             try:
                 match, events, _ = download_reference_match()
-                st.sidebar.success(f"{len(events)} événements enregistrés : {match['home_team']['home_team_name']} – {match['away_team']['away_team_name']}")
+                status.update(label=f"{len(events)} événements enregistrés", state="complete")
+                st.sidebar.success(f"Import vérifié : {match['home_team']['home_team_name']} – {match['away_team']['away_team_name']}")
             except (DataValidationError, DownloadError, OSError) as exc:
-                st.sidebar.error(f"Import impossible : {exc}")
+                status.update(label="Import impossible", state="error")
+                st.sidebar.error(str(exc))
 
 
 def _dashboard(match: dict | None, events: list[dict] | None) -> None:
@@ -60,40 +68,11 @@ def _dashboard(match: dict | None, events: list[dict] | None) -> None:
                  title="Tirs enregistrés par équipe et par période")
     fig.update_xaxes(tickmode="array", tickvals=[1, 2], ticktext=["1re", "2e"])
     st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(metrics.rename(columns={
-        "team": "Équipe", "period": "Période", "events": "Événements",
-        "shots": "Tirs", "passes": "Passes tentées", "passes_completed": "Passes réussies",
-        "pass_completion_pct": "Passes réussies (%)", "xg": "xG StatsBomb",
-    }), hide_index=True, use_container_width=True)
-    st.caption("Passes réussies : événements Pass sans pass.outcome. xG affiché seulement s'il est présent pour tous les tirs.")
-
-
-def _tactics(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Analyse tactique · observations descriptives")
-    if not events or not match:
-        st.warning("L'analyse nécessite des données réelles importées et validées.")
-        return
-    teams = (match["home_team"]["home_team_name"], match["away_team"]["away_team_name"])
-    chosen = st.selectbox("Équipe", teams)
-    period_choice = st.radio("Période", [1, 2], horizontal=True, format_func=lambda p: "1re mi-temps" if p == 1 else "2e mi-temps")
-    metrics = metrics_by_period(events, teams)
-    row = metrics[(metrics.team == chosen) & (metrics.period == period_choice)].iloc[0]
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Tirs", int(row.shots))
-    c2.metric("Passes tentées", int(row.passes))
-    c3.metric("Passes réussies", int(row.passes_completed))
-    spots = shot_locations(events, chosen, period_choice)
-    if spots.empty:
-        st.info("Aucun tir localisé pour cette équipe et cette période.")
-    else:
-        fig = px.scatter(spots, x="x", y="y", hover_data=["player", "minute"],
-                         range_x=[0, 120], range_y=[80, 0],
-                         labels={"x": "Longueur (0–120)", "y": "Largeur (0–80)"},
-                         title="Positions des tirs enregistrés · repère StatsBomb 120 × 80")
-        fig.update_traces(marker={"size": 13, "opacity": 0.8})
-        fig.update_layout(yaxis_scaleanchor="x")
-        st.plotly_chart(fig, use_container_width=True)
-    st.caption("Vue descriptive : ni vidéo, ni preuve de causalité. Les données 360 ne sont pas du tracking continu.")
+    st.dataframe(metrics.rename(columns={"team": "Équipe", "period": "Période", "events": "Événements",
+                                         "shots": "Tirs", "passes": "Passes tentées", "passes_completed": "Passes réussies",
+                                         "pass_completion_pct": "Passes réussies (%)", "xg": "xG StatsBomb"}),
+                 hide_index=True, use_container_width=True)
+    st.caption("Passes réussies : événements Pass sans champ pass.outcome. xG affiché seulement si renseigné pour tous les tirs de la période.")
 
 
 def _placeholder(title: str, description: str) -> None:
@@ -111,16 +90,16 @@ def main() -> None:
     except DataUnavailableError:
         match = events = metadata = None
     except DataValidationError as exc:
-        st.error(f"Cache invalide : {exc}. Réimporte les données pour le réparer.")
+        st.error(f"Cache invalide : {exc}. Réimporte les données vérifiées pour le réparer.")
         match = events = metadata = None
     _source_panel(metadata)
     if page == "Dashboard":
         _dashboard(match, events)
     elif page == "Analyse tactique":
-        _tactics(match, events)
+        render_tactical(match, events)
     elif page == "Vidéo":
-        _placeholder("Vidéo et annotations", "Stratégie vidéo ouverte : intégration, licences, synchronisation et format restent à valider. Aucun replay n'est copié ou diffusé.")
+        _placeholder("Vidéo et annotations", "Stratégie vidéo ouverte : intégration, licences, synchronisation des séquences et formats restent à valider. Aucun replay n'est copié ou diffusé.")
     elif page == "Assistant IA":
-        _placeholder("Assistant IA contextualisé", "Le modèle et le fournisseur ne sont pas configurés. Les futures réponses devront utiliser les données calculées et citer leur provenance.")
+        render_assistant(match, events)
     else:
-        _placeholder("Générateur de séances", "Ce module proposera des exercices modifiables à partir de constats vérifiés ; une validation humaine sera obligatoire avant utilisation.")
+        render_training(match, events)
