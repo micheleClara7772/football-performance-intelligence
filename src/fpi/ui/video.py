@@ -40,8 +40,17 @@ def render_video() -> None:
     )
     clip = OFFICIAL_FIFA_CLIPS[selected]
     st.caption(f"Source : {clip['provider']}")
-    st.video(clip["url"], autoplay=False)
-    st.link_button("Ouvrir la vidéo officielle sur YouTube", clip["url"])
+    st.link_button("Regarder les vraies images sur la chaîne FIFA (YouTube)", clip["url"], type="primary")
+    st.caption(
+        "La lecture dans FPI peut être refusée par YouTube. "
+        "La consultation sur la page officielle reste l'option à privilégier."
+    )
+    if st.toggle("Essayer le lecteur intégré (peut être indisponible)", value=False):
+        st.video(clip["url"], autoplay=False)
+    st.link_button(
+        "Voir également le résumé sur FIFA.com",
+        "https://www.fifa.com/fr/watch/4se3MdPEAeiq5n0e9eT14w",
+    )
 
     st.warning(
         "Stratégie vidéo ouverte : intégration commerciale, droits d'annotation "
