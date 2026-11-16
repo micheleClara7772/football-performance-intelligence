@@ -2,7 +2,7 @@
 
 ## À lire en premier
 
-👉 **[Suivi actuel : état réel, priorités et prochaines étapes (16–20 novembre)](docs/suivi-actuel.md)** · [GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
+👉 **[Recette complète : 125 vérifications avant le 17 novembre](docs/recette-pre17.md)** · **[Suivi actuel et prochaines étapes](docs/suivi-actuel.md)** · [GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
 
 
 **Statut au 16/11/2026 : version 1 fusionnée dans main ; version 2 fusionnée dans main via PR #20 ; annotations en cours sur PR #21.**

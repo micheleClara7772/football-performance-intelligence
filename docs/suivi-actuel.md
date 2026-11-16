@@ -25,6 +25,10 @@
 
 **Important :** la navigation des cinq rubriques ne signifie pas que les cinq modules finaux sont intégralement livrés. L'ancien « 0/7 étapes vérifiées » du socle documentaire était obsolète, mais le **parcours métier complet en sept étapes** n'est pas encore homologué.
 
+## Validation complète avant le chantier du 17 novembre
+
+**[Checklist détaillée : 125 contrôles](recette-pre17.md)** — cocher directement les cases dans [l'Issue qualité #15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15). Les tests automatisés ont réussi, mais les contrôles manuels restent **à faire**. La [PR #21](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) est toujours en brouillon et non fusionnée.
+
 ## 2. Ce qu'on fait maintenant, dans l'ordre
 
 ### Lundi 16 novembre — Stabiliser la PR #20 (P0)
