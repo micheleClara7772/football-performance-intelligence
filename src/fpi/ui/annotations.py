@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from fpi.analysis.annotations import (
-    EVENT_TYPES, NOTE_TYPES, MAX_NOTES, build_annotation, eligible_events,
+    EVENT_TYPES, NOTE_TYPES, MAX_NOTES, MAX_TEXT_LENGTH, build_annotation, eligible_events,
     export_document, format_video_clock, import_document, parse_video_clock,
 )
 from fpi.ui.formatting import team_label, event_label
