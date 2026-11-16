@@ -5,7 +5,7 @@
 👉 **[Suivi actuel : état réel, priorités et prochaines étapes (16–20 novembre)](docs/suivi-actuel.md)** · [GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
 
 
-**Statut au 16/11/2026 : version 1 fusionnée dans main ; version 2 en PR #20 (prête pour revue, non fusionnée).**
+**Statut au 16/11/2026 : version 1 fusionnée dans main ; version 2 fusionnée dans main via PR #20 ; annotations en cours sur PR #21.**
 **Démonstration ciblée : 20 novembre 2026 (rendez-vous à confirmer).**
 
 FPI est un MVP d'analyse de la performance **collective** au football. Le match de référence retenu est **Maroc – Portugal (10 décembre 2022)**. Les droits des données et des vidéos restent à contrôler.
@@ -44,8 +44,9 @@ Les branches de développement prévues : `feat/*`, `fix/*` ; intégrer par Pull
 - [x] Architecture Python / Streamlit et dépôt privé.
 - [x] Version 1 fusionnée : [PR #19](https://github.com/micheleClara7772/football-performance-intelligence/pull/19).
 - [x] Import StatsBomb réel contrôlé par l'utilisateur dans Codespaces : **3 381 événements**.
-- [x] Cinq rubriques navigables et contrôles navigateur/CI sur [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20) — **prête pour revue, non fusionnée**.
-- [ ] Finaliser et intégrer la version 2 après revue et tests.
+- [x] Cinq rubriques navigables et contrôles navigateur/CI sur [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20) — **fusionnée dans main**.
+- [x] Version 2 intégrée dans main après revue et tests : PR #20.
+- [ ] Annotations d'événements StatsBomb avec export et repères vidéo manuels : PR #21 en préparation.
 - [ ] Corriger l'expérience vidéo : YouTube fonctionne en externe, **erreur 153 en iframe**.
 - [ ] Confirmer les droits commerciaux StatsBomb et FIFA avant tout usage non autorisé.
 - [ ] Intégrer et valider le parcours complet de démonstration ; rendez-vous du 20 à confirmer.

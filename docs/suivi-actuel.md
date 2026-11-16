@@ -1,6 +1,6 @@
 # FPI — Où en est-on ? Quelles sont les prochaines étapes ?
 
-**Point de pilotage actualisé le 16 novembre 2026 (soirée, heure de Paris).**  
+**Point de pilotage actualisé le 16 novembre 2026 (soirée, heure de Paris), après fusion de la PR #20.**  
 **Démonstration envisagée : vendredi 20 novembre 2026, rendez-vous encore à confirmer.**
 
 [Ouvrir le tableau GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [Voir les 18 Issues](https://github.com/micheleClara7772/football-performance-intelligence/issues) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
@@ -11,7 +11,7 @@
 |---|---|
 | Dépôt privé, plan de suivi | Créés ; GitHub Project privé et Issues importées confirmés par l'utilisateur |
 | Version 1 (socle) | **Fusionnée** dans `main` via [PR #19](https://github.com/micheleClara7772/football-performance-intelligence/pull/19) |
-| Version 2 (tactique / assistant factuel / séances / extraits FIFA) | **PR #20 prête pour revue, NON fusionnée** ; tests actuels réussis, validation humaine avant intégration |
+| Version 2 (tactique / assistant factuel / séances / extraits FIFA) | **PR #20 fusionnée dans main** (commit `fb037707`) ; contrôles réussis. Le nouveau lot d'annotations est ouvert en [PR #21](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) (brouillon, non fusionné) |
 | CI Python, tests automatisés | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070) |
 | Données réelles + navigateur Chromium | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120) |
 | Recette utilisateur Codespaces | Streamlit fonctionne, **3 381 événements** importés manuellement ; cinq rubriques ouvertes et tableaux/graphes affichés |
@@ -37,18 +37,18 @@ Tickets : [#4](https://github.com/micheleClara7772/football-performance-intellig
 - [x] Vérifier les 27 fichiers du diff (aucune vidéo, donnée tierce ni secret repérés) ; rejouer les [tests Python](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070) et le [test réel/navigateur](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120) sur la même tête de PR.
 - [x] Versionner les 39 dépendances Python 3.11/Linux et les dépendances du navigateur, vérifier la reconstruction isolée avec `pip check`.
 - [x] Sortir la PR #20 du mode brouillon : **prête pour revue**.
-- [ ] **Décider la fusion après acceptation finale du porteur** ; ne pas fusionner automatiquement. Droits commerciaux StatsBomb/FIFA toujours ouverts.
+- [x] Le porteur a explicitement autorisé la fusion et la **PR #20 est fusionnée**. Les droits commerciaux StatsBomb/FIFA restent ouverts.
 
 **Critère de fin :** PR #20 verte, limites documentées, pas de vidéo copiée ni de chiffres fictifs.
 
-### Mardi 17 novembre — Analyse tactique et annotations traçables
+### Mardi 17 novembre — Analyse tactique et annotations traçables (démarré le 16 au soir)
 
 Tickets : [#6](https://github.com/micheleClara7772/football-performance-intelligence/issues/6), [#7](https://github.com/micheleClara7772/football-performance-intelligence/issues/7), [#8](https://github.com/micheleClara7772/football-performance-intelligence/issues/8), [#11](https://github.com/micheleClara7772/football-performance-intelligence/issues/11).
 
 - [ ] Revoir les définitions et limites des tirs, passes, périodes, entrées dans le dernier tiers et cartes.
-- [ ] Préparer les annotations d'événements : minute du **match StatsBomb** distincte du minutage du **montage YouTube**.
-- [ ] Noter observations et sources sans copier ni annoter une vidéo protégée.
-- [ ] Tester l'export, les erreurs et le rechargement d'annotations. **#11 reste bloquée pour la synchronisation vidéo complète tant que #10 n'est pas autorisée.**
+- [x] Première implémentation des annotations textuelles sur [PR #21](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) : minute du **match StatsBomb** distincte du minutage **manuel du montage YouTube** (tests en cours).
+- [x] Prévoir notes observation/hypothèse, source StatsBomb et éventuelle URL officielle FIFA ; aucun média copié.
+- [ ] Vérifier sur la PR #21 le parcours navigateur, l'export, les erreurs et le rechargement JSON d'annotations. **#11 reste bloquée pour la synchronisation vidéo complète tant que #10 n'est pas autorisée.**
 
 ### Mercredi 18 novembre — Relier les cinq modules
 
@@ -91,5 +91,7 @@ Ticket : [#18](https://github.com/micheleClara7772/football-performance-intellig
 - **Backlog** : prévu après les priorités immédiates.
 
 Les labels `status:*` des **Issues** sont maintenus avec le fichier [backlog/issues.json](../backlog/issues.json). **Limite technique :** le connecteur GitHub de cette conversation ne peut pas modifier directement les champs du **Project V2**. Les changements d'étiquettes d'Issues **ne déplacent pas automatiquement les cartes entre les colonnes du tableau** : ne pas confondre les deux.
+
+**La PR #20 est fusionnée. La PR #21 reste un lot de développement indépendant et non fusionné.**
 
 **La page présente constitue le suivi de référence.** Les engagements de livraison dépendent des tests, des droits des contenus et de la confirmation du rendez-vous.

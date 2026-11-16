@@ -2,7 +2,7 @@
 
 Le suivi opérationnel détaillé et ses preuves sont dans **[Suivi actuel](suivi-actuel.md)**.
 
-**Bilan du 16 novembre :** PR #20 stabilisée techniquement et **prête pour revue** (non fusionnée), [CI Python + dépendances verrouillées réussie](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070), [import réel et parcours navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120). La fusion et l'acceptation utilisateur restent à décider.
+**Bilan du 16 novembre :** PR #20 stabilisée puis **fusionnée dans main** avec accord du porteur, [CI Python + dépendances verrouillées réussie](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070), [import réel et parcours navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120). La nouvelle [PR #21](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) prépare les annotations textuelles d'événements (brouillon, non fusionnée).
 
 | Date | Prochaine action | Issues | Validation |
 |---|---|---|---|
