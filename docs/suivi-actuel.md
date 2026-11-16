@@ -1,0 +1,93 @@
+# FPI — Où en est-on ? Quelles sont les prochaines étapes ?
+
+**Point de pilotage au 16 novembre 2026 (matin, heure de Paris).**  
+**Démonstration envisagée : vendredi 20 novembre 2026, rendez-vous encore à confirmer.**
+
+[Ouvrir le tableau GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [Voir les 18 Issues](https://github.com/micheleClara7772/football-performance-intelligence/issues) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
+
+## 1. État réel et preuves
+
+| Élément | Situation |
+|---|---|
+| Dépôt privé, plan de suivi | Créés ; GitHub Project privé et Issues importées confirmés par l'utilisateur |
+| Version 1 (socle) | **Fusionnée** dans `main` via [PR #19](https://github.com/micheleClara7772/football-performance-intelligence/pull/19) |
+| Version 2 (tactique / assistant factuel / séances / extraits FIFA) | **PR #20 ouverte en brouillon, NON fusionnée** |
+| CI Python, tests automatisés | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993298) |
+| Données réelles + navigateur Chromium | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993223) |
+| Recette utilisateur Codespaces | Streamlit fonctionne, **3 381 événements** importés manuellement ; cinq rubriques ouvertes et tableaux/graphes affichés |
+| Cache des données | Pas de téléchargement automatique ; import volontaire, puis relecture du cache tant que le Codespace conserve ses fichiers |
+| Vraies images FIFA | Résumé YouTube **lisible sur YouTube** ; lecture intégrée FPI **en échec (YouTube 153)** ; lien de secours fonctionnel |
+| IA | Assistant **factuel déterministe**, pas encore de modèle LLM connecté |
+| Séances | Proposition éditable et export JSON, validation humaine nécessaire ; contenu à enrichir |
+| Droits | **StatsBomb commercial : non confirmé ; vidéo FIFA commerciale : non confirmée** |
+| Environnement | Codespace distant utilisé et **arrêté par l'utilisateur** ; pas d'installation FPI sur son PC |
+
+**Important :** la navigation des cinq rubriques ne signifie pas que les cinq modules finaux sont intégralement livrés. L'ancien « 0/7 étapes vérifiées » du socle documentaire était obsolète, mais le **parcours métier complet en sept étapes** n'est pas encore homologué.
+
+## 2. Ce qu'on fait maintenant, dans l'ordre
+
+### Lundi 16 novembre — Stabiliser la PR #20 (P0)
+
+**Pilote : développement FPI / GitHub ; validation produit : porteur du projet.**  
+Tickets : [#4](https://github.com/micheleClara7772/football-performance-intelligence/issues/4), [#8](https://github.com/micheleClara7772/football-performance-intelligence/issues/8), [#15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15).
+
+- [ ] Supprimer les avertissements `use_container_width` de Streamlit et corriger les libellés anglais visibles.
+- [ ] Mettre l'accès YouTube officiel en avant ; ne pas laisser croire que le lecteur embarqué erreur 153 fonctionne.
+- [ ] Vérifier le diff et les risques ; rejouer CI Python et test données réelles/navigateur après corrections.
+- [ ] Fournir une méthode reproductible d'installation (verrouillage dépendances à confirmer dans #4).
+- [ ] **Puis seulement**, sortir la PR du mode brouillon et décider sa fusion. Ne pas fusionner sans revue satisfaisante.
+
+**Critère de fin :** PR #20 verte, limites documentées, pas de vidéo copiée ni de chiffres fictifs.
+
+### Mardi 17 novembre — Analyse tactique et annotations traçables
+
+Tickets : [#6](https://github.com/micheleClara7772/football-performance-intelligence/issues/6), [#7](https://github.com/micheleClara7772/football-performance-intelligence/issues/7), [#8](https://github.com/micheleClara7772/football-performance-intelligence/issues/8), [#11](https://github.com/micheleClara7772/football-performance-intelligence/issues/11).
+
+- [ ] Revoir les définitions et limites des tirs, passes, périodes, entrées dans le dernier tiers et cartes.
+- [ ] Préparer les annotations d'événements : minute du **match StatsBomb** distincte du minutage du **montage YouTube**.
+- [ ] Noter observations et sources sans copier ni annoter une vidéo protégée.
+- [ ] Tester l'export, les erreurs et le rechargement d'annotations. **#11 reste bloquée pour la synchronisation vidéo complète tant que #10 n'est pas autorisée.**
+
+### Mercredi 18 novembre — Relier les cinq modules
+
+Tickets : [#12](https://github.com/micheleClara7772/football-performance-intelligence/issues/12), [#13](https://github.com/micheleClara7772/football-performance-intelligence/issues/13), [#14](https://github.com/micheleClara7772/football-performance-intelligence/issues/14).
+
+- [ ] IA : maintenir les réponses exactes sourcées ; toute API LLM payante reste soumise à un choix/accord explicite.
+- [ ] Séances : objectifs, exercices, matériel, contraintes, variantes, édition et validation humaine.
+- [ ] Tester les sept étapes du parcours, avec indication honnête des manques et lien vidéo externe comme repli.
+
+### Jeudi 19 novembre — Qualité et répétition
+
+Tickets : [#15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15), [#16](https://github.com/micheleClara7772/football-performance-intelligence/issues/16).
+
+- [ ] Tests complets, erreurs réseau, absence de données, sécurité, absence de secrets et de médias non autorisés.
+- [ ] Répétition chronométrée de 7–10 minutes ; plan B si YouTube ou StatsBomb ne répondent pas.
+- [ ] Vérifier la confirmation du rendez-vous ; ne pas laisser un Codespace actif inutilement.
+
+### Vendredi 20 novembre — Démonstration envisagée / retour
+
+Ticket : [#18](https://github.com/micheleClara7772/football-performance-intelligence/issues/18).
+
+- [ ] Si rendez-vous et droits appropriés confirmés : démonstration selon le périmètre autorisé.
+- [ ] Sinon : présentation limitée aux éléments dont les droits sont validés, ou report.
+- [ ] Noter les retours et définir le post-MVP. [#17 (360)](https://github.com/micheleClara7772/football-performance-intelligence/issues/17) est facultatif / P2, **pas** sur le chemin critique.
+
+## 3. Blocages réels — à ne pas masquer
+
+1. **[#3 — StatsBomb](https://github.com/micheleClara7772/football-performance-intelligence/issues/3) :** licence/permission commerciale pas validée ; les tests privés et l'ingestion technique sont réussis.
+2. **[#9 — Vidéo FIFA](https://github.com/micheleClara7772/football-performance-intelligence/issues/9) :** YouTube disponible directement, mais erreur 153 en iframe FPI ; droit de diffusion/annotation commerciale non confirmé.
+3. **[#10 — Lecteur vidéo complet](https://github.com/micheleClara7772/football-performance-intelligence/issues/10) et [#11 — synchronisation](https://github.com/micheleClara7772/football-performance-intelligence/issues/11) :** dépendent d'une source audiovisuelle autorisée et d'un repérage vérifié.
+4. **[#2 — Suivi GitHub Project](https://github.com/micheleClara7772/football-performance-intelligence/issues/2) :** Project créé/import validé par l'utilisateur ; les champs personnalisés et la synchronisation automatique des colonnes ne sont pas vérifiés via le connecteur.
+
+## 4. Comment lire les statuts
+
+- **Done** : terminé avec preuves ;
+- **In Review** : code existant, vérification ou fusion manquante ;
+- **In Progress** : en cours, pas encore complet ;
+- **Ready** : prochain chantier prêt à démarrer ;
+- **Blocked** : dépendance juridique, technique ou projet ouverte ;
+- **Backlog** : prévu après les priorités immédiates.
+
+Les labels `status:*` des **Issues** sont maintenus avec le fichier [backlog/issues.json](../backlog/issues.json). **Limite technique :** le connecteur GitHub de cette conversation ne peut pas modifier directement les champs du **Project V2**. Les changements d'étiquettes d'Issues **ne déplacent pas automatiquement les cartes entre les colonnes du tableau** : ne pas confondre les deux.
+
+**La page présente constitue le suivi de référence.** Les engagements de livraison dépendent des tests, des droits des contenus et de la confirmation du rendez-vous.

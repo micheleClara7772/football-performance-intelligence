@@ -28,8 +28,8 @@
   "date_field": "Target date",
   "initial_status": "See each issue's current status",
   "url": "https://github.com/users/micheleClara7772/projects/1/views/1",
-  "project_creation": "Project URL provided by owner; project access/settings not independently inspectable through this GitHub connector",
-  "github_project_configuration": "Pending: add issues to Project, confirm private visibility, configure columns and custom fields in GitHub UI",
+  "project_creation": "Project URL and private visibility confirmed by owner/screenshots (16 November 2026)",
+  "github_project_configuration": "Project private and 18 Issues imported, 6 statuses configured: user-confirmed via screenshots/conversation. Custom fields Priority, Module and Target date have not been independently verified. The GitHub connector cannot update Project V2 board columns.",
   "issue_label_mapping": {
     "Backlog": "status:backlog",
     "Ready": "status:ready",
@@ -37,5 +37,8 @@
     "In Review": "status:in-review",
     "Blocked": "status:blocked",
     "Done": "status:done"
-  }
+  },
+  "issue_label_mapping_note": "Issue labels are metadata only; changing status:* labels does NOT automatically change GitHub Project V2 Status field. GitHub Project column synchronization is still to verify manually.",
+  "tracking_page": "docs/suivi-actuel.md",
+  "last_tracking_review": "2026-11-16"
 }

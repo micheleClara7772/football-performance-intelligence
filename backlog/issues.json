@@ -52,7 +52,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Ready"
+    "status": "Blocked"
   },
   {
     "id": "FPI-I04",
@@ -71,7 +71,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Ready"
+    "status": "In Review"
   },
   {
     "id": "FPI-I05",
@@ -91,7 +91,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "Done"
   },
   {
     "id": "FPI-I06",
@@ -110,7 +110,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "In Review"
   },
   {
     "id": "FPI-I07",
@@ -129,7 +129,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "In Review"
   },
   {
     "id": "FPI-I08",
@@ -148,7 +148,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "In Review"
   },
   {
     "id": "FPI-I09",
@@ -208,7 +208,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "Blocked"
   },
   {
     "id": "FPI-I12",
@@ -228,7 +228,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "In Progress"
   },
   {
     "id": "FPI-I13",
@@ -247,7 +247,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "In Review"
   },
   {
     "id": "FPI-I14",
@@ -289,7 +289,7 @@
       "Critères d'acceptation détaillés dans l'Issue GitHub correspondante",
       "Aucun résultat déclaré livré sans test ou preuve vérifiable"
     ],
-    "status": "Backlog"
+    "status": "Ready"
   },
   {
     "id": "FPI-I16",

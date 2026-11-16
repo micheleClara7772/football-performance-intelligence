@@ -1,14 +1,17 @@
-# Plan du 15 au 20 novembre 2026
+# Feuille de route FPI — 16 au 20 novembre 2026
 
-| Date | Jalon | Critère |
-|---|---|---|
-| Dim 15 | GitHub et gouvernance | Dépôt, Issues, docs, suivi |
-| Lun 16 | Fondations et données | Ingestion, premiers cinq modules reliés |
-| Mar 17 | Analyse fiable | Métriques, graphiques, tendances vérifiées |
-| Mer 18 | Intégration | Vidéo autorisée, IA, séances, 7 étapes |
-| Jeu 19 | Stabilisation | Tests, répétition, plan de secours |
-| Ven 20 | Démonstration si confirmée | Retours et prochaines décisions |
+Le suivi opérationnel détaillé et ses preuves sont dans **[Suivi actuel](suivi-actuel.md)**.
 
-**Chemin critique :** droits des données → ingestion → calculs → constat tactique → vidéo correspondante → IA → séance.
+| Date | Prochaine action | Issues | Validation |
+|---|---|---|---|
+| **16 nov.** | Stabiliser PR #20 : avertissements Streamlit, interface française, fallback YouTube, revue CI, dépendances reproductibles | #4, #8, #15 | Tests verts sur la tête de PR, revue avant fusion |
+| **17 nov.** | Revoir les métriques et préparer les annotations horodatées sans confusion avec le replay | #6, #7, #8, #11 | Calculs sourcés, annotations exportables, limites documentées |
+| **18 nov.** | Consolider assistant factuel, séances éditables et parcours des cinq modules | #12, #13, #14 | Démo de bout en bout avec états honnêtes |
+| **19 nov.** | Vérification sécurité/risques, répétition 7–10 min, scénario de secours | #15, #16 | Exécution reproductible, limites et droits explicités |
+| **20 nov.** | Présentation envisagée si date et droits confirmés, puis synthèse des retours | #18 | Décision go/no-go et retours consignés |
 
-Les cinq modules restent obligatoires, leur profondeur est maîtrisée ; aucun ticket terminé sans preuve de validation.
+**Acquis :** version 1 fusionnée dans `main` (PR #19). PR #20 en brouillon, [tests Python réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993298) et [données réelles + navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993223). L'utilisateur a vérifié Streamlit via Codespaces et importé 3 381 événements du match Maroc–Portugal.
+
+**Risques à ne pas considérer comme résolus :** droits de démonstration commerciale StatsBomb, droits vidéo FIFA, échec iframe YouTube 153 ; l'extrait officiel reste accessible via le bouton externe. Une IA générative complète n'est pas encore intégrée.
+
+**Priorité P2 :** #17 vues 360 seulement si le chemin critique est sécurisé. Aucune facturation ou abonnement nouveau sans accord.
