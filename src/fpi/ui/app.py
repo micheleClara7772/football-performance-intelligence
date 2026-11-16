@@ -15,6 +15,7 @@ from fpi.metrics.collective import metrics_by_period
 from fpi.ui.tactical import render_tactical
 from fpi.ui.assistant import render_assistant
 from fpi.ui.training import render_training
+from fpi.ui.video import render_video
 
 PAGES = ("Dashboard", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
 
@@ -98,7 +99,7 @@ def main() -> None:
     elif page == "Analyse tactique":
         render_tactical(match, events)
     elif page == "Vidéo":
-        _placeholder("Vidéo et annotations", "Stratégie vidéo ouverte : intégration, licences, synchronisation des séquences et formats restent à valider. Aucun replay n'est copié ou diffusé.")
+        render_video()
     elif page == "Assistant IA":
         render_assistant(match, events)
     else:

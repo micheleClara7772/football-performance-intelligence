@@ -36,3 +36,15 @@
 - FIFA : https://inside.fifa.com/fr/tournament-organisation/commercial/news/de-nouvelles-fonctionnalites-pour-ameliorer-lexperience-des-telespectateurs
 - Règlement compétition Qatar 2022 : https://digitalhub.fifa.com/ (droits média, reproduction et diffusion soumis à autorisation)
 - StatsBomb Open Data (se rapporte aux données événementielles **et non** aux vidéos) : https://github.com/hudl/open-data
+
+## Sources d'images réelles retenues pour un aperçu technique interne (16/11/2026)
+
+Deux résumés **authentiques** du quart de finale, publiés sur la chaîne officielle FIFA sur YouTube :
+- Résumé prolongé : https://www.youtube.com/watch?v=5GVitElttLY
+- Résumé original : https://www.youtube.com/watch?v=M766FGsv5do
+
+La documentation Streamlit permet de présenter une URL YouTube avec `st.video` et un lien de secours vers la vidéo officielle. Un lecteur YouTube intégré reste soumis aux règles YouTube, aux paramètres d'intégration de la chaîne, au réseau et aux éventuelles restrictions géographiques. **Le fonctionnement réel du lecteur doit être vérifié chez l'utilisateur.**
+
+Cette intégration ne télécharge ni ne copie le média et n'offre pas la synchronisation événement-film ; les minutes du montage ne correspondent pas aux minutes de match StatsBomb. L'aperçu est réservé à un contexte technique non commercial à ce stade. **L'utilisation commerciale dans un produit, une démonstration à un partenaire ou la création de séquences dérivées nécessite une analyse de droits et, le cas échéant, l'autorisation préalable du titulaire.** Les conditions FIFA publiées limitent les usages commerciaux non autorisés : https://inside.fifa.com/fr/terms-of-service et https://inside.fifa.com/fr/terms-of-service-fifaplus
+
+**Statut :** de vraies images officielles accessibles par une source externe, mais aucune licence d'usage commercial ou de création de clips accordée ; Issue #9 ouverte.
