@@ -63,9 +63,9 @@ def main() -> None:
         sidebar.get_by_text("Vidéo", exact=True).click()
         page.get_by_role("heading", name="Vidéo et annotations").wait_for(timeout=60_000)
         page.get_by_text("Images réelles du match", exact=False).wait_for(timeout=60_000)
-        page.get_by_role("link", name="Ouvrir la vidéo officielle sur YouTube").wait_for(timeout=60_000)
+        page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").wait_for(timeout=60_000)
         # Scroller sur le lecteur pour que la capture contrôle la zone vidéo
-        page.get_by_role("link", name="Ouvrir la vidéo officielle sur YouTube").scroll_into_view_if_needed()
+        page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").scroll_into_view_if_needed()
         page.wait_for_timeout(1200)
         page.screenshot(path=str(OUT / "05-video-non-arbitree.png"), full_page=True)
 
