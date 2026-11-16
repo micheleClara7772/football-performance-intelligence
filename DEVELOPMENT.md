@@ -6,7 +6,7 @@
 
 Le dépôt contient `.devcontainer/devcontainer.json` pour un environnement distant compatible **GitHub Codespaces**. L'ouverture d'un Codespace crée une machine distante et peut consommer ton quota GitHub ; **vérifie les quotas et frais potentiels avant toute création**. Aucun Codespace n'est créé automatiquement par ce dépôt.
 
-Dans le Codespace (terminal intégré au navigateur), après le postCreateCommand :
+Dans le Codespace (terminal intégré au navigateur), après le `postCreateCommand` qui installe les dépendances verrouillées :
 
 ```bash
 .venv/bin/python -m streamlit run app.py --server.address 0.0.0.0
@@ -28,7 +28,9 @@ py -3.11 -m venv .venv
 
 ```bash
 python3.11 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python -m pip install -r requirements/py311-linux.lock
+.venv/bin/python -m pip install --no-deps -e .
+.venv/bin/python -m pip check
 .venv/bin/python -m streamlit run app.py
 ```
 
@@ -41,7 +43,7 @@ python3.11 -m venv .venv
 .venv/bin/python -m pytest
 ```
 
-`pyproject.toml` définit des **plages de versions compatibles**, pas encore un verrouillage complet des versions transitives. Un lockfile devra être généré et testé avant de promettre des reconstructions à l'identique.
+`pyproject.toml` conserve des plages de compatibilité. Pour **reproduire l'environnement de référence Python 3.11 Linux**, les versions directes et transitives sont figées dans `requirements/py311-linux.lock`, produites à partir d'un véritable environnement GitHub Actions du 16/11/2026. Le navigateur des tests est figé séparément dans `requirements/py311-linux-browser.lock`. Les workflows vérifient `pip check` et la correspondance exacte entre le lock et `pip freeze`. Cette liste verrouille les **versions**, pas les empreintes de fichiers de distribution ; elle ne constitue pas une garantie de reproductibilité bit à bit ni un audit de sécurité. Pour Windows/macOS, le `pyproject.toml` reste la méthode d'installation de repli, et une résolution/validation par plateforme sera nécessaire avant de promettre une reconstruction identique.
 
 ## Données et licences
 
@@ -51,6 +53,19 @@ Match de référence **Maroc 1–0 Portugal (10 décembre 2022)**. Catalogue Sta
 
 - Dashboard : premiers indicateurs réels après import explicite ; sinon état vide.
 - Analyse tactique : mesures descriptives et emplacements des tirs (pas d'interprétation automatique).
-- Vidéo : stratégie à déterminer.
-- Assistant IA : non configuré.
-- Séances : en préparation.
+- Vidéo : vrais résumés FIFA via liens externes, lecteur intégré désactivé à cause de l'erreur YouTube 153 observée ; droits commerciaux ouverts.
+- Assistant IA : questions factuelles prédéfinies (aucun LLM connecté).
+- Séances : propositions éditables et exportables en JSON, à valider par un entraîneur.
+
+## Lot 02 — exploration tactique et séances (branche de revue)
+
+La vue Analyse tactique propose une comparaison des mi-temps, une chronologie d'événements et des positions dans le repère StatsBomb. Le module Séances propose un brouillon modifiable sur choix explicite du thème par l'entraîneur. L'onglet Assistant IA n'effectue **aucun appel de modèle** : il répond provisoirement à des questions factuelles prédéfinies. La vidéo reste à arbitrer.
+
+Définitions et limites : `docs/tactical-metrics.md`. Ne pas confondre une variation descriptive avec sa cause tactique.
+
+
+## Stabilisation du 16 novembre — dépendances reproductibles
+
+Les environnements Python 3.11 sont créés dans Codespaces ou les runners GitHub, jamais sur l'ordinateur utilisateur. Le lock `requirements/py311-linux.lock` (versions exactes) est désormais versionné et utilisé dans Codespaces et la CI. Il est construit depuis la résolution effectivement installée dans GitHub Actions le 16/11/2026. Les tests de réinstallation depuis le lock doivent encore être confirmés sur la nouvelle tête de PR avant de déclarer ce point terminé.
+
+Le lecteur vidéo embarqué a été retiré de l'interface de démonstration parce qu'il affichait l'erreur YouTube 153 sur Codespaces. Le bouton vers la vidéo officielle reste disponible. Les labels d'équipes sont traduits pour l'affichage uniquement ; les chaînes StatsBomb `Morocco` / `Portugal` restent inchangées dans les calculs et dans les données source.

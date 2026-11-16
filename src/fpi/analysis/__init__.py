@@ -1,0 +1,1 @@
+"""Event-derived tactical indicators."""

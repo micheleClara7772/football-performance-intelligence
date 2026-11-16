@@ -18,7 +18,20 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install --upgrade pip
-          .venv/bin/python -m pip install -e '.[dev]'
+          .venv/bin/python -m pip install -r requirements/py311-linux.lock
+          .venv/bin/python -m pip install --no-deps -e .
+          .venv/bin/python -m pip check
+      - name: Capturer les versions résolues (Python 3.11 Linux)
+        run: |
+          mkdir -p outputs
+          .venv/bin/python -m pip freeze --exclude-editable > outputs/requirements-linux-py311-resolved.txt
+          diff -u requirements/py311-linux.lock outputs/requirements-linux-py311-resolved.txt
+      - name: Archiver les versions résolues pour verrouillage
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-resolved-dependencies-py311
+          path: outputs/requirements-linux-py311-resolved.txt
+          retention-days: 7
       - name: Validate original project scaffold
         run: .venv/bin/python scripts/verify_scaffold.py
       - name: Run product unit and UI smoke tests
