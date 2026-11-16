@@ -18,7 +18,7 @@ from fpi.ui.training import render_training
 from fpi.ui.video import render_video
 from fpi.ui.formatting import team_label, localized_team_frame
 
-PAGES = ("Dashboard", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
+PAGES = ("Tableau de bord", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
 
 
 def _banner() -> None:
@@ -95,7 +95,7 @@ def main() -> None:
         st.error(f"Cache invalide : {exc}. Réimporte les données vérifiées pour le réparer.")
         match = events = metadata = None
     _source_panel(metadata)
-    if page == "Dashboard":
+    if page == "Tableau de bord":
         _dashboard(match, events)
     elif page == "Analyse tactique":
         render_tactical(match, events)
