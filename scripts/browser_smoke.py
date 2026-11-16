@@ -35,7 +35,7 @@ def main() -> None:
         browser = tool.chromium.launch(headless=True, args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1)
         page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
-        page.get_by_role("heading", name="Dashboard collectif").wait_for(timeout=90_000)
+        page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
         page.get_by_text("Événements validés").first.wait_for(timeout=60_000)
         page.locator('[data-testid="stPlotlyChart"]').first.wait_for(timeout=45_000)
         assert not page.get_by_text("Aucune donnée vérifiée en cache.").count()
@@ -64,10 +64,10 @@ def main() -> None:
         page.get_by_role("heading", name="Vidéo et annotations").wait_for(timeout=60_000)
         page.get_by_text("Images réelles du match", exact=False).wait_for(timeout=60_000)
         page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").wait_for(timeout=60_000)
-        # Scroller sur le lecteur pour que la capture contrôle la zone vidéo
+        # Afficher le lien vers les vraies images, sans intégrer une iframe en erreur.
         page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").scroll_into_view_if_needed()
         page.wait_for_timeout(1200)
-        page.screenshot(path=str(OUT / "05-video-non-arbitree.png"), full_page=True)
+        page.screenshot(path=str(OUT / "05-video-lien-officiel.png"), full_page=True)
 
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()

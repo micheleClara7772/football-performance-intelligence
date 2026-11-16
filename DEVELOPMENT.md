@@ -51,12 +51,19 @@ Match de référence **Maroc 1–0 Portugal (10 décembre 2022)**. Catalogue Sta
 
 - Dashboard : premiers indicateurs réels après import explicite ; sinon état vide.
 - Analyse tactique : mesures descriptives et emplacements des tirs (pas d'interprétation automatique).
-- Vidéo : stratégie à déterminer.
-- Assistant IA : non configuré.
-- Séances : en préparation.
+- Vidéo : vrais résumés FIFA via liens externes, lecteur intégré désactivé à cause de l'erreur YouTube 153 observée ; droits commerciaux ouverts.
+- Assistant IA : questions factuelles prédéfinies (aucun LLM connecté).
+- Séances : propositions éditables et exportables en JSON, à valider par un entraîneur.
 
 ## Lot 02 — exploration tactique et séances (branche de revue)
 
 La vue Analyse tactique propose une comparaison des mi-temps, une chronologie d'événements et des positions dans le repère StatsBomb. Le module Séances propose un brouillon modifiable sur choix explicite du thème par l'entraîneur. L'onglet Assistant IA n'effectue **aucun appel de modèle** : il répond provisoirement à des questions factuelles prédéfinies. La vidéo reste à arbitrer.
 
 Définitions et limites : `docs/tactical-metrics.md`. Ne pas confondre une variation descriptive avec sa cause tactique.
+
+
+## Stabilisation du 16 novembre — dépendances reproductibles
+
+Les environnements Python 3.11 sont initialement créés dans le Codespace/runner GitHub, **jamais sur l'ordinateur utilisateur**. La CI émet à présent un artefact `fpi-resolved-dependencies-py311` contenant les versions exactes actuellement résolues pour Python 3.11 / Linux. Ce relevé permet de générer un fichier de dépendances verrouillé à vérifier puis à versionner. **Tant que ce fichier de verrouillage n'est pas publié et utilisé dans la CI, la reconstruction à l'identique n'est pas encore démontrée.**
+
+Le lecteur vidéo embarqué a été retiré de l'interface de démonstration parce qu'il affichait l'erreur YouTube 153 sur Codespaces. Le bouton vers la vidéo officielle reste disponible. Les labels d'équipes sont traduits pour l'affichage uniquement ; les chaînes StatsBomb `Morocco` / `Portugal` restent inchangées dans les calculs et dans les données source.

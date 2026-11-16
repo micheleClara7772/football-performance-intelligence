@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from fpi.training.generator import FOCUSES, generate_session
+from fpi.ui.formatting import team_label, localized_description
 
 
 def render_training(match: dict | None, events: list[dict] | None) -> None:
@@ -18,7 +19,7 @@ def render_training(match: dict | None, events: list[dict] | None) -> None:
         return
     teams = (match["home_team"]["home_team_name"], match["away_team"]["away_team_name"])
     with st.form("training_form"):
-        team = st.selectbox("Équipe", teams, key="training_team")
+        team = st.selectbox("Équipe", teams, format_func=team_label, key="training_team")
         focus = st.selectbox("Objectif choisi par l'entraîneur", FOCUSES, key="training_focus")
         duration = st.select_slider("Durée totale", options=[45, 60, 75], value=60, key="training_duration")
         players = st.number_input("Nombre de joueurs", min_value=6, max_value=30, value=18, step=1, key="training_players")
@@ -29,12 +30,12 @@ def render_training(match: dict | None, events: list[dict] | None) -> None:
     if draft is None:
         st.info("Sélectionne les paramètres, puis génère une proposition.")
         return
-    st.subheader(f"{draft.team} · {draft.focus} · {draft.duration_minutes} minutes")
-    st.info(draft.observation)
+    st.subheader(f"{team_label(draft.team)} · {draft.focus} · {draft.duration_minutes} minutes")
+    st.info(localized_description(draft.observation))
     st.warning(draft.disclaimer)
     st.caption("Modifie les consignes, durées ou points de vigilance dans le tableau ci-dessous.")
     proposed = pd.DataFrame(draft.exercises)
-    edited = st.data_editor(proposed, use_container_width=True, hide_index=True, num_rows="dynamic", key="training_editor")
+    edited = st.data_editor(proposed, width="stretch", hide_index=True, num_rows="dynamic", key="training_editor")
     total = pd.to_numeric(edited["Durée (min)"], errors="coerce").sum() if "Durée (min)" in edited else 0
     if total != draft.duration_minutes:
         st.warning(f"Durée actuelle des exercices : {total:g} min, différente de l'objectif initial {draft.duration_minutes} min.")

@@ -16,6 +16,7 @@ from fpi.ui.tactical import render_tactical
 from fpi.ui.assistant import render_assistant
 from fpi.ui.training import render_training
 from fpi.ui.video import render_video
+from fpi.ui.formatting import team_label, localized_team_frame
 
 PAGES = ("Dashboard", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
 
@@ -29,7 +30,7 @@ def _banner() -> None:
 
 def _source_panel(metadata: dict | None) -> None:
     st.sidebar.divider()
-    st.sidebar.caption("Source prévue : [StatsBomb Open Data](https://github.com/hudl/open-data)")
+    st.sidebar.caption("Source des données : [StatsBomb Open Data](https://github.com/hudl/open-data)")
     st.sidebar.caption("Attribution StatsBomb obligatoire pour toute publication/partage ; droits de démonstration commerciale à confirmer.")
     if metadata:
         st.sidebar.success(f"Événements contrôlés : {metadata['validated_events']:,}")
@@ -39,41 +40,41 @@ def _source_panel(metadata: dict | None) -> None:
 def _import_panel() -> None:
     st.sidebar.subheader("Données du match")
     st.sidebar.caption("L'import utilise une requête externe seulement après clic ; aucun téléchargement automatique.")
-    if st.sidebar.button("Importer depuis StatsBomb", type="primary", use_container_width=True):
+    if st.sidebar.button("Importer depuis StatsBomb", type="primary", width="stretch"):
         with st.sidebar.status("Téléchargement et validation…", expanded=False) as status:
             try:
                 match, events, _ = download_reference_match()
                 status.update(label=f"{len(events)} événements enregistrés", state="complete")
-                st.sidebar.success(f"Import vérifié : {match['home_team']['home_team_name']} – {match['away_team']['away_team_name']}")
+                st.sidebar.success(f"Import vérifié : {team_label(match['home_team']['home_team_name'])} – {team_label(match['away_team']['away_team_name'])}")
             except (DataValidationError, DownloadError, OSError) as exc:
                 status.update(label="Import impossible", state="error")
                 st.sidebar.error(str(exc))
 
 
 def _dashboard(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Dashboard collectif")
+    st.header("Tableau de bord collectif")
     if not events or not match:
         st.warning("Aucune donnée vérifiée en cache. Utilise « Importer depuis StatsBomb » dans la barre latérale.")
         st.caption("Aucun nombre de tirs, de passes ou graphique n'est simulé.")
         return
     home, away = (match[side][f"{side}_name"] for side in ("home_team", "away_team"))
     metrics = metrics_by_period(events, (home, away))
-    st.subheader(f"{home} {match['home_score']} – {match['away_score']} {away}")
+    st.subheader(f"{team_label(home)} {match['home_score']} – {match['away_score']} {team_label(away)}")
     st.caption("Source : catalogue et événements StatsBomb Open Data (mi-temps réglementaires uniquement)")
     left, middle, right = st.columns(3)
     left.metric("Événements validés", f"{len(events):,}")
-    middle.metric(f"Tirs · {home}", str(int(metrics.loc[metrics.team == home, "shots"].sum())))
-    right.metric(f"Tirs · {away}", str(int(metrics.loc[metrics.team == away, "shots"].sum())))
-    fig = px.bar(metrics, x="period", y="shots", color="team", barmode="group",
+    middle.metric(f"Tirs · {team_label(home)}", str(int(metrics.loc[metrics.team == home, "shots"].sum())))
+    right.metric(f"Tirs · {team_label(away)}", str(int(metrics.loc[metrics.team == away, "shots"].sum())))
+    fig = px.bar(localized_team_frame(metrics), x="period", y="shots", color="team", barmode="group",
                  labels={"period": "Mi-temps", "shots": "Nombre de tirs", "team": "Équipe"},
                  title="Tirs enregistrés par équipe et par période")
     fig.update_xaxes(tickmode="array", tickvals=[1, 2], ticktext=["1re", "2e"])
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(metrics.rename(columns={"team": "Équipe", "period": "Période", "events": "Événements",
+    st.plotly_chart(fig, width="stretch")
+    st.dataframe(localized_team_frame(metrics).rename(columns={"team": "Équipe", "period": "Période", "events": "Événements",
                                          "shots": "Tirs", "passes": "Passes tentées", "passes_completed": "Passes réussies",
                                          "pass_completion_pct": "Passes réussies (%)", "xg": "xG StatsBomb"}),
-                 hide_index=True, use_container_width=True)
-    st.caption("Passes réussies : événements Pass sans champ pass.outcome. xG affiché seulement si renseigné pour tous les tirs de la période.")
+                 hide_index=True, width="stretch")
+    st.caption("Passes réussies : passes sans indication d'échec selon le champ fournisseur pass.outcome. xG affiché uniquement lorsque tous les tirs de la période possèdent une valeur StatsBomb.")
 
 
 def _placeholder(title: str, description: str) -> None:

@@ -41,12 +41,10 @@ def render_video() -> None:
     clip = OFFICIAL_FIFA_CLIPS[selected]
     st.caption(f"Source : {clip['provider']}")
     st.link_button("Regarder les vraies images sur la chaîne FIFA (YouTube)", clip["url"], type="primary")
-    st.caption(
-        "La lecture dans FPI peut être refusée par YouTube. "
-        "La consultation sur la page officielle reste l'option à privilégier."
+    st.warning(
+        "La lecture intégrée YouTube a échoué lors de notre test Codespaces (erreur 153). "
+        "Pour regarder les vraies images, ouvre le lecteur officiel grâce au bouton ci-dessus."
     )
-    if st.toggle("Essayer le lecteur intégré (peut être indisponible)", value=False):
-        st.video(clip["url"], autoplay=False)
     st.link_button(
         "Voir également le résumé sur FIFA.com",
         "https://www.fifa.com/fr/watch/4se3MdPEAeiq5n0e9eT14w",
@@ -61,7 +59,4 @@ def render_video() -> None:
         "Elles ne correspondent pas aux minutes du match ; aucun alignement "
         "automatique avec StatsBomb n'est prétendu."
     )
-    st.caption(
-        "Si la lecture intégrée est refusée par YouTube, utilise le lien officiel. "
-        "Aucun replay ou extrait n'est stocké dans FPI."
-    )
+    st.caption("Aucun replay ni extrait n’est téléchargé, stocké ou réhébergé dans FPI.")
