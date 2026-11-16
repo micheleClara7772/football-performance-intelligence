@@ -47,6 +47,15 @@ def main() -> None:
         page.get_by_text("Comparaison des mi-temps", exact=True).first.wait_for(timeout=60_000)
         assert page.locator('[data-testid="stPlotlyChart"]').count() >= 1
         page.screenshot(path=str(OUT / "02-analyse-tactique.png"), full_page=True)
+        page.get_by_role("tab", name="Annotations").click()
+        page.get_by_text("Annotations d'événements vérifiés").wait_for(timeout=45_000)
+        page.get_by_role("textbox", name="Observation tactique ou hypothèse à vérifier").fill(
+            "Note de validation du parcours sur un événement réel, sans vidéo copiée."
+        )
+        page.get_by_role("button", name="Enregistrer l'annotation").click()
+        page.get_by_text("Annotation enregistrée dans cette session", exact=False).wait_for(timeout=45_000)
+        page.get_by_role("button", name="Exporter les annotations en JSON").wait_for(timeout=45_000)
+        page.screenshot(path=str(OUT / "02b-annotations-evenements.png"), full_page=True)
 
         sidebar.get_by_text("Assistant IA", exact=True).click()
         page.get_by_role("heading", name="Assistant IA · fondation factuelle").wait_for(timeout=60_000)
