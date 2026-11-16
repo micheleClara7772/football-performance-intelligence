@@ -8,6 +8,7 @@ import streamlit as st
 from fpi.analysis.tactical import tactical_by_period, event_locations, event_timeline, describe_period_changes
 from fpi.metrics.collective import metrics_by_period
 from fpi.ui.formatting import team_label, event_label, localized_team_frame
+from fpi.ui.annotations import render_annotations
 
 _METRIC_LABELS = {
     "shots": "Tirs",
@@ -34,7 +35,7 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
     focus = combined[combined.team == team].sort_values("period").reset_index(drop=True)
     st.caption("Données : StatsBomb Open Data, uniquement mi-temps réglementaires. Évolution descriptive, sans conclusion causale.")
 
-    comparison, chronology, spatial = st.tabs(["Comparaison des mi-temps", "Chronologie", "Emplacements des événements"])
+    comparison, chronology, spatial, annotations = st.tabs(["Comparaison des mi-temps", "Chronologie", "Emplacements des événements", "Annotations"])
     with comparison:
         options = ["shots", "passes", "passes_completed", "pressures", "ball_recoveries", "interceptions", "attacking_third_entries"]
         metric = st.selectbox("Indicateur", options, format_func=lambda v: _METRIC_LABELS[v], key="tactical_metric")
@@ -80,3 +81,6 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
             fig.update_layout(yaxis_scaleanchor="x")
             st.plotly_chart(fig, width="stretch")
         st.caption("Ces points sont des positions d'événements dans le repère StatsBomb (120×80), pas des trajectoires ni un tracking continu.")
+
+    with annotations:
+        render_annotations(match, events, teams)
