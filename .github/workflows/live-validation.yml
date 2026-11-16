@@ -10,6 +10,9 @@ on:
       - '.github/workflows/live-validation.yml'
       - 'src/fpi/**'
       - 'app.py'
+      - 'requirements/**'
+      - 'pyproject.toml'
+      - '.devcontainer/devcontainer.json'
 
 permissions:
   contents: read
@@ -29,13 +32,16 @@ jobs:
       - name: Préparer les dépendances isolées
         run: |
           python -m venv .venv
-          .venv/bin/python -m pip install -e '.[dev]'
+          .venv/bin/python -m pip install -r requirements/py311-linux.lock
+          .venv/bin/python -m pip install --no-deps -e .
+          .venv/bin/python -m pip check
       - name: Vérifier le match officiel et les cinq modules avec les événements réels
         run: |
           .venv/bin/python scripts/validate_reference_live.py
       - name: Installer uniquement le navigateur éphémère du runner
         run: |
-          .venv/bin/python -m pip install "playwright>=1.50,<2"
+          .venv/bin/python -m pip install -r requirements/py311-linux-browser.lock
+          .venv/bin/python -m pip check
           .venv/bin/python -m playwright install --with-deps chromium
       - name: Démarrer Streamlit et tester le parcours navigateur
         run: |

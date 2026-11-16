@@ -40,3 +40,14 @@ def test_video_fallback_is_external_and_not_embedded():
     assert 'st.link_button(' in video
     assert 'st.video(' not in video
     assert 'erreur 153' in video
+
+def test_linux_reference_lock_is_pinned():
+    from pathlib import Path
+    lock = (Path(__file__).resolve().parents[1] / "requirements/py311-linux.lock").read_text(encoding="utf-8").splitlines()
+    names = set()
+    for line in lock:
+        assert "==" in line and "@" not in line and "git+" not in line
+        name, version = line.split("==", 1)
+        assert name and version and name.lower() not in names
+        names.add(name.lower())
+    assert {"streamlit", "pandas", "plotly", "requests", "pytest"}.issubset(names)
