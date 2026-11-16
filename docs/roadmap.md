@@ -2,6 +2,8 @@
 
 Le suivi opérationnel détaillé et ses preuves sont dans **[Suivi actuel](suivi-actuel.md)**.
 
+**Bilan du 16 novembre :** PR #20 stabilisée techniquement et **prête pour revue** (non fusionnée), [CI Python + dépendances verrouillées réussie](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070), [import réel et parcours navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120). La fusion et l'acceptation utilisateur restent à décider.
+
 | Date | Prochaine action | Issues | Validation |
 |---|---|---|---|
 | **16 nov.** | Stabiliser PR #20 : avertissements Streamlit, interface française, fallback YouTube, revue CI, dépendances reproductibles | #4, #8, #15 | Tests verts sur la tête de PR, revue avant fusion |

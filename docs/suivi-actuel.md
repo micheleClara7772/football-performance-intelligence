@@ -1,6 +1,6 @@
 # FPI — Où en est-on ? Quelles sont les prochaines étapes ?
 
-**Point de pilotage au 16 novembre 2026 (matin, heure de Paris).**  
+**Point de pilotage actualisé le 16 novembre 2026 (soirée, heure de Paris).**  
 **Démonstration envisagée : vendredi 20 novembre 2026, rendez-vous encore à confirmer.**
 
 [Ouvrir le tableau GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [Voir les 18 Issues](https://github.com/micheleClara7772/football-performance-intelligence/issues) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
@@ -11,16 +11,17 @@
 |---|---|
 | Dépôt privé, plan de suivi | Créés ; GitHub Project privé et Issues importées confirmés par l'utilisateur |
 | Version 1 (socle) | **Fusionnée** dans `main` via [PR #19](https://github.com/micheleClara7772/football-performance-intelligence/pull/19) |
-| Version 2 (tactique / assistant factuel / séances / extraits FIFA) | **PR #20 ouverte en brouillon, NON fusionnée** |
-| CI Python, tests automatisés | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993298) |
-| Données réelles + navigateur Chromium | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993223) |
+| Version 2 (tactique / assistant factuel / séances / extraits FIFA) | **PR #20 prête pour revue, NON fusionnée** ; tests actuels réussis, validation humaine avant intégration |
+| CI Python, tests automatisés | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070) |
+| Données réelles + navigateur Chromium | [Dernier run sur la PR #20 : réussi](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120) |
 | Recette utilisateur Codespaces | Streamlit fonctionne, **3 381 événements** importés manuellement ; cinq rubriques ouvertes et tableaux/graphes affichés |
 | Cache des données | Pas de téléchargement automatique ; import volontaire, puis relecture du cache tant que le Codespace conserve ses fichiers |
-| Vraies images FIFA | Résumé YouTube **lisible sur YouTube** ; lecture intégrée FPI **en échec (YouTube 153)** ; lien de secours fonctionnel |
+| Vraies images FIFA | Résumé YouTube **lisible sur YouTube** ; lecture intégrée FPI **en échec (YouTube 153)** ; iframe retirée de la démonstration, bouton externe fonctionnel |
 | IA | Assistant **factuel déterministe**, pas encore de modèle LLM connecté |
 | Séances | Proposition éditable et export JSON, validation humaine nécessaire ; contenu à enrichir |
 | Droits | **StatsBomb commercial : non confirmé ; vidéo FIFA commerciale : non confirmée** |
 | Environnement | Codespace distant utilisé et **arrêté par l'utilisateur** ; pas d'installation FPI sur son PC |
+| Reproductibilité technique | Versions Python 3.11/Linux **figées dans `requirements/py311-linux.lock` (39 paquets)** et utilisées dans CI/Codespaces ; installation et `pip check` réussis, sans hashes binaires |
 
 **Important :** la navigation des cinq rubriques ne signifie pas que les cinq modules finaux sont intégralement livrés. L'ancien « 0/7 étapes vérifiées » du socle documentaire était obsolète, mais le **parcours métier complet en sept étapes** n'est pas encore homologué.
 
@@ -31,11 +32,12 @@
 **Pilote : développement FPI / GitHub ; validation produit : porteur du projet.**  
 Tickets : [#4](https://github.com/micheleClara7772/football-performance-intelligence/issues/4), [#8](https://github.com/micheleClara7772/football-performance-intelligence/issues/8), [#15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15).
 
-- [ ] Supprimer les avertissements `use_container_width` de Streamlit et corriger les libellés anglais visibles.
-- [ ] Mettre l'accès YouTube officiel en avant ; ne pas laisser croire que le lecteur embarqué erreur 153 fonctionne.
-- [ ] Vérifier le diff et les risques ; rejouer CI Python et test données réelles/navigateur après corrections.
-- [ ] Fournir une méthode reproductible d'installation (verrouillage dépendances à confirmer dans #4).
-- [ ] **Puis seulement**, sortir la PR du mode brouillon et décider sa fusion. Ne pas fusionner sans revue satisfaisante.
+- [x] Remplacer `use_container_width` par `width="stretch"` et franciser les principaux libellés visibles, sans altérer les valeurs StatsBomb.
+- [x] Mettre l'accès YouTube officiel en avant ; retirer le lecteur intégré en erreur 153 de la démonstration.
+- [x] Vérifier les 27 fichiers du diff (aucune vidéo, donnée tierce ni secret repérés) ; rejouer les [tests Python](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070) et le [test réel/navigateur](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120) sur la même tête de PR.
+- [x] Versionner les 39 dépendances Python 3.11/Linux et les dépendances du navigateur, vérifier la reconstruction isolée avec `pip check`.
+- [x] Sortir la PR #20 du mode brouillon : **prête pour revue**.
+- [ ] **Décider la fusion après acceptation finale du porteur** ; ne pas fusionner automatiquement. Droits commerciaux StatsBomb/FIFA toujours ouverts.
 
 **Critère de fin :** PR #20 verte, limites documentées, pas de vidéo copiée ni de chiffres fictifs.
 
