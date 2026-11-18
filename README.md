@@ -12,16 +12,24 @@
 ## Modules testés
 
 1. **Tableau de bord collectif** — match, tirs, passes, xG fournisseur, mi-temps et sources.
-2. **Analyse tactique** — indicateurs descriptifs, comparaisons, chronologie, cartes de localisation et annotations par ID d'événement StatsBomb ; export/réimport JSON vérifiés en navigateur.
+2. **Analyse tactique** — comparaisons, chronologie, positions d'événements, **8 signaux avancés sur les 2 mi-temps**, annotations StatsBomb, export/réimport JSON vérifiés en navigateur.
 3. **Vidéos officielles** — rediffusion **intégrale** Maroc–Portugal sur **FIFA+ via lien externe uniquement**, résumés officiels FIFA/YouTube via lien externe et iframe YouTube facultative **dont la lecture réelle n'est pas garantie**.
-4. **Assistant factuel** — **8 questions guidées**, sans LLM, sans API payante, réponses traçables aux calculs.
+4. **Assistant libre gratuit** — questions en français saisies sans menu figé : réponses calculées depuis StatsBomb, sans LLM ni API payante ; demandes sans métrique identifiable refusées.
 5. **Séances** — quatre objectifs, trois exercices initiaux, matériel/variantes/consignes éditables, contrôle de la durée et des champs avant export JSON, validation humaine nécessaire.
 
 Un bouton « Continuer » permet de parcourir les cinq modules. Les valeurs de référence vérifiées sont : **3 381 événements**, **Maroc 9 / Portugal 12 tirs**, **Maroc 249 / Portugal 731 passes tentées** sur les mi-temps 1/2.
 
 ## Contrôles techniques
 
-Toutes les PR **#19, #20, #21, #22, #23, #24** sont fusionnées après contrôles GitHub Actions. Dernière tranche : [Python / tests #44277188457](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44277188457) et [StatsBomb réel / Chromium #44277188528](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44277188528), tous deux réussis avant fusion. Les résultats automatiques ne remplacent **ni la recette manuelle ni la vérification du déploiement public**.
+Les PR **#19 à #28** sont intégrées dans `main`. La [dernière validation StatsBomb réel + Chromium + matrice de recette](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44284095730) et les [tests Python](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44284095982) sont réussis.
+
+**Recette historique 125 cas : 60 contrôles calculés, 10 contrôles navigateur, 55 contrôles restants à vérifier humainement.** Les 34 cases que l'utilisateur avait cochées dans l'Issue #15 restent inchangées ; voir [le rapport automatique](docs/automatic-acceptance.md).
+
+## Exploration du match intégral
+
+- [FIFA+ officiel](https://www.plus.fifa.com/en/showcase/relive-qatar-2022/2725ef5c-b40e-43b8-ba26-27081c5f17a6) : replay complet sur la plateforme diffuseur, pas en iframe.
+- D'autres pistes de visionnage sont recensées dans [la revue des sources vidéo](docs/video-source-review-2026-11-18.md), sans présumer de leurs licences d'extraction.
+- **La détection de joueurs et du ballon dans les pixels n'est pas encore livrée.** Elle exige un fichier vidéo exploitable/autorisé et une évaluation, suivie dans l'[Issue #29](https://github.com/micheleClara7772/football-performance-intelligence/issues/29). Les huit signaux avancés actuels proviennent **des événements StatsBomb**, pas d'images FIFA.
 
 ## Conditions et périmètre
 
