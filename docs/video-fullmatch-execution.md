@@ -65,6 +65,19 @@ python -m fpi.video_analysis.tracking --detections outputs/dense.json \
   --out outputs/provisional-tracks.json --max-gap-seconds 0.6
 ```
 
+### Vrai ByteTrack optionnel
+
+L'adaptateur `fpi.video_analysis.bytetrack_adapter` utilise désormais la bibliothèque [Roboflow Trackers](https://github.com/roboflow/trackers) **2.7.0** (Apache-2.0), et non l'ancien `sv.ByteTrack` retiré de Supervision 0.31. Il doit être utilisé dans un environnement de calcul privé. La CI exécute un test réel de l'algorithme sur des boîtes de synthèse, sans télécharger de vidéo.
+
+```bash
+python -m pip install "trackers==2.7.0" # venv privé, dépendances optionnelles
+python -m fpi.video_analysis.bytetrack_adapter \
+  --detections outputs/dense.json --out outputs/bytetrack-tracks.json \
+  --max-gap-seconds 0.6
+```
+
+Les pistes sont séparées par classe et par segment temporel. **Même avec un vrai ByteTrack, les identités sont provisoires** tant qu'aucune mesure de continuité d'identité sur un véritable match annoté n'a été effectuée. Il ne différencie pas les joueurs des arbitres et ne connaît pas les équipes.
+
 Ceci **n'est pas ByteTrack/BoT-SORT**, pas une vraie identification de joueur, et ne reconstitue pas l'identité après une occlusion ou une coupure de caméra. **Validation suivante** : mesurer les métriques MOT/IDF1/HOTA sur des segments réels avec identité annotée, implémenter un tracker dédié, séparer arbitres, joueurs et équipes. Ne pas montrer ces IDs provisoires comme des numéros de maillot.
 
 ## 4. Métriques collectives sur coordonnées terrain
