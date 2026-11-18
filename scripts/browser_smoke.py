@@ -48,6 +48,10 @@ def main() -> None:
         page.get_by_text("Comparaison des mi-temps", exact=True).first.wait_for(timeout=60_000)
         assert page.locator('[data-testid="stPlotlyChart"]').count() >= 1
         page.screenshot(path=str(OUT / "02-analyse-tactique.png"), full_page=True)
+        page.get_by_role("tab", name="Signaux avancés").click()
+        page.get_by_text("Signaux avancés sur la totalité du match").wait_for(timeout=45_000)
+        page.get_by_text("Passes progressives (proxy)").first.wait_for(timeout=45_000)
+        page.screenshot(path=str(OUT / "02d-signaux-avances.png"), full_page=True)
         page.get_by_role("tab", name="Annotations").click()
         page.get_by_text("Annotations d'événements vérifiés").wait_for(timeout=45_000)
         page.get_by_role("textbox", name="Observation tactique ou hypothèse à vérifier").fill(

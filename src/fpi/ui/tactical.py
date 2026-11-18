@@ -6,6 +6,7 @@ import plotly.express as px
 import streamlit as st
 
 from fpi.analysis.tactical import tactical_by_period, event_locations, event_timeline, describe_period_changes
+from fpi.analysis.advanced import advanced_metrics_by_period, ADVANCED_LABELS, ADVANCED_DESCRIPTIONS
 from fpi.metrics.collective import metrics_by_period
 from fpi.ui.formatting import team_label, event_label, localized_team_frame
 from fpi.ui.annotations import render_annotations
@@ -35,7 +36,7 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
     focus = combined[combined.team == team].sort_values("period").reset_index(drop=True)
     st.caption("Données : StatsBomb Open Data, uniquement mi-temps réglementaires. Évolution descriptive, sans conclusion causale.")
 
-    comparison, chronology, spatial, annotations = st.tabs(["Comparaison des mi-temps", "Chronologie", "Emplacements des événements", "Annotations"])
+    comparison, chronology, spatial, annotations, advanced = st.tabs(["Comparaison des mi-temps", "Chronologie", "Emplacements des événements", "Annotations", "Signaux avancés"])
     with comparison:
         options = ["shots", "passes", "passes_completed", "pressures", "ball_recoveries", "interceptions", "attacking_third_entries"]
         metric = st.selectbox("Indicateur", options, format_func=lambda v: _METRIC_LABELS[v], key="tactical_metric")
@@ -84,3 +85,36 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
 
     with annotations:
         render_annotations(match, events, teams)
+
+    with advanced:
+        st.subheader("Signaux avancés sur la totalité du match")
+        st.caption(
+            "Calculs gratuits à partir des 3 381 événements du match. "
+            "Ce n'est PAS une analyse automatisée des pixels de la vidéo ni du tracking de joueurs."
+        )
+        advanced_frame = advanced_metrics_by_period(events, teams)
+        metric = st.selectbox(
+            "Mesure avancée à explorer", list(ADVANCED_LABELS),
+            format_func=lambda key: ADVANCED_LABELS[key], key="advanced_signal",
+        )
+        st.info(ADVANCED_DESCRIPTIONS[metric])
+        fig = px.bar(
+            localized_team_frame(advanced_frame), x="period", y=metric, color="team",
+            barmode="group", labels={"period": "Mi-temps", "team": "Équipe", metric: ADVANCED_LABELS[metric]},
+            title=f"{ADVANCED_LABELS[metric]} · événements des deux périodes",
+        )
+        fig.update_xaxes(tickmode="array", tickvals=[1, 2], ticktext=["1re", "2e"])
+        st.plotly_chart(fig, width="stretch")
+        subset = advanced_frame[advanced_frame.team == team].copy()
+        st.dataframe(
+            subset.rename(columns={"team": "Équipe", "period": "Mi-temps", **ADVANCED_LABELS,
+                                   "possessions_annotated": "Possessions identifiées par fournisseur",
+                                   "possessions_with_shot": "Possessions contenant un tir",
+                                   "possession_shot_pct": "Possessions avec tir (%)"}),
+            hide_index=True, width="stretch",
+        )
+        st.warning(
+            "Les seuils géométriques et temporels sont des PROXYS, pas des labels fiables de "
+            "pressing efficace, création de danger ou schéma tactique. "
+            "Les possessions reflètent seulement les identifiants fournis par StatsBomb."
+        )
