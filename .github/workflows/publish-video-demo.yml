@@ -26,6 +26,12 @@ jobs:
             --name fpi-tracking-12sec-video-byte-track-ids \
             --dir /tmp/fpi-verified-video
           ls -lh /tmp/fpi-verified-video
+      - name: Préparer ffmpeg pour MP4 H.264 compatible navigateurs
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          command -v ffmpeg
+          command -v ffprobe
       - name: Vérifier source, limites et dimensions de la vidéo réelle
         run: |
           python - <<'PY'
