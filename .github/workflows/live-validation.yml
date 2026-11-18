@@ -12,6 +12,8 @@ on:
       - 'app.py'
       - 'requirements/**'
       - 'pyproject.toml'
+      - 'requirements.txt'
+      - '.streamlit/**'
       - '.devcontainer/devcontainer.json'
 
 permissions:
@@ -32,8 +34,7 @@ jobs:
       - name: Préparer les dépendances isolées
         run: |
           python -m venv .venv
-          .venv/bin/python -m pip install -r requirements/py311-linux.lock
-          .venv/bin/python -m pip install --no-deps -e .
+          .venv/bin/python -m pip install -r requirements.txt
           .venv/bin/python -m pip check
       - name: Vérifier le match officiel et les cinq modules avec les événements réels
         run: |

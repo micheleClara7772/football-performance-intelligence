@@ -19,6 +19,9 @@ def test_official_real_footage_sources_are_provider_hosted():
     assert len(OFFICIAL_FIFA_CLIPS) == 2
     assert all(clip["url"].startswith("https://www.youtube.com/watch?v=") for clip in OFFICIAL_FIFA_CLIPS)
     assert len({clip["url"] for clip in OFFICIAL_FIFA_CLIPS}) == 2
+    from fpi.ui.video import OFFICIAL_FIFA_FULL_MATCH
+    assert OFFICIAL_FIFA_FULL_MATCH["url"].startswith("https://www.plus.fifa.com/")
+    assert "5f1b5797-25d0-4e10-b723-5072b470bae8" in OFFICIAL_FIFA_FULL_MATCH["url"]
 
 
 def test_french_labels_preserve_source_team_names():
@@ -39,6 +42,10 @@ def test_video_fallback_is_external_and_not_embedded():
     video = (Path(__file__).resolve().parents[1] / 'src/fpi/ui/video.py').read_text(encoding='utf-8')
     assert 'st.link_button(' in video
     assert 'st.video(' not in video
+    assert 'st.iframe(' in video
+    assert 'st.iframe(f"https://www.youtube.com/embed/' in video
+    assert "OFFICIAL_FIFA_FULL_MATCH[\"url\"]" in video
+    assert 'st.iframe(OFFICIAL_FIFA_FULL_MATCH' not in video
     assert 'erreur 153' in video
 
 def test_linux_reference_lock_is_pinned():

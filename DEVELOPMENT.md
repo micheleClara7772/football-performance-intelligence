@@ -68,4 +68,9 @@ Définitions et limites : `docs/tactical-metrics.md`. Ne pas confondre une varia
 
 Les environnements Python 3.11 sont créés dans Codespaces ou les runners GitHub, jamais sur l'ordinateur utilisateur. Le lock `requirements/py311-linux.lock` (versions exactes) est désormais versionné et utilisé dans Codespaces et la CI. Il est construit depuis la résolution effectivement installée dans GitHub Actions le 16/11/2026. Les tests de réinstallation depuis le lock doivent encore être confirmés sur la nouvelle tête de PR avant de déclarer ce point terminé.
 
-Le lecteur vidéo embarqué a été retiré de l'interface de démonstration parce qu'il affichait l'erreur YouTube 153 sur Codespaces. Le bouton vers la vidéo officielle reste disponible. Les labels d'équipes sont traduits pour l'affichage uniquement ; les chaînes StatsBomb `Morocco` / `Portugal` restent inchangées dans les calculs et dans les données source.
+Le replay intégral FIFA+ officiel est proposé par lien externe, car FIFA+ interdit les iframes non autorisées. Les résumés YouTube sont accessibles via liens externes, avec un essai facultatif du lecteur natif Streamlit (résultat de lecture non garanti, erreur 153 antérieure). Les labels d'équipes sont traduits pour l'affichage uniquement ; les chaînes StatsBomb `Morocco` / `Portugal` restent inchangées dans les calculs et dans les données source.
+
+
+## Déploiement Streamlit Community Cloud (sans frais d'hébergement)
+
+Le dépôt contient désormais `requirements.txt` en racine. Il installe les dépendances du lock Linux/Python 3.11 et le paquet local `fpi`. Le même parcours d'installation est vérifié dans GitHub Actions. Le propriétaire peut utiliser [le guide de déploiement gratuit](docs/deploiement-gratuit.md) et garder le dépôt source privé. La création du compte/l'autorisation GitHub Streamlit doivent être effectuées par le propriétaire. Aucun sous-domaine n'est présumé créé tant que l'URL n'a pas été réellement ouverte.
