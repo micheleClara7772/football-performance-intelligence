@@ -37,6 +37,10 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
     if state_key not in st.session_state:
         st.session_state[state_key] = {}
     notes = st.session_state[state_key]
+    version_key = f"fpi_notes_form_version_{match_id}"
+    if version_key not in st.session_state:
+        st.session_state[version_key] = 0
+    form_version = st.session_state[version_key]
     c1, c2, c3 = st.columns(3)
     team = c1.selectbox("Équipe de l'action", teams, format_func=team_label, key="annotation_team")
     kind = c2.selectbox("Action", EVENT_TYPES, format_func=event_label, key="annotation_kind")
@@ -59,23 +63,23 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
             nature = st.selectbox(
                 "Nature de la note", NOTE_TYPES,
                 index=NOTE_TYPES.index(previous.get("nature", "Observation")),
-                key=f"annotation_nature_{chosen_id}",
+                key=f"annotation_nature_{chosen_id}_{form_version}",
             )
             note = st.text_area(
                 "Observation tactique ou hypothèse à vérifier",
                 value=previous.get("note", ""), max_chars=MAX_TEXT_LENGTH,
-                key=f"annotation_text_{chosen_id}",
+                key=f"annotation_text_{chosen_id}_{form_version}",
             )
             source = st.selectbox(
                 "Résumé FIFA consulté, facultatif", sources,
                 index=sources.index(previous.get("video_url")) if previous.get("video_url") in sources else 0,
-                format_func=lambda x: titles[x], key=f"annotation_source_{chosen_id}",
+                format_func=lambda x: titles[x], key=f"annotation_source_{chosen_id}_{form_version}",
             )
             timestamp = st.text_input(
                 "Repère manuel dans le résumé (MM:SS, facultatif)",
                 value=format_video_clock(previous.get("video_seconds")),
                 help="Minutage du montage YouTube, jamais la minute du match.",
-                key=f"annotation_timestamp_{chosen_id}",
+                key=f"annotation_timestamp_{chosen_id}_{form_version}",
             )
             saved = st.form_submit_button("Enregistrer l'annotation")
         if saved:
@@ -90,6 +94,10 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
                 st.success("Annotation enregistrée dans cette session. Exporte le JSON pour la conserver.")
             except ValueError as exc:
                 st.error(str(exc))
+        if chosen_id in notes and st.button("Supprimer l'annotation sélectionnée", key="annotation_delete"):
+            del notes[chosen_id]
+            st.session_state[version_key] += 1
+            st.rerun()
     st.caption("Les annotations restent dans la session Streamlit. Un export JSON est nécessaire pour les conserver après sa fermeture.")
     if notes:
         records = [
@@ -119,7 +127,7 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
                 allowed_video_urls=[clip["url"] for clip in OFFICIAL_FIFA_CLIPS],
             )
             st.session_state[state_key] = imported
-            st.success(f"{len(imported)} annotations restaurées depuis le fichier.")
+            st.session_state[version_key] += 1
             st.rerun()
         except (ValueError, UnicodeError, TypeError, KeyError, json.JSONDecodeError) as exc:
             st.error(f"Import refusé : {exc}")

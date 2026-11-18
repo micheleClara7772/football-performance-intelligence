@@ -65,3 +65,16 @@ def test_import_rejects_foreign_match_event_or_tampered_minute(events):
     payload["annotations"][0]["event_id"] = "missing"
     with pytest.raises(ValueError):
         import_document(payload, 3869486, events)
+
+
+def test_reimport_rejects_duplicate_event_and_unapproved_video(events):
+    from copy import deepcopy
+    annotation = build_annotation(events[1], "Observation", "Observation")
+    payload = json.loads(export_document(3869486, [annotation]))
+    payload["annotations"].append(deepcopy(annotation))
+    with pytest.raises(ValueError, match="double"):
+        import_document(payload, 3869486, events)
+    payload["annotations"].pop()
+    payload["annotations"][0]["video_url"] = "https://evil.example/video"
+    with pytest.raises(ValueError, match="non référencée"):
+        import_document(payload, 3869486, events)
