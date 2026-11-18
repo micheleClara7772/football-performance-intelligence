@@ -77,7 +77,7 @@ Rapport calculé pour chaque classe : vrais positifs, faux positifs, omissions, 
 
 1. `tests/test_football_ball.py` : le décodage du modèle ONNX simulé, transformation letterbox, et sélection du modèle spécialisé pour la classe ballon ; **pas une mesure de qualité du modèle**.
 2. `scripts/validate_specialist_ball.py` : **véritable modèle spécialisé** téléchargé de Hugging Face et exécuté sur trois images réelles annotées d'un autre dataset ; imprime nombre de correspondances, sans exagérer la taille de l'échantillon.
-3. `scripts/validate_full_duration.py` : génère une vidéo synthétique originale de **92 minutes**, parcourt vraiment ses frames à intervalles de 5 minutes et vérifie le décodage/horodatage de fin ; le « détecteur » de ce seul test est simulé pour isoler les erreurs d'I/O, **pas pour prouver le rappel sur un match**.
+3. `scripts/validate_full_duration.py` : génère une vidéo synthétique originale de **92 minutes**, parcourt vraiment ses frames à intervalles de 2 minutes et vérifie le décodage/horodatage de fin ; le « détecteur » de ce seul test est simulé pour isoler les erreurs d'I/O, **pas pour prouver le rappel sur un match**.
 4. `scripts/validate_video_model.py` : détecteur YOLOX original avec vraies inférences et vraies images, maintien en non-régression.
 
 ## Travail encore nécessaire pour déclarer « validé match intégral »
