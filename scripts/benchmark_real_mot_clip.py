@@ -15,12 +15,12 @@ from tempfile import TemporaryDirectory
 from time import perf_counter
 
 from scripts.evaluate_video_detections import evaluate
-from scripts.prepare_soccertrack import DATASET, REVISION
+from scripts.prepare_soccertrack import DATASET, REVISION, MATCH_IDS
 
 MATCH_ID = "117093"
 VIDEO = f"mot/clips/{MATCH_ID}.mp4"
 MOT = f"mot/{MATCH_ID}.txt"
-VIDEO_MAX_BYTES = 400 * 1024**2
+VIDEO_MAX_BYTES = 750 * 1024**2
 MOT_MAX_BYTES = 25 * 1024**2
 
 
@@ -89,9 +89,14 @@ def _size_limit(api, path, token, limit):
     return size
 
 
-def real_mot_benchmark(*, token, samples_interval=8.0, api=None, downloader=None):
+def real_mot_benchmark(*, token, samples_interval=8.0, match_id=MATCH_ID,
+                       preview_dir=None, api=None, downloader=None):
     if not 5 <= samples_interval <= 30:
         raise ValueError("Intervalle benchmark limité entre 5 et 30 secondes")
+    if match_id not in MATCH_IDS:
+        raise ValueError("Match MOT hors liste SoccerTrack v2")
+    video_ref = f"mot/clips/{match_id}.mp4"
+    mot_ref = f"mot/{match_id}.txt"
     from huggingface_hub import HfApi, hf_hub_download
     from fpi.video_analysis.detector import YOLOXDetector, download_model
     from fpi.video_analysis.pipeline import analyze_video
@@ -99,17 +104,17 @@ def real_mot_benchmark(*, token, samples_interval=8.0, api=None, downloader=None
 
     api = api or HfApi()
     downloader = downloader or hf_hub_download
-    _size_limit(api, VIDEO, token, VIDEO_MAX_BYTES)
-    _size_limit(api, MOT, token, MOT_MAX_BYTES)
+    _size_limit(api, video_ref, token, VIDEO_MAX_BYTES)
+    _size_limit(api, mot_ref, token, MOT_MAX_BYTES)
 
     with TemporaryDirectory(prefix="fpi-mot-private-") as private:
         # These are explicitly consented dataset files, not protected replays.
         video = downloader(
-            repo_id=DATASET, repo_type="dataset", filename=VIDEO,
+            repo_id=DATASET, repo_type="dataset", filename=video_ref,
             revision=REVISION, token=token, local_dir=private,
         )
         annotations = downloader(
-            repo_id=DATASET, repo_type="dataset", filename=MOT,
+            repo_id=DATASET, repo_type="dataset", filename=mot_ref,
             revision=REVISION, token=token, local_dir=private,
         )
         if Path(video).stat().st_size > VIDEO_MAX_BYTES or Path(annotations).stat().st_size > MOT_MAX_BYTES:
@@ -137,13 +142,18 @@ def real_mot_benchmark(*, token, samples_interval=8.0, api=None, downloader=None
         expected_timestamps = None
         for name, columns, rows, threshold in configurations:
             start = perf_counter()
-            summary, _ = analyze_video(
+            summary, previews = analyze_video(
                 Path(video), PersonThresholdAdapter(model, threshold),
                 sample_interval_seconds=samples_interval,
-                max_frames=0, preview_limit=0,
+                max_frames=0, preview_limit=(3 if preview_dir else 0),
                 tile_columns=columns, tile_rows=rows,
             )
             elapsed = round(perf_counter() - start, 2)
+            if preview_dir:
+                preview_dir = Path(preview_dir)
+                preview_dir.mkdir(parents=True, exist_ok=True)
+                for k, (t, jpg) in enumerate(previews):
+                    (preview_dir / f"{match_id}-{name}-t{int(t):04d}-{k}.jpg").write_bytes(jpg)
             timestamps = [x["time_seconds"] for x in summary.per_frame]
             if expected_timestamps is None:
                 expected_timestamps = timestamps
@@ -191,7 +201,7 @@ def real_mot_benchmark(*, token, samples_interval=8.0, api=None, downloader=None
         return {
             "validation_type": "exploratory_real_yolox_tiling_on_soccertrack_mot_clip",
             "license": "SoccerTrack v2 CC BY 4.0 (attribution required)",
-            "match_id": MATCH_ID, "dataset_revision": REVISION,
+            "match_id": match_id, "dataset_revision": REVISION,
             "real_clip_inference_executed": True,
             "actual_full_match_inference": False,
             "full_match_detection_validated": False,
@@ -233,12 +243,16 @@ def main():
     p = argparse.ArgumentParser(description="FPI — vrai benchmark YOLOX sur clip SoccerTrack privé")
     p.add_argument("--out", type=Path, default=Path("outputs/real-mot-117093.json"))
     p.add_argument("--interval-seconds", type=float, default=8.0)
+    p.add_argument("--match-id", choices=MATCH_IDS, default=MATCH_ID)
+    p.add_argument("--preview-dir", type=Path, default=None,
+                   help="Three derived annotated preview JPEG per model in private artifacts")
     args = p.parse_args()
     token = os.environ.get("HF_TOKEN")
     if not token:
         raise SystemExit("FPI_REAL_MOT=NEEDS_AUTHENTICATION")
     try:
-        report = real_mot_benchmark(token=token, samples_interval=args.interval_seconds)
+        report = real_mot_benchmark(token=token, samples_interval=args.interval_seconds,
+                                    match_id=args.match_id, preview_dir=args.preview_dir)
     except Exception as exc:
         # Do not dump exceptions that could contain signed HF URLs or headers.
         raise SystemExit(f"FPI_REAL_MOT=FAILED ({type(exc).__name__}); voir schéma/ressources")
