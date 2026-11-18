@@ -64,3 +64,15 @@ def test_exploratory_tiling_selection_uses_measured_f1():
     ]
     assert choose_tiling(experiments) == "fine"
     assert choose_tiling([{"quality_scoreable": False}]) is None
+
+
+def test_match_whitelist_rejects_unknown_without_download():
+    from scripts.benchmark_real_mot_clip import real_mot_benchmark
+    with pytest.raises(ValueError, match="Match MOT"):
+        real_mot_benchmark(token="DO_NOT_PRINT", match_id="../../etc/passwd")
+
+
+def test_other_match_file_paths_are_separate():
+    from scripts.prepare_soccertrack import MATCH_IDS
+    assert "128057" in MATCH_IDS
+    assert f"mot/clips/{'128057'}.mp4" != VIDEO
