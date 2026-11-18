@@ -1,6 +1,7 @@
 """Parcours réel Streamlit via navigateur Chromium headless, avec captures de preuve."""
 from __future__ import annotations
 
+import json
 import os
 import time
 from urllib.error import URLError
@@ -33,7 +34,7 @@ def main() -> None:
     wait_for_server()
     with sync_playwright() as tool:
         browser = tool.chromium.launch(headless=True, args=["--no-sandbox"])
-        page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1)
+        page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1, accept_downloads=True)
         page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
         page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
         page.get_by_text("Événements validés").first.wait_for(timeout=60_000)
@@ -47,6 +48,42 @@ def main() -> None:
         page.get_by_text("Comparaison des mi-temps", exact=True).first.wait_for(timeout=60_000)
         assert page.locator('[data-testid="stPlotlyChart"]').count() >= 1
         page.screenshot(path=str(OUT / "02-analyse-tactique.png"), full_page=True)
+        page.get_by_role("tab", name="Annotations").click()
+        page.get_by_text("Annotations d'événements vérifiés").wait_for(timeout=45_000)
+        page.get_by_role("textbox", name="Observation tactique ou hypothèse à vérifier").fill(
+            "Note de validation du parcours sur un événement réel, sans vidéo copiée."
+        )
+        page.get_by_role("button", name="Enregistrer l'annotation").click()
+        page.get_by_text("Annotation enregistrée dans cette session", exact=False).wait_for(timeout=45_000)
+        page.get_by_role("button", name="Exporter les annotations en JSON").wait_for(timeout=45_000)
+        page.screenshot(path=str(OUT / "02b-annotations-evenements.png"), full_page=True)
+        with page.expect_download(timeout=45_000) as file_event:
+            page.get_by_role("button", name="Exporter les annotations en JSON").click()
+        output_notes = OUT / "temporary-annotations.json"
+        file_event.value.save_as(str(output_notes))
+        exported = json.loads(output_notes.read_text(encoding="utf-8"))
+        assert exported["match_id"] == 3869486
+        assert exported["video_sync"] == "manual_summary_clock_only"
+        assert len(exported["annotations"]) == 1
+        assert exported["annotations"][0]["note"].startswith("Note de validation")
+
+        # Nouvelle session navigateur : export/import réels, sans re-saisie ni faux événements.
+        fresh = browser.new_context(viewport={"width": 1440, "height": 960}, accept_downloads=True)
+        imported_page = fresh.new_page()
+        imported_page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
+        imported_page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
+        imported_page.locator('[data-testid="stSidebar"]').get_by_text("Analyse tactique", exact=True).click()
+        imported_page.get_by_role("tab", name="Annotations").click()
+        imported_page.locator('input[type="file"]').set_input_files(str(output_notes))
+        imported_page.get_by_role("button", name="Charger les annotations du fichier").click()
+        from playwright.sync_api import expect
+        expect(imported_page.get_by_role("textbox", name="Observation tactique ou hypothèse à vérifier")).to_have_value(
+            "Note de validation du parcours sur un événement réel, sans vidéo copiée.",
+            timeout=45_000,
+        )
+        imported_page.screenshot(path=str(OUT / "02c-annotations-reimport.png"), full_page=True)
+        fresh.close()
+        output_notes.unlink(missing_ok=True)
 
         sidebar.get_by_text("Assistant IA", exact=True).click()
         page.get_by_role("heading", name="Assistant IA · fondation factuelle").wait_for(timeout=60_000)
