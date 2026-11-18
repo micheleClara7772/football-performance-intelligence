@@ -1,0 +1,49 @@
+name: FPI - analyse réelle de vidéo CC BY
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/fpi/video_analysis/**'
+      - 'src/fpi/ui/video.py'
+      - 'scripts/validate_video_model.py'
+      - 'tests/test_video_analysis.py'
+      - 'requirements.txt'
+      - 'requirements/video-py311-linux.lock'
+      - '.github/workflows/video-validation.yml'
+      - '.streamlit/config.toml'
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-video-inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FPI_CV_PROOF_DIR: outputs/video-proof
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dépendances ONNX CPU et OpenCV
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt
+          .venv/bin/python -m pip check
+      - name: Tests de sécurité et vidéos générées
+        run: .venv/bin/python -m pytest -q tests/test_video_analysis.py
+      - name: Vrai modèle sur séquence SoccerTrack CC BY
+        run: .venv/bin/python scripts/validate_video_model.py
+      - name: Archiver preuves sans réhéberger la vidéo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-video-cv-proof
+          path: |
+            outputs/video-proof/soccertrack-real-inference.json
+            outputs/video-proof/ccby-detection-*.jpg
+          if-no-files-found: warn
+          retention-days: 7
