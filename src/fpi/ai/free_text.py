@@ -14,13 +14,13 @@ METRICS = {
     "passes": (r"\bpasses?\b", r"\bballons? transmis\b", r"\bcirculation\b"),
     "pressures": (r"\bpressions?\b", r"\bpressing\b"),
     "recoveries": (r"\brecuperations?\b", r"\bballons? recuperes?\b"),
-    "interceptions": (r"\binterceptions?\b"),
+    "interceptions": (r"\binterceptions?\b",)
     "entries": (r"\bdernier tiers\b", r"\bprogressions?\b"),
     "xg": (r"\bxg\b", r"\bexpected goals?\b"),
     "goals": (r"\bbuts?\b", r"\bbuteurs?\b", r"\bmarqu[ea]\b", r"\bscore\b"),
     "carries": (r"\bconduites?\b", r"\bcarries?\b"),
-    "dribbles": (r"\bdribbles?\b"),
-    "fouls": (r"\bfautes?\b"),
+    "dribbles": (r"\bdribbles?\b",)
+    "fouls": (r"\bfautes?\b",)
     "offsides": (r"\bhors.jeux?\b", r"\boffside\b"),
 }
 EVENT_TYPES = {
