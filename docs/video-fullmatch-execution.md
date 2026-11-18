@@ -21,6 +21,21 @@ python -m scripts.prepare_soccertrack --match-id 117093 --download --access-conf
 
 **Spécification critique** : les `gsr/*.json` livrés ont un **objet COCO SoccerNet** (`images`, `annotations`, `attributes`, `bbox_image`, `bbox_pitch`) et non le tableau plat initialement documenté. Certains fichiers dépassent **2 Go par mi-temps**. L'outil de conversion/benchmark doit les parcourir en flux, sans `json.load` complet, et utiliser les dimensions réelles de la vidéo. Les JSON d'annotation de balle `ball/` contiennent une **trajectoire reconstruite/interpolée**, ce qui n'est pas une vérité terrain de boîtes de balle visible dans les pixels. Ne pas la noter comme un détecteur d'objets. Références : documentation [format GSR](https://github.com/AtomScott/SoccerTrack-v2/blob/main/docs/format-gsr.md), [release v1.2](https://huggingface.co/datasets/atomscott/soccertrack-v2).
 
+### Convertir la vérité terrain spatiale sans épuiser la mémoire
+
+Les fichiers GSR peuvent peser plus de 2 Go chacun. Installer `ijson` **dans le Codespace** pour parcourir les annotations sans les charger en mémoire, puis générer des positions pitch indépendantes du modèle :
+
+```bash
+python -m pip install "ijson>=3.2,<4"
+python -m scripts.convert_soccertrack_gsr \
+  --gsr data/raw/soccertrack-v2/gsr/117093/117093_1st.json \
+  --out outputs/gsr-reference-half1.json --every-seconds 5
+python -m fpi.video_analysis.team_metrics \
+  --positions outputs/gsr-reference-half1.json --out outputs/gsr-shape-half1.json
+```
+
+Répéter pour `117093_2nd.json`. Cela **mesure les annotations de référence**, pas les sorties de FPI. Un test du parseur sur des objets simulant le format livré est inclus dans la CI ; aucune réelle annotation de plusieurs gigaoctets n'est disponible dans le runner public. Aucun alignement inter-mi-temps n'est présumé.
+
 ## 2. Benchmark comparatif reproductible
 
 Après accès à une vraie vidéo autorisée, produire les rapports YOLOX et hybride sur exactement la même grille temporelle. Exemple *à adapter au fichier privé* :
