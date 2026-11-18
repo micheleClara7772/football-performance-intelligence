@@ -2,6 +2,15 @@
 
 Statut (18 novembre 2026) : **travail en cours**. La vidéo d'un vrai match de 90 minutes n'a **pas encore** été acquise ni testée de bout en bout. La nouvelle association de boîtes et les calculs spatiaux sont des modules expérimentaux. Ne pas fermer l'Issue #29 sur les seuls tests unitaires.
 
+## Connexion sécurisée de l'accès déjà autorisé
+
+L'acceptation des conditions sur Hugging Face est individuelle et **ne donne aucun accès automatique au GitHub Actions de FPI**. Pour vérifier l'accès sans placer de jeton dans le dépôt ni dans le chat, créer un **jeton HF en lecture seule** (ou fine-grained avec lecture du dataset gated déjà accepté) dans https://huggingface.co/settings/tokens, puis le déposer dans le **secret GitHub Actions de dépôt** nommé `HF_TOKEN` :
+https://github.com/micheleClara7772/football-performance-intelligence/settings/secrets/actions
+
+Vérification sans téléchargement de match : l'action `.github/workflows/soccertrack-access.yml` est disponible via `workflow_dispatch` et sur push ciblé dans main. Elle tente un téléchargement **forcé** du minuscule `mot/README.md` de la révision `v1.2`, puis élimine le fichier avec le runner éphémère. Artefact `fpi-soccertrack-access-preflight` : `ACCESS_VERIFIED`, `NEEDS_AUTHENTICATION`, ou `ACCESS_NOT_VERIFIED`. Le rapport ne contient ni jeton, ni identité du compte, ni vidéo. Un statut de workflow CI vert ne signifie **pas** que le dataset est accessible : il faut lire explicitement `verified_file_access: true`.
+
+**Ne jamais copier un token dans ChatGPT, dans un message GitHub, dans `README.md` ou dans un script.** On peut également se connecter directement depuis un Codespace **privé** avec `hf auth login`. Le secret du dépôt est utile à la vérification autonome future, mais les vidéos complètes ne doivent pas être téléchargées par ce préflight. Avant de lancer l'analyse complète, vérifier capacité disque/quotas et éviter toute exécution payante involontaire.
+
 ## 1. Acquisition légitime, une seule rencontre
 
 Dataset : [SoccerTrack v2](https://huggingface.co/datasets/atomscott/soccertrack-v2), licence de données CC BY 4.0, version `v1.2`, 10 rencontres réparties en 20 vidéos de mi-temps (environ 145 Go au total). Le site exige une **acceptation explicite** des conditions en étant connecté à Hugging Face. Aucune API FPI ne peut consentir à la place de l'utilisateur.
