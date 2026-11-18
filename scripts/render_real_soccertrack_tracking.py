@@ -60,6 +60,9 @@ def score_real_tracklets(tracked: dict, frame_ids: list[int],
         raise ValueError("IDs GT/timestamps incohérents")
     import motmetrics as mm
     acc=mm.MOTAccumulator(auto_id=True)
+    # MOTMetrics 1.4 coerces hypothesis IDs to float in pandas.
+    # Map ByteTrack's namespaced IDs to stable integers per run.
+    numeric_ids={}
     observations=0
     for source_id,frame in zip(frame_ids,tracked["frames"]):
         truth=ground.get(source_id,[])
@@ -68,7 +71,12 @@ def score_real_tracklets(tracked: dict, frame_ids: list[int],
             if d["label"]=="joueur_candidat" and d.get("track_id") is not None
         ]
         gt_ids=[obj["id"] for obj in truth]
-        predicted_ids=[p["track_id"] for p in predictions]
+        predicted_ids=[]
+        for obj in predictions:
+            raw_id=obj["track_id"]
+            if raw_id not in numeric_ids:
+                numeric_ids[raw_id]=len(numeric_ids)+1
+            predicted_ids.append(numeric_ids[raw_id])
         distances=np.full((len(truth),len(predictions)), np.nan, dtype=np.float64)
         for i,obj in enumerate(truth):
             for j,pred in enumerate(predictions):
