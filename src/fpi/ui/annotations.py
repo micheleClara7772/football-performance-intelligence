@@ -11,7 +11,7 @@ from fpi.analysis.annotations import (
     export_document, format_video_clock, import_document, parse_video_clock,
 )
 from fpi.ui.formatting import team_label, event_label
-from fpi.ui.video import OFFICIAL_FIFA_CLIPS
+from fpi.ui.video import OFFICIAL_FIFA_CLIPS, OFFICIAL_FIFA_FULL_MATCH
 
 
 def _event_title(event: dict) -> str:
@@ -29,8 +29,8 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
         "ou une hypothèse. Les données sources et les notes restent distinctes."
     )
     st.warning(
-        "La minute du match et le minutage d'un résumé FIFA sont deux références différentes. "
-        "Le minutage du résumé doit être relevé manuellement : aucune synchronisation automatique."
+        "La minute du match et la position de lecture d'une vidéo FIFA sont deux références différentes. "
+        "Le repère du lecteur doit être saisi manuellement : aucune synchronisation automatique."
     )
     match_id = match["match_id"]
     state_key = f"fpi_notes_{match_id}"
@@ -57,8 +57,9 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
         chosen_id = st.selectbox("Événement StatsBomb", list(candidates), format_func=lambda x: _event_title(candidates[x]), key="annotation_event_id")
         selected = candidates[chosen_id]
         previous = notes.get(chosen_id, {})
-        sources = (None, *[clip["url"] for clip in OFFICIAL_FIFA_CLIPS])
-        titles = {None: "Aucun extrait associé", **{clip["url"]: clip["label"] for clip in OFFICIAL_FIFA_CLIPS}}
+        official_sources = (OFFICIAL_FIFA_FULL_MATCH, *OFFICIAL_FIFA_CLIPS)
+        sources = (None, *[clip["url"] for clip in official_sources])
+        titles = {None: "Aucune vidéo associée", **{clip["url"]: clip["label"] for clip in official_sources}}
         with st.form(f"annotation_form_{chosen_id}"):
             nature = st.selectbox(
                 "Nature de la note", NOTE_TYPES,
@@ -71,14 +72,14 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
                 key=f"annotation_text_{chosen_id}_{form_version}",
             )
             source = st.selectbox(
-                "Résumé FIFA consulté, facultatif", sources,
+                "Vidéo officielle consultée, facultatif", sources,
                 index=sources.index(previous.get("video_url")) if previous.get("video_url") in sources else 0,
                 format_func=lambda x: titles[x], key=f"annotation_source_{chosen_id}_{form_version}",
             )
             timestamp = st.text_input(
-                "Repère manuel dans le résumé (MM:SS, facultatif)",
+                "Repère manuel dans la vidéo (MM:SS, facultatif)",
                 value=format_video_clock(previous.get("video_seconds")),
-                help="Minutage du montage YouTube, jamais la minute du match.",
+                help="Position du lecteur officiel (replay ou résumé), à relever manuellement. Elle n'est pas automatiquement la minute du match.",
                 key=f"annotation_timestamp_{chosen_id}_{form_version}",
             )
             saved = st.form_submit_button("Enregistrer l'annotation")
@@ -89,11 +90,13 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
                 clip_seconds = parse_video_clock(timestamp)
                 notes[chosen_id] = build_annotation(
                     selected, note, nature, source, clip_seconds,
-                    allowed_video_urls=[clip["url"] for clip in OFFICIAL_FIFA_CLIPS],
+                    allowed_video_urls=[clip["url"] for clip in (OFFICIAL_FIFA_FULL_MATCH, *OFFICIAL_FIFA_CLIPS)],
                 )
                 st.success("Annotation enregistrée dans cette session. Exporte le JSON pour la conserver.")
             except ValueError as exc:
                 st.error(str(exc))
+        if source:
+            st.link_button("Ouvrir la vidéo officielle sélectionnée", source)
         if chosen_id in notes and st.button("Supprimer l'annotation sélectionnée", key="annotation_delete"):
             del notes[chosen_id]
             st.session_state[version_key] += 1
@@ -104,7 +107,7 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
             {"Minute match": f"{note['match_minute']:02d}:{note['match_second']:02d}",
              "Équipe": team_label(note["team"]), "Action": event_label(note["event_type"]),
              "Nature": note["nature"], "Note": note["note"],
-             "Résumé (manuel)": format_video_clock(note["video_seconds"])}
+             "Vidéo (repère manuel)": format_video_clock(note["video_seconds"])}
             for note in notes.values()
         ]
         st.dataframe(pd.DataFrame(records), hide_index=True, width="stretch")
@@ -124,7 +127,7 @@ def render_annotations(match: dict, events: list[dict], teams: tuple[str, str]) 
             payload = json.loads(raw.decode("utf-8"))
             imported = import_document(
                 payload, match_id, events,
-                allowed_video_urls=[clip["url"] for clip in OFFICIAL_FIFA_CLIPS],
+                allowed_video_urls=[clip["url"] for clip in (OFFICIAL_FIFA_FULL_MATCH, *OFFICIAL_FIFA_CLIPS)],
             )
             st.session_state[state_key] = imported
             st.session_state[version_key] += 1

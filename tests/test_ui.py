@@ -58,3 +58,14 @@ def test_linux_reference_lock_is_pinned():
         assert name and version and name.lower() not in names
         names.add(name.lower())
     assert {"streamlit", "pandas", "plotly", "requests", "pytest"}.issubset(names)
+
+
+def test_guided_navigation_changes_page_without_crash():
+    from streamlit.testing.v1 import AppTest
+    from pathlib import Path
+    at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=15).run()
+    assert at.sidebar.radio[0].value == "Tableau de bord"
+    next_button = next(b for b in at.button if b.label.startswith("Continuer :"))
+    next_button.click().run()
+    assert at.sidebar.radio[0].value == "Analyse tactique"
+    assert len(at.exception) == 0

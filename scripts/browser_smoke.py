@@ -63,7 +63,8 @@ def main() -> None:
         file_event.value.save_as(str(output_notes))
         exported = json.loads(output_notes.read_text(encoding="utf-8"))
         assert exported["match_id"] == 3869486
-        assert exported["video_sync"] == "manual_summary_clock_only"
+        assert exported["schema_version"] == 2
+        assert exported["video_sync"] == "manual_player_clock_only"
         assert len(exported["annotations"]) == 1
         assert exported["annotations"][0]["note"].startswith("Note de validation")
 
@@ -110,6 +111,9 @@ def main() -> None:
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
         page.screenshot(path=str(OUT / "05b-youtube-integration-experimentale.png"), full_page=True)
 
+        assert page.locator('[data-testid="stException"]').count() == 0
+        page.get_by_role("button", name="Continuer : Assistant IA").click()
+        page.get_by_role("heading", name="Assistant IA · fondation factuelle").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()
         print("FPI_BROWSER_SMOKE=PASS, five pages, screenshots in", OUT)
