@@ -22,6 +22,13 @@ METRICS = {
     "dribbles": (r"\bdribbles?\b",),
     "fouls": (r"\bfautes?\b",),
     "offsides": (r"\bhors.jeux?\b", r"\boffside\b"),
+    "progressive_passes": (r"\bpasses? progressives?\b",),
+    "switches_of_play": (r"\brenversements?\b", r"\bchangements? d.aile\b"),
+    "high_recoveries": (r"\brecuperations? hautes?\b",),
+    "box_shots": (r"\btirs? (?:dans|depuis) la surface\b",),
+    "shot_assists": (r"\bpasses? (?:cles?|decisives? vers un tir)\b",),
+    "goal_assists": (r"\bpasses? decisives?\b",),
+    "pressures_then_recovery_8s": (r"\brecuperations? apres pressions?\b",),
 }
 EVENT_TYPES = {
     "shots": "Shot", "passes": "Pass", "pressures": "Pressure",
@@ -35,6 +42,10 @@ METRIC_LABELS = {
     "entries": "entrées dans le dernier tiers", "xg": "xG StatsBomb",
     "goals": "buts", "carries": "conduites", "dribbles": "dribbles",
     "fouls": "fautes commises", "offsides": "hors-jeu",
+    "progressive_passes": "passes progressives", "switches_of_play": "renversements de jeu",
+    "high_recoveries": "récupérations hautes", "box_shots": "tirs depuis la surface",
+    "shot_assists": "passes précédant un tir", "goal_assists": "passes décisives",
+    "pressures_then_recovery_8s": "récupérations après une pression",
 }
 TEAM_TOKENS = {"Morocco": ("maroc", "morocco", "marocains"),
                "Portugal": ("portugal", "portugais", "portugaise")}
@@ -85,6 +96,12 @@ def _selected_events(events: list[dict], team: str, period: int | None,
 
 
 def _count(selected: list[dict], metric: str) -> tuple[int | float | None, str]:
+    if metric in ("progressive_passes", "switches_of_play", "high_recoveries",
+                  "box_shots", "shot_assists", "goal_assists", "pressures_then_recovery_8s"):
+        from fpi.analysis.advanced import advanced_metrics_by_period, ADVANCED_DESCRIPTIONS
+        team = _get(selected[0], "team") if selected else ""
+        value = int(advanced_metrics_by_period(selected, (team,))[metric].sum()) if team else 0
+        return value, ADVANCED_DESCRIPTIONS[metric]
     if metric == "entries":
         from fpi.analysis.tactical import tactical_by_period
         team = _get(selected[0], "team") if selected else ""
