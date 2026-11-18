@@ -27,7 +27,7 @@ jobs:
           python -m pip check
       - name: Vérifier IDF1 et interruptions de suivi
         run: PYTHONPATH=src python -m pytest -q tests/test_real_tracking_video.py tests/test_bytetrack_adapter.py
-      - name: Vidéo réelle 12 s à 5 FPS : YOLOX + YOLOv9 + vrai ByteTrack
+      - name: 'Vidéo réelle 12 s à 5 FPS : YOLOX + YOLOv9 + vrai ByteTrack'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
