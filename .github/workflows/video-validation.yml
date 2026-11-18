@@ -13,6 +13,7 @@ on:
       - 'tests/test_video_evaluation.py'
       - 'scripts/evaluate_video_detections.py'
       - 'scripts/validate_full_duration.py'
+      - 'scripts/validate_specialist_ball.py'
       - 'requirements.txt'
       - 'requirements/video-py311-linux.lock'
       - '.github/workflows/video-validation.yml'
@@ -43,6 +44,8 @@ jobs:
         run: .venv/bin/python scripts/validate_full_duration.py
       - name: Vrai modèle sur séquence SoccerTrack CC BY
         run: .venv/bin/python scripts/validate_video_model.py
+      - name: Essai réel du détecteur ballon spécialisé (ONNX, trois images annotées)
+        run: .venv/bin/python scripts/validate_specialist_ball.py
       - name: Archiver preuves sans réhéberger la vidéo
         if: always()
         uses: actions/upload-artifact@v4
