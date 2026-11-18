@@ -1,2 +1,4 @@
+# Modèle vidéo ONNX CPU, pinned across installation environments.
+flatbuffers==25.12.19
 onnxruntime==1.32.0
 opencv-python-headless==4.13.0.92

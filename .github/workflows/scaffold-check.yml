@@ -24,7 +24,11 @@ jobs:
         run: |
           mkdir -p outputs
           .venv/bin/python -m pip freeze --exclude-editable > outputs/requirements-linux-py311-resolved.txt
-          diff -u requirements/py311-linux.lock outputs/requirements-linux-py311-resolved.txt
+          # Le lock de base doit rester exact ; les dépendances optionnelles CV sont
+          # pinées dans le second lock. Aucun paquet transitif non verrouillé.
+          sort -f requirements/py311-linux.lock requirements/video-py311-linux.lock > outputs/requirements-expected.txt
+          sort -f outputs/requirements-linux-py311-resolved.txt > outputs/requirements-sorted.txt
+          diff -u outputs/requirements-expected.txt outputs/requirements-sorted.txt
       - name: Archiver les versions résolues pour verrouillage
         uses: actions/upload-artifact@v4
         with:
