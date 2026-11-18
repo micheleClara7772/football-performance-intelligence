@@ -75,6 +75,23 @@ def generate_session(events: list[dict], teams: tuple[str, str], team: str,
     first = max(10, duration_minutes // 4)
     second = duration_minutes // 2
     times = (first, second, duration_minutes - first - second)
-    exercises = [{"Phase": f"{i + 1}. {name}", "Durée (min)": times[i], "Consigne": instruction,
-                  "Point de vigilance": attention} for i, (name, instruction, attention) in enumerate(_DRILLS[focus])]
+    # Gabarit éditorial : matériel et variantes proposés par thème, jamais inférés
+    # d'une vidéo ou de métriques manquantes.
+    materials = ("Ballons, plots, chasubles", "Ballons, plots et cibles", "Ballons, buts et chasubles")
+    variants = (
+        "Adapter espace et nombre de touches au niveau du groupe",
+        "Augmenter ou diminuer la pression des opposants",
+        "Ajuster taille du terrain et temps d'effort avec le staff",
+    )
+    exercises = [
+        {
+            "Phase": f"{i + 1}. {name}",
+            "Durée (min)": times[i],
+            "Consigne": instruction,
+            "Matériel": materials[i],
+            "Variante": variants[i],
+            "Point de vigilance": attention,
+        }
+        for i, (name, instruction, attention) in enumerate(_DRILLS[focus])
+    ]
     return TrainingDraft(team, focus, duration_minutes, players, observation, exercises)
