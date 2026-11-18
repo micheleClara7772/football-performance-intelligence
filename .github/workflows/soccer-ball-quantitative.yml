@@ -1,0 +1,54 @@
+name: FPI - comparaison quantitative vraie balle YOLOX vs YOLOv9
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccer-ball-quantitative.yml'
+      - 'scripts/benchmark_ball_independent.py'
+
+permissions:
+  contents: read
+
+jobs:
+  real-independent-ball-annotations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dépendances d'inférence CPU en environnement temporaire
+        run: |
+          python -m pip install -r requirements/video-py311-linux.lock \
+            'huggingface_hub>=0.28,<2' 'pytest>=8,<10'
+          python -m pip check
+      - name: Tester les conversions de boîtes indépendantes
+        run: PYTHONPATH=src python -m pytest -q tests/test_ball_independent.py
+      - name: Ne récupérer que les 100 images de validation et leurs labels
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/skaczylo/Football-Image-Dataset.git \
+            /tmp/fpi-ball-truth
+          git -C /tmp/fpi-ball-truth sparse-checkout set images/val labels/val
+          test "$(find /tmp/fpi-ball-truth/images/val -name '*.jpg' | wc -l)" -eq 100
+          test "$(find /tmp/fpi-ball-truth/labels/val -name '*.txt' | wc -l)" -eq 100
+          git -C /tmp/fpi-ball-truth rev-parse HEAD
+      - name: Faire une vraie inférence de DEUX modèles sur les mêmes 100 images
+        run: |
+          PYTHONPATH=src python -m scripts.benchmark_ball_independent \
+            --dataset-root /tmp/fpi-ball-truth \
+            --max-images 100 \
+            --proof-dir outputs/ball-real-visual-proofs \
+            --out outputs/ball-models-independent-comparison.json
+      - name: Archiver métriques et 4 preuves visuelles attribuées (privées, temporaires)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-ball-100-real-images-benchmark
+          path: |
+            outputs/ball-models-independent-comparison.json
+            outputs/ball-real-visual-proofs/*.jpg
+          if-no-files-found: warn
+          retention-days: 3
