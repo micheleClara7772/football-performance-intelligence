@@ -87,9 +87,12 @@ def main() -> None:
         output_notes.unlink(missing_ok=True)
 
         sidebar.get_by_text("Assistant IA", exact=True).click()
-        page.get_by_role("heading", name="Assistant IA · fondation factuelle").wait_for(timeout=60_000)
-        page.get_by_role("button", name="Obtenir la réponse calculée").click()
-        page.get_by_text("Source : StatsBomb Open Data", exact=False).last.wait_for(timeout=60_000)
+        page.get_by_role("heading", name="Assistant IA · questions libres").wait_for(timeout=60_000)
+        ask = page.locator('[data-testid="stChatInput"] textarea')
+        ask.fill("Compare les tirs du Maroc et du Portugal")
+        ask.press("Enter")
+        page.get_by_text("Maroc : 9", exact=False).wait_for(timeout=45_000)
+        page.get_by_text("Portugal : 12").wait_for(timeout=45_000)
         page.screenshot(path=str(OUT / "03-assistant-factuel.png"), full_page=True)
 
         sidebar.get_by_text("Séances", exact=True).click()
@@ -113,7 +116,7 @@ def main() -> None:
 
         assert page.locator('[data-testid="stException"]').count() == 0
         page.get_by_role("button", name="Continuer : Assistant IA").click()
-        page.get_by_role("heading", name="Assistant IA · fondation factuelle").wait_for(timeout=45_000)
+        page.get_by_role("heading", name="Assistant IA · questions libres").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()
         print("FPI_BROWSER_SMOKE=PASS, five pages, screenshots in", OUT)
