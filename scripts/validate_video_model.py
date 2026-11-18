@@ -44,41 +44,65 @@ def main():
         json.dumps(summary.to_dict(), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    # Independent sports-ball test on a visible football photo. The panoramic
-    # match demo has a ball only a few pixels wide and may yield zero ball boxes.
-    # Credit: Photospook, "Soccer Ball about to be kicked", CC BY-SA 4.0.
+    # Independent ball evaluation on genuine football frames with YOLO labels.
+    # Attribution: skaczylo / Football Image Dataset, declared CC BY 4.0.
+    # Derived labels may be re-used under CC BY; originals remain ephemeral.
     import cv2
     import numpy as np
-    from fpi.video_analysis.pipeline import render_preview
 
-    ball_photo_url = (
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/"
-        "Soccer_Ball_about_to_be_kicked.JPG/"
-        "1280px-Soccer_Ball_about_to_be_kicked.JPG"
-    )
-    req = Request(ball_photo_url, headers={
-        "User-Agent": "FPI-CV-validation/1.0 (CC-BY-SA attributed, non-commercial test)"
-    })
-    with urlopen(req, timeout=45) as response:
-        content = response.read(2_000_000)
-    photo = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_COLOR)
-    if photo is None:
-        raise AssertionError("Could not decode the free-licensed football photograph")
-    ball_detections = model.detect_frame(
-        photo, tile_columns=2, tile_rows=2, ball_threshold=0.10,
-    )
-    actual_balls = [d for d in ball_detections if d.label == "ballon_candidat"]
-    assert actual_balls, (
-        "No real sports-ball candidate found on the visible-ball CC-BY-SA photo"
-    )
-    (target / "ccby-sa-visible-ball.jpg").write_bytes(
-        render_preview(photo, ball_detections)
-    )
-    print("FPI_REAL_BALL_IMAGE=PASS " + json.dumps({
-        "source": "Photospook / Wikimedia Commons CC BY-SA 4.0",
-        "sports_ball_candidates": len(actual_balls),
-        "confidence_max": round(max(d.confidence for d in actual_balls), 4),
+    ball_sources = [
+        "NED_VS_FRA_mp4-20",
+        "NED_VS_FRA_mp4-21",
+        "NED_VS_FRA_mp4-22",
+    ]
+    matches = 0
+    candidate_count = 0
+    sources_used = 0
+    for stem in ball_sources:
+        base = "https://raw.githubusercontent.com/skaczylo/Football-Image-Dataset/main/"
+        photo_req = Request(base + "images/val/" + stem + ".jpg",
+                            headers={"User-Agent": "FPI research CI/1.0"})
+        label_req = Request(base + "labels/val/" + stem + ".txt",
+                            headers={"User-Agent": "FPI research CI/1.0"})
+        with urlopen(photo_req, timeout=45) as response:
+            content = response.read(1_000_000)
+        with urlopen(label_req, timeout=45) as response:
+            labels = response.read(20_000).decode("utf-8")
+        photo = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if photo is None:
+            raise AssertionError("A football validation image could not be decoded")
+        height, width = photo.shape[:2]
+        ground_truth = [
+            [float(v) for v in line.split()[1:]]
+            for line in labels.splitlines()
+            if line.strip().startswith("0 ")
+        ]
+        assert ground_truth, "This image is supposed to have a labelled ball"
+        guesses = model.detect_frame(
+            photo, tile_columns=4, tile_rows=3, ball_threshold=0.08,
+        )
+        balls = [d for d in guesses if d.label == "ballon_candidat"]
+        candidate_count += len(balls)
+        sources_used += 1
+        # Compare centers to manual labels, not merely presence of boxes.
+        for gx, gy, gw, gh in ground_truth:
+            gt_x, gt_y = gx * width, gy * height
+            if any(
+                abs((d.x1 + d.x2) / 2 - gt_x) <= max(gw * width * 1.2, 18)
+                and abs((d.y1 + d.y2) / 2 - gt_y) <= max(gh * height * 1.2, 18)
+                for d in balls
+            ):
+                matches += 1
+    print("FPI_REAL_BALL_EVALUATION=" + json.dumps({
+        "dataset": "skaczylo/Football-Image-Dataset (CC BY 4.0 claimed)",
+        "images": sources_used,
+        "ball_candidates": candidate_count,
+        "ground_truth_matches": matches,
     }))
+    assert matches >= 1, (
+        "The base YOLOX model did not localize any labelled soccer ball "
+        "in three true football frames; ball detection needs improvement"
+    )
     video.unlink(missing_ok=True)
     print("FPI_REAL_VIDEO_MODEL=PASS "+json.dumps({
         "source": "SoccerTrack-v2 demo tracking, CC BY 4.0",
