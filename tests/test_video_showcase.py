@@ -59,3 +59,15 @@ def test_reject_unrelated_match_or_corrupt_json(tmp_path):
     assert read_verified_demo_report(p) is None
     p.write_text("{broken", encoding="utf-8")
     assert read_verified_demo_report(p) is None
+
+
+def test_license_attributed_real_video_is_bundled_for_no_upload_demo():
+    from fpi.ui.video_showcase import _VIDEO, _REPORT, _POSTER, video_is_ready
+    assert _VIDEO.is_file(), "La démo ne doit pas dépendre d'un upload"
+    assert _POSTER.is_file()
+    assert video_is_ready(_VIDEO, _REPORT)
+    data = read_verified_demo_report(_REPORT)
+    assert data is not None
+    assert data["mot_identity_benchmark"]["mot_gt_box_count"] == 1320
+    assert data["ball_candidates_unverified"] == 0
+    assert data["full_match_90min_tracking_validated"] is False
