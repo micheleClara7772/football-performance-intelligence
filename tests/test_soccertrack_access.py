@@ -4,9 +4,10 @@ from scripts.check_soccertrack_access import check_access, DATASET, REVISION, SM
 
 
 def test_missing_token_fails_closed(monkeypatch):
+    import sys
+    from types import SimpleNamespace
     monkeypatch.delenv("HF_TOKEN", raising=False)
-    import huggingface_hub
-    monkeypatch.setattr(huggingface_hub, "get_token", lambda: None)
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(get_token=lambda: None))
     assert check_access()["status"] == "NEEDS_AUTHENTICATION"
 
 
