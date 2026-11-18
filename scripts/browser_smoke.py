@@ -105,7 +105,7 @@ def main() -> None:
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
         page.screenshot(path=str(OUT / "05-video-liens-officiels.png"), full_page=True)
         # Tentative facultative d'intégration des SEULS résumés YouTube autorisés.
-        page.get_by_role("checkbox", name="Essayer le lecteur YouTube intégré (résumés uniquement)").check()
+        page.get_by_text("Essayer le lecteur YouTube intégré (résumés uniquement)", exact=True).click()
         page.locator('iframe[src*="youtube.com/embed/"]').wait_for(timeout=30_000)
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
         page.screenshot(path=str(OUT / "05b-youtube-integration-experimentale.png"), full_page=True)
