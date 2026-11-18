@@ -6,7 +6,7 @@
 
 
 **Statut au 16/11/2026 : version 1 fusionnée dans main ; version 2 fusionnée dans main via PR #20 ; annotations en cours sur PR #21.**
-**Démonstration ciblée : 20 novembre 2026 (rendez-vous à confirmer).**
+**Objectif : revue interne 18 novembre 2026 à 16 h, puis revue partenaire envisagée à 22 h, sous réserve des droits.**
 
 FPI est un MVP d'analyse de la performance **collective** au football. Le match de référence retenu est **Maroc – Portugal (10 décembre 2022)**. Les droits des données et des vidéos restent à contrôler.
 
@@ -14,7 +14,7 @@ FPI est un MVP d'analyse de la performance **collective** au football. Le match 
 1. Dashboard de performance collective.
 2. Analyse tactique par match et période.
 3. Assistant IA contextualisé en français, alimenté par des métriques calculées.
-4. Séquences vidéo annotées (**stratégie technique ouverte, décision à prendre**).
+4. Annotations d'événements et accès aux vidéos FIFA officielles (replay complet externe ; résumé YouTube intégré facultatif).
 5. Générateur de séances d'entraînement révisables et validées par un entraîneur.
 
 **Parcours principal :** dashboard → match → périodes → preuves chiffrées → vidéo → questions IA → séance.
@@ -24,7 +24,7 @@ FPI est un MVP d'analyse de la performance **collective** au football. Le match 
 - Le dépôt est privé ; aucune donnée sous licence incertaine, vidéo protégée ou clé API n'y est publiée.
 - Pas d'invention de résultats sportifs ; les conclusions doivent découler de données contrôlées.
 - Le périmètre reste celui du MVP, avec cinq modules intégrés plutôt que cinq démos isolées.
-- La vidéo n'est pas encore arbitrée ; toute alternative doit être explicitement validée.
+- FIFA+ interdit l'intégration en iframe ; replay officiel accessible uniquement par lien externe. Tentative d'intégration YouTube limitée aux résumés.
 - **Le socle de calcul et l'ingestion réelle ont été testés ; l'intégration métier finale, la vidéo et les droits commerciaux ne sont pas encore validés.**
 
 ## Organisation
@@ -51,7 +51,11 @@ Les branches de développement prévues : `feat/*`, `fix/*` ; intégrer par Pull
 - [ ] Confirmer les droits commerciaux StatsBomb et FIFA avant tout usage non autorisé.
 - [ ] Intégrer et valider le parcours complet de démonstration ; rendez-vous du 20 à confirmer.
 
+## Hébergement gratuit
+
+**[Guide de déploiement Streamlit Community Cloud](docs/deploiement-gratuit.md)** : compatible avec dépôt GitHub privé, URL publique possible, dépendances déclarées dans requirements.txt. Le propriétaire doit connecter son compte GitHub à Streamlit Community Cloud et sélectionner Python 3.11. Le code prêt à déployer ne prouve pas que l'application a été publiée. Les droits commerciaux StatsBomb/FIFA restent à examiner avant présentation externe.
+
 ## Vérification
 L'installation isolée et les commandes de lancement sont décrites dans [DEVELOPMENT.md](DEVELOPMENT.md) ; le suivi opérationnel et ses liens de preuves sont dans [docs/suivi-actuel.md](docs/suivi-actuel.md).
 
-**Le parcours complet en sept étapes n'est pas encore homologué.** La navigation des cinq rubriques et les données réelles ont toutefois été vérifiées. Voir le suivi actuel.
+**Le parcours complet en sept étapes exige encore une recette humaine.** La navigation des cinq rubriques et les données réelles ont toutefois été vérifiées. Voir le suivi actuel.

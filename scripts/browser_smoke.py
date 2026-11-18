@@ -98,13 +98,17 @@ def main() -> None:
         page.screenshot(path=str(OUT / "04-seances.png"), full_page=True)
 
         sidebar.get_by_text("Vidéo", exact=True).click()
-        page.get_by_role("heading", name="Vidéo et annotations").wait_for(timeout=60_000)
-        page.get_by_text("Images réelles du match", exact=False).wait_for(timeout=60_000)
-        page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").wait_for(timeout=60_000)
-        # Afficher le lien vers les vraies images, sans intégrer une iframe en erreur.
-        page.get_by_role("link", name="Regarder les vraies images sur la chaîne FIFA (YouTube)").scroll_into_view_if_needed()
-        page.wait_for_timeout(1200)
-        page.screenshot(path=str(OUT / "05-video-lien-officiel.png"), full_page=True)
+        page.get_by_role("heading", name="Vidéos officielles · Maroc – Portugal").wait_for(timeout=60_000)
+        page.get_by_role("link", name="Ouvrir le match complet sur FIFA+").wait_for(timeout=60_000)
+        page.get_by_role("link", name="Regarder ce résumé sur YouTube (solution fiable)").wait_for(timeout=60_000)
+        # La plateforme FIFA+ ne doit jamais être placée dans une iframe.
+        assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
+        page.screenshot(path=str(OUT / "05-video-liens-officiels.png"), full_page=True)
+        # Tentative facultative d'intégration des SEULS résumés YouTube autorisés.
+        page.get_by_role("checkbox", name="Essayer le lecteur YouTube intégré (résumés uniquement)").check()
+        page.locator('iframe[src*="youtube.com/embed/"]').wait_for(timeout=30_000)
+        assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
+        page.screenshot(path=str(OUT / "05b-youtube-integration-experimentale.png"), full_page=True)
 
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()

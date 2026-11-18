@@ -1,0 +1,4 @@
+# Environnement Python 3.11/Linux : versions exactes déjà testées en CI.
+-r requirements/py311-linux.lock
+# Le code Python applicatif est dans src/fpi, à rendre importable sur Streamlit Cloud.
+-e .
