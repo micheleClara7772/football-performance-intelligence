@@ -45,6 +45,14 @@ python -m fpi.video_analysis.team_metrics \
 
 Répéter pour `117093_2nd.json`. Cela **mesure les annotations de référence**, pas les sorties de FPI. Un test du parseur sur des objets simulant le format livré est inclus dans la CI ; aucune réelle annotation de plusieurs gigaoctets n'est disponible dans le runner public. Aucun alignement inter-mi-temps n'est présumé.
 
+### Premier benchmark réel indépendant, sur un extrait MOT de 4 minutes
+
+**Une fois `HF_TOKEN` vérifié**, la chaîne `.github/workflows/soccertrack-mot-benchmark.yml` traite une vidéo réelle du dataset, `mot/clips/117093.mp4` (305 Mo), qui dispose de `mot/117093.txt` (6,22 Mo, **5 976 frames annotées**). Elle vérifie les tailles **avant transfert**, limite le téléchargement du clip à 400 Mio et le job à 20 minutes CPU, puis fait de vraies inférences YOLOX sur une grille temporelle de 8 secondes (environ 30 images couvrant 239 secondes). Le rapport compare les boîtes **personnes** aux boîtes annotées **joueurs** avec un IoU minimal de 0,3. Les scores pourraient être biaisés par les arbitres/collaborateurs non annotés et doivent être interprétés comme une mesure initiale spécifique à ce dataset.
+
+Le rapport est gardé 3 jours dans les artefacts GitHub Actions, **sans image ni vidéo redistribuée**. L'inventaire réel est archivé dans le [workflow](https://github.com/micheleClara7772/football-performance-intelligence/actions/workflows/soccertrack-match-inventory.yml) (run initial #44333146027). Les deux véritables mi-temps couvrent 3,35 + 3,48 Go, les fichiers GSR 5,54 Go ; ne pas les télécharger tous dans un runner gratuit sans vérifier l'espace et les quotas.
+
+Ce benchmark **ne valide ni les ballons** (la vérité terrain MOT ne contient pas de boîtes de ballons), **ni les identités sur les 90 minutes**, ni la précision des statistiques de pressing. Il n'utilise pas le flux Maroc–Portugal et n'extrait aucun replay protégé.
+
 ## 2. Benchmark comparatif reproductible
 
 Après accès à une vraie vidéo autorisée, produire les rapports YOLOX et hybride sur exactement la même grille temporelle. Exemple *à adapter au fichier privé* :
