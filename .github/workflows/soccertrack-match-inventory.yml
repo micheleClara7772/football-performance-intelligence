@@ -33,6 +33,20 @@ jobs:
             --match-id 117093 \
             --download-mot \
             --out outputs/soccertrack-117093-inventory.json
+      - name: Résumer les tailles et les observations dans les logs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("outputs/soccertrack-117093-inventory.json").read_text())
+          print("FPI_MATCH_FILES=" + str(data.get("file_count")))
+          print("FPI_MATCH_KNOWN_BYTES=" + str(data.get("known_total_bytes")))
+          print("FPI_MATCH_VIDEO_FILES=" + str(data.get("video_file_count")))
+          for entry in data.get("files", []):
+              if entry["path"].startswith(("videos/", "gsr/", "mot/", "ball/", "bas/")):
+                  print("FPI_MATCH_FILE=" + entry["path"] + " bytes=" + str(entry.get("size_bytes")))
+          print("FPI_MOT_STATS=" + json.dumps(data.get("mot_reference", {}), sort_keys=True))
+          PY
       - name: Archiver uniquement les tailles et statistiques, jamais les médias
         if: always()
         uses: actions/upload-artifact@v4
