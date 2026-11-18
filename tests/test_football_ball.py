@@ -48,6 +48,13 @@ def test_invalid_ball_schema_rejected():
         FootballBallONNX._predictions(np.zeros((5, 8), dtype=np.float32))
 
 
+def test_untrusted_ball_weights_rejected_before_onnx_load(tmp_path):
+    target = tmp_path / "untrusted.onnx"
+    target.write_bytes(b"not a verified model")
+    with pytest.raises(ValueError, match="SHA-256"):
+        FootballBallONNX(target)
+
+
 def test_hybrid_filters_generic_ball_boxes():
     person = Detection("joueur_candidat", 0.9, 1, 2, 3, 4)
     generic_ball = Detection("ballon_candidat", 0.4, 8, 9, 11, 12)
