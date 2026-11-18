@@ -42,6 +42,8 @@ Sur 90 minutes à 5 secondes : environ **1080 instants** demandés. Ces instants
 
 Sans `--ball-onnx`, le moteur d'origine YOLOX continue de fonctionner. Le `--ball-onnx` est un choix explicite, pas une garantie de ballons trouvés.
 
+**Modèle vérifié :** 45 250 216 octets, SHA-256 `9fd2031e5bced9dff47a48bae8c6809dd56493124ef8924ae28a3ce26a17a441`. Tout poids différent est refusé. Sur trois images réelles de football annotées, ce détecteur a localisé **2 ballons sur 3** ; YOLOX d'origine (avec tuiles 4×3) en localisait 3 sur 3 dans ce même très petit échantillon. **Aucune supériorité globale du spécialiste n'est établie.**
+
 ## Référence annotée et évaluation honnête
 
 Sur le jeu vidéo que l'on a le droit d'analyser, sélectionner des frames dans toute la chronologie (début, deuxième mi-temps, plans larges, arrêts de jeu, coups de pied arrêtés) et annoter **toutes les personnes et tous les ballons visibles** sur chacune des frames retenues (y compris les frames sans ballon). Exemple de fichier `annotations.json` :
