@@ -83,12 +83,21 @@ def provenance(m, ev, meta, basic, tac):
 def no_media(m, ev, meta, basic, tac):
     txt = (ROOT / ".gitignore").read_text(encoding="utf-8")
     ensure(all(token in txt for token in ("data/raw/", "*.mp4", ".env", "media/")), "gitignore")
+    # The ONLY intentional media is the 12-second licensed CC BY SoccerTrack
+    # DERIVATIVE demonstrator, paired with a strictly validated MOTMetrics report.
+    # No full match, FIFA broadcast, raw dataset or unrestricted media may be tracked.
+    allowed_demo = ROOT / "assets/fpi-video/real-bytetrack-12s.mp4"
     forbidden = [
         p for p in ROOT.rglob("*") if p.is_file() and ".git" not in p.parts
         and ".venv" not in p.parts and "outputs" not in p.parts
         and "data" not in p.parts and p.suffix.lower() in (".mp4", ".mov", ".mkv", ".webm")
+        and p != allowed_demo
     ]
-    ensure(not forbidden, f"médias dans le dépôt : {forbidden[:3]}")
+    ensure(not forbidden, f"médias non autorisés dans le dépôt : {forbidden[:3]}")
+    if allowed_demo.exists():
+        from fpi.ui.video_showcase import video_is_ready
+        ensure(video_is_ready(), "Une vidéo de démo ne peut être publiée sans rapport validé")
+        ensure(allowed_demo.stat().st_size < 9_000_000, "Vidéo de démo trop longue/volumineuse")
 
 
 @check("B12", "Validation négative du match/score et des IDs événementiels")
