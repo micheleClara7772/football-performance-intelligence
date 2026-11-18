@@ -12,6 +12,7 @@ from pathlib import Path
 import os
 
 from .detector import YOLOXDetector, download_model
+from .football_ball import FootballBallONNX, HybridFootballDetector
 from .pipeline import analyze_video
 
 
@@ -25,12 +26,25 @@ def main() -> None:
     parser.add_argument("--columns", type=int, default=2)
     parser.add_argument("--rows", type=int, default=2)
     parser.add_argument("--model-dir", type=Path, default=Path("data/models"))
+    parser.add_argument("--ball-onnx", type=Path, default=None,
+                        help="Poids ONNX football spécialisés, optionnels et sous licence séparée")
+    parser.add_argument("--ball-threshold", type=float, default=0.20)
+    parser.add_argument("--ball-columns", type=int, default=2,
+                        help="Tuiles horizontales pour les petits ballons (1 à 4)")
+    parser.add_argument("--ball-rows", type=int, default=1,
+                        help="Tuiles verticales pour les petits ballons (1 à 3)")
     parser.add_argument("--consent-rights", action="store_true",
                         help="Je dispose des droits de traitement de ces images.")
     args = parser.parse_args()
     if not args.consent_rights:
         parser.error("--consent-rights requis : vérifie les droits de traitement vidéo.")
     model = YOLOXDetector(download_model(args.model_dir))
+    if args.ball_onnx is not None:
+        specialist = FootballBallONNX(args.ball_onnx, threshold=args.ball_threshold)
+        model = HybridFootballDetector(
+            model, specialist, ball_columns=args.ball_columns, ball_rows=args.ball_rows,
+        )
+        print('Modèle spécialisé de ballon activé ; vérifier sa licence AGPL-3.0.')
     summary, previews = analyze_video(
         args.video, model, sample_interval_seconds=args.interval_seconds,
         max_frames=args.max_frames, tile_columns=args.columns, tile_rows=args.rows,
