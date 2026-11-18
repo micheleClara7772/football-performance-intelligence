@@ -51,6 +51,10 @@ Répéter pour `117093_2nd.json`. Cela **mesure les annotations de référence**
 
 Le rapport est gardé 3 jours dans les artefacts GitHub Actions, **sans image ni vidéo redistribuée**. L'inventaire réel est archivé dans le [workflow](https://github.com/micheleClara7772/football-performance-intelligence/actions/workflows/soccertrack-match-inventory.yml) (run initial #44333146027). Les deux véritables mi-temps couvrent 3,35 + 3,48 Go, les fichiers GSR 5,54 Go ; ne pas les télécharger tous dans un runner gratuit sans vérifier l'espace et les quotas.
 
+**Résultat initial réel (run #44334419124, 18/11/2026)** : sur 30 frames de l'extrait 4096×1080 à 25 fps, 660 boîtes joueurs annotées, YOLOX 2×2 seuil 0,25 : 114 TP, 108 FP, 546 FN, **précision 51,35 %, rappel 17,27 %, F1 25,85 %**, 18,02 s de traitement. Résultat insuffisant ; fortement dépendant du panoramique et de la sémantique des annotations. Il ne s'agit **pas** d'un benchmark complet de match.
+
+**Expérience d'optimisation** : la prochaine exécution compare automatiquement sur **les mêmes 30 frames et les mêmes 660 boîtes** le paramétrage 2×2, seuil 0,25, et un découpage 4×3, seuil 0,20. Seul le score F1 mesuré détermine la recommandation **exploratoire** ; aucune qualité hors échantillon, de tracking ou de ballon n'est présumée. Les deux résultats figurent dans `benchmarks` et sont comparables en précision/rappel/F1, avec leur temps CPU séparé.
+
 Ce benchmark **ne valide ni les ballons** (la vérité terrain MOT ne contient pas de boîtes de ballons), **ni les identités sur les 90 minutes**, ni la précision des statistiques de pressing. Il n'utilise pas le flux Maroc–Portugal et n'extrait aucun replay protégé.
 
 ## 2. Benchmark comparatif reproductible
