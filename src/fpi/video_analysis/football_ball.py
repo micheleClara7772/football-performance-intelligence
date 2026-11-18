@@ -8,11 +8,14 @@ Never download or redistribute weights silently. Supply a local ONNX file.
 from __future__ import annotations
 
 from pathlib import Path
-import math
+from hashlib import sha256
 
 import numpy as np
 
 from .detector import Detection, _regions
+
+# Exact validated model artifact; the ONNX export has a separately applicable AGPL-3.0 license.
+FOOTBALL_BALL_MODEL_SHA256 = "9fd2031e5bced9dff47a48bae8c6809dd56493124ef8924ae28a3ce26a17a441"
 
 
 class FootballBallONNX:
@@ -28,6 +31,12 @@ class FootballBallONNX:
         path = Path(path)
         if not path.is_file() or path.suffix.lower() != ".onnx":
             raise ValueError("Fichier de poids ONNX ballon absent ou invalide")
+        digest = sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+        if digest.hexdigest() != FOOTBALL_BALL_MODEL_SHA256:
+            raise ValueError("Empreinte SHA-256 du modèle ballon différente du modèle testé")
         try:
             import onnxruntime as ort
         except ImportError as exc:
