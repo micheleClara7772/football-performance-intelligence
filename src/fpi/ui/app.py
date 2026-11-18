@@ -16,16 +16,19 @@ from fpi.ui.tactical import render_tactical
 from fpi.ui.assistant import render_assistant
 from fpi.ui.training import render_training
 from fpi.ui.video import render_video
+from fpi.ui.video_showcase import render_video_showcase
 from fpi.ui.formatting import team_label, localized_team_frame
 
-PAGES = ("Tableau de bord", "Analyse tactique", "Vidéo", "Assistant IA", "Séances")
+PAGES = ("Démo vidéo", "Tableau de bord", "Analyse tactique", "Assistant IA", "Séances", "Vidéo")
 
 
 def _banner() -> None:
     st.set_page_config(page_title="FPI · Football Performance Intelligence", page_icon="⚽", layout="wide")
     st.title("Football Performance Intelligence")
-    st.caption("Prototype d'analyse collective · Maroc – Portugal · 10 décembre 2022")
-    st.info("Démonstration technique : cinq modules sur événements StatsBomb vérifiés. Les droits de diffusion commerciale restent à confirmer.")
+    st.caption(
+        "Football assisté par les données · vidéo SoccerTrack v2 autorisée "
+        "et statistiques du match Maroc–Portugal 2022 (sources distinctes)."
+    )
 
 
 def _source_panel(metadata: dict | None) -> None:
@@ -98,7 +101,9 @@ def main() -> None:
         st.error(f"Cache invalide : {exc}. Réimporte les données vérifiées pour le réparer.")
         match = events = metadata = None
     _source_panel(metadata)
-    if page == "Tableau de bord":
+    if page == "Démo vidéo":
+        render_video_showcase(match, events)
+    elif page == "Tableau de bord":
         _dashboard(match, events)
     elif page == "Analyse tactique":
         render_tactical(match, events)
@@ -118,6 +123,7 @@ def main() -> None:
         width="stretch",
     )
     st.caption(
-        "Parcours : tableau de bord → tactique/annotations → vidéo officielle → "
-        "assistant factuel → séance d'entraînement."
+        "Parcours : démo vidéo réelle → chiffres du match → tactique → "
+        "assistant factuel → séance → outils vidéo avancés."
+
     )

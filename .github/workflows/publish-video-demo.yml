@@ -1,0 +1,78 @@
+name: FPI - intégrer vidéo démo annotée sans upload utilisateur
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-video-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  reuse-validated-real-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupérer uniquement la vidéo de tracking déjà validée par GitHub Actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/fpi-verified-video
+          gh run download 44341672073 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name fpi-tracking-12sec-video-byte-track-ids \
+            --dir /tmp/fpi-verified-video
+          ls -lh /tmp/fpi-verified-video
+      - name: Vérifier source, limites et dimensions de la vidéo réelle
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/fpi-verified-video')
+          video = root / 'soccertrack-tracks-117093-first12s.mp4'
+          report = root / 'tracking-report.json'
+          assert video.is_file() and 100_000 < video.stat().st_size < 7_000_000
+          data = json.loads(report.read_text(encoding='utf-8'))
+          assert data['source_match_id'] == '117093'
+          assert data['clip_seconds'] == 12.0 and data['processed_frames'] == 60
+          assert data['tracker'].startswith('Roboflow ByteTrack')
+          assert data['mot_identity_benchmark']['frames_evaluated'] == 60
+          assert data['full_match_90min_tracking_validated'] is False
+          assert data['ball_tracking_accuracy_validated'] is False
+          assert data['team_assignment_validated'] is False
+          print('FPI_DEMO_PROOF=REAL_VIDEO_12_SECONDS_IDF1_VALIDATED')
+          PY
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 /tmp/fpi-verified-video/soccertrack-tracks-117093-first12s.mp4
+      - name: Intégrer une copie attribuée au dépôt privé avec aperçu
+        run: |
+          mkdir -p assets/fpi-video
+          # OpenCV's mp4v codec is not reliably playable in Chrome/Safari.
+          # Transcode the already validated annotations into H.264 browser MP4.
+          ffmpeg -loglevel error -y \
+            -i /tmp/fpi-verified-video/soccertrack-tracks-117093-first12s.mp4 \
+            -c:v libx264 -preset fast -crf 25 \
+            -pix_fmt yuv420p -movflags +faststart \
+            assets/fpi-video/real-bytetrack-12s.mp4
+          codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 assets/fpi-video/real-bytetrack-12s.mp4)"
+          test "$codec" = "h264"
+          cp /tmp/fpi-verified-video/tracking-report.json assets/fpi-video/real-bytetrack-report.json
+          ffmpeg -loglevel error -y -ss 00:00:04 \
+            -i assets/fpi-video/real-bytetrack-12s.mp4 \
+            -frames:v 1 -q:v 4 assets/fpi-video/real-bytetrack-poster.jpg
+          test "$(stat -c '%s' assets/fpi-video/real-bytetrack-poster.jpg)" -gt 1000
+          sha256sum assets/fpi-video/*
+      - name: Publier sans clé ni vidéo intégrale, en restant sous contrôle GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The repo intentionally ignores all MP4 files. Override ONLY for
+          # this verified, 12-second, license-attributed derivative.
+          git add -f assets/fpi-video/real-bytetrack-12s.mp4
+          git add assets/fpi-video/real-bytetrack-report.json \
+            assets/fpi-video/real-bytetrack-poster.jpg
+          git diff --cached --stat
+          git commit -m "assets(video): validated real licensed SoccerTrack tracking 12s"
+          git push origin HEAD:main

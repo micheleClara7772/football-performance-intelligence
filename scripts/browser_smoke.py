@@ -36,6 +36,11 @@ def main() -> None:
         browser = tool.chromium.launch(headless=True, args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1, accept_downloads=True)
         page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
+        page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=90_000)
+        assert page.locator('[data-testid="stVideo"]').count() >= 1
+        assert page.locator('input[type="file"]').count() == 0, "La démo principale doit être sans upload"
+        page.screenshot(path=str(OUT / "00-demo-video-sans-upload.png"), full_page=True)
+        page.locator('[data-testid="stSidebar"]').get_by_text("Tableau de bord", exact=True).click()
         page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
         page.get_by_text("Événements validés").first.wait_for(timeout=60_000)
         page.locator('[data-testid="stPlotlyChart"]').first.wait_for(timeout=45_000)
@@ -76,6 +81,8 @@ def main() -> None:
         fresh = browser.new_context(viewport={"width": 1440, "height": 960}, accept_downloads=True)
         imported_page = fresh.new_page()
         imported_page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
+        imported_page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=90_000)
+        imported_page.locator('[data-testid="stSidebar"]').get_by_text("Tableau de bord", exact=True).click()
         imported_page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
         imported_page.locator('[data-testid="stSidebar"]').get_by_text("Analyse tactique", exact=True).click()
         imported_page.get_by_role("tab", name="Annotations").click()
@@ -122,11 +129,11 @@ def main() -> None:
         page.screenshot(path=str(OUT / "05b-youtube-integration-experimentale.png"), full_page=True)
 
         assert page.locator('[data-testid="stException"]').count() == 0
-        page.get_by_role("button", name="Continuer : Assistant IA").click()
-        page.get_by_role("heading", name="Assistant IA · questions libres").wait_for(timeout=45_000)
+        page.get_by_role("button", name="Continuer : Démo vidéo").click()
+        page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()
-        print("FPI_BROWSER_SMOKE=PASS, five pages, screenshots in", OUT)
+        print("FPI_BROWSER_SMOKE=PASS, six pages including no-upload video, screenshots in", OUT)
 
 
 if __name__ == "__main__":
