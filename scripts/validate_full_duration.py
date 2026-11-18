@@ -41,18 +41,18 @@ def main():
             # regularly to ensure frames are actually encoded/decoded.
             for index in range(5520):
                 cv2.rectangle(frame, (0, 0), (60, 20), (0, 130, 0), -1)
-                cv2.putText(frame, str(index // 300), (2, 15),
+                cv2.putText(frame, str(index // 120), (2, 15),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                 writer.write(frame)
         finally:
             writer.release()
         summary, previews = analyze_video(
-            path, ControlledInference(), sample_interval_seconds=300,
+            path, ControlledInference(), sample_interval_seconds=120,
             max_frames=0, preview_limit=0, tile_columns=1, tile_rows=1,
         )
         times = [row["time_seconds"] for row in summary.per_frame]
         assert summary.duration_seconds >= 5500, summary.duration_seconds
-        assert summary.sampled_frames == 19, times
+        assert summary.sampled_frames == 46, times
         assert times[0] == 0.0
         assert times[-1] >= 5400, times
         assert times == sorted(set(times))
