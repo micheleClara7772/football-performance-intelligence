@@ -31,6 +31,14 @@ Les PR **#19 à #28** sont intégrées dans `main`. La [dernière validation Sta
 - D'autres pistes de visionnage sont recensées dans [la revue des sources vidéo](docs/video-source-review-2026-11-18.md), sans présumer de leurs licences d'extraction.
 - **La détection de joueurs et du ballon dans les pixels n'est pas encore livrée.** Elle exige un fichier vidéo exploitable/autorisé et une évaluation, suivie dans l'[Issue #29](https://github.com/micheleClara7772/football-performance-intelligence/issues/29). Les huit signaux avancés actuels proviennent **des événements StatsBomb**, pas d'images FIFA.
 
+## Détection de joueurs et de ballons sur vidéo autorisée
+
+- **Nouveau module d'analyse vidéo par ordinateur** dans l'onglet Vidéo : upload d'un fichier autorisé (jusqu'à 100 Mo), modèle YOLOX-Nano local sur CPU, détection de **personnes candidates** et **ballons de sport candidats**, boîtes visuelles, horodatages et export JSON **sans vidéo**. Il ne s'agit pas d'une simple exploitation StatsBomb.
+- **Démonstration sans fichier à fournir** : sélectionner « Utiliser l'extrait de démonstration libre SoccerTrack v2 (CC BY 4.0) », confirmer les droits, puis « Détecter les joueurs et ballons candidats ». Les véritables images sont issues d'un autre match amateur libre, **pas de Maroc–Portugal**.
+- **Match entier** : la commande privée `python -m fpi.video_analysis.cli` peut échantillonner sur **toute** la durée d'un fichier complet que l'utilisateur est autorisé à traiter. Elle ne garantit pas la vitesse de calcul, le suivi continu des joueurs ni la détection de chaque ballon.
+- **Tests réels** : 183 boîtes personnes sur 18 images d'une vraie vidéo SoccerTrack ; 3 correspondances aux étiquettes ballon sur 3 images de football annotées (6 candidats produits). Le ballon **n'a pas été reconnu dans les 18 images panoramiques** ; sa fiabilité à distance reste à améliorer.
+- **[Guide de la vision par ordinateur](docs/video-computer-vision.md)** et [Issue #29](https://github.com/micheleClara7772/football-performance-intelligence/issues/29) pour le travail sur un match complet licencié, la vérité terrain et la précision du tracking.
+
 ## Conditions et périmètre
 
 **L'utilisateur a choisi le 18 novembre un MVP sur un match, sans vues 360 ni LLM payant.** Aucune licence commerciale FIFA/StatsBomb n'est confirmée ; la diffusion à un partenaire à 22 h doit rester conditionnée à la clarification des droits et du périmètre. L'autorisation de déployer le code FPI ne donne pas de droits sur des vidéos ou données tierces.

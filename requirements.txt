@@ -2,3 +2,6 @@
 -r requirements/py311-linux.lock
 # Le code Python applicatif est dans src/fpi, à rendre importable sur Streamlit Cloud.
 -e .
+
+# Modèle vidéo local et gratuit (CPU)
+-r requirements/video-py311-linux.lock

@@ -28,3 +28,6 @@ outputs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Model weights downloaded after explicit user action
+data/models/

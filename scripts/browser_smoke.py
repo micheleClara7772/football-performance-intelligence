@@ -111,6 +111,9 @@ def main() -> None:
         page.get_by_role("link", name="Regarder ce résumé sur YouTube (solution fiable)").wait_for(timeout=60_000)
         # La plateforme FIFA+ ne doit jamais être placée dans une iframe.
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
+        page.get_by_text("Détection automatique dans un fichier vidéo autorisé").wait_for(timeout=30_000)
+        page.get_by_text("Utiliser l'extrait de démonstration libre SoccerTrack v2 (CC BY 4.0)").wait_for(timeout=30_000)
+        assert page.get_by_role("button", name="Détecter les joueurs et ballons candidats").is_disabled()
         page.screenshot(path=str(OUT / "05-video-liens-officiels.png"), full_page=True)
         # Tentative facultative d'intégration des SEULS résumés YouTube autorisés.
         page.get_by_text("Essayer le lecteur YouTube intégré (résumés uniquement)", exact=True).click()
