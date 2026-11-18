@@ -50,3 +50,17 @@ def test_no_reference_frame_is_not_a_ground_truth_zero():
     res = reference_for_samples(iter([row(1)]), [0.0], 25, 200, 100)
     assert res["sampled_times_with_reference"] == 0
     assert res["frames"] == []
+
+
+def test_exploratory_tiling_selection_uses_measured_f1():
+    from scripts.benchmark_real_mot_clip import choose_tiling
+    experiments = [
+        {"name": "baseline", "quality_scoreable": True,
+         "person_detection_metrics": {"f1": 0.25, "recall": 0.17},
+         "person_detection_runtime_seconds": 18},
+        {"name": "fine", "quality_scoreable": True,
+         "person_detection_metrics": {"f1": 0.52, "recall": 0.49},
+         "person_detection_runtime_seconds": 46},
+    ]
+    assert choose_tiling(experiments) == "fine"
+    assert choose_tiling([{"quality_scoreable": False}]) is None
