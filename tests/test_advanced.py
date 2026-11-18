@@ -51,7 +51,8 @@ def test_invalid_coordinates_and_unsourced_possession_ignored():
     assert r.progressive_passes==0
     assert r.box_shots==0
     assert r.high_recoveries==0
-    assert r.possessions_annotated!=r.possessions_annotated  # unknown, not zero
+    import pandas as pd
+    assert pd.isna(r.possessions_annotated)  # unknown, not zero
 
 
 def test_free_text_advanced_signals_for_match(events):
