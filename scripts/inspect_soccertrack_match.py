@@ -23,9 +23,18 @@ def selected_path(path: str, match_id: str) -> bool:
     parts = path.split("/")
     if not parts or parts[0] not in {"videos", "gsr", "bas", "ball", "mot", "raw"}:
         return False
-    return match_id in parts[1:-1] or (parts[-1].startswith(match_id + "_")
-                                       or parts[-1] == match_id + ".mp4"
-                                       or parts[-1] == match_id + ".txt")
+    if match_id in parts[1:-1]:
+        return True
+    basename = parts[-1]
+    if basename in (match_id + ".mp4", match_id + ".txt"):
+        return True
+    if parts[0] == "videos" and basename.startswith(match_id + "_panorama_"):
+        return True
+    if parts[0] == "gsr" and basename in (match_id + "_1st.json", match_id + "_2nd.json"):
+        return True
+    if parts[0] == "bas" and basename.startswith(match_id + "_12_class_"):
+        return True
+    return False
 
 
 def inventory(files, match_id: str) -> dict:
