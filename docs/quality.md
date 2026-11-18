@@ -9,4 +9,4 @@ Une tâche n'est terminée que si : code sur main, comportement testé, données
 - Séances : durées, contraintes, édition et validation.
 - API indisponible : aucun résultat simulé présenté comme vrai.
 
-**Audit démo : 0/7 étapes vérifiées.**
+**Audit du 18 novembre :** navigation automatisée des cinq modules réussie avec de vraies données StatsBomb ; parcours métier et publication Cloud pas encore validés manuellement. Consulter [la recette 125 points](recette-pre17.md) et [le bilan](mvp-acceptance-2026-11-18.md).
