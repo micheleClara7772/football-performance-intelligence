@@ -1,0 +1,45 @@
+name: FPI - vraie vidéo SoccerTrack annotée ByteTrack et IDF1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-dense-tracking.yml'
+      - 'scripts/render_real_soccertrack_tracking.py'
+
+permissions:
+  contents: read
+
+jobs:
+  dense-real-byte-tracking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer vrais modèles CPU, ByteTrack et métriques MOT
+        run: |
+          python -m pip install -r requirements/video-py311-linux.lock \
+            'huggingface_hub>=0.28,<2' 'trackers==2.7.0' \
+            'motmetrics==1.4.0' 'pytest>=8,<10'
+          python -m pip check
+      - name: Vérifier IDF1 et interruptions de suivi
+        run: PYTHONPATH=src python -m pytest -q tests/test_real_tracking_video.py tests/test_bytetrack_adapter.py
+      - name: Vidéo réelle 12 s à 5 FPS : YOLOX + YOLOv9 + vrai ByteTrack
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          PYTHONPATH=src python -m scripts.render_real_soccertrack_tracking \
+            --out-dir outputs/soccertrack-private-tracking
+      - name: Archiver vidéo annotée dérivée CC BY + IDF1, en accès privé temporaire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-tracking-12sec-video-byte-track-ids
+          path: |
+            outputs/soccertrack-private-tracking/tracking-report.json
+            outputs/soccertrack-private-tracking/soccertrack-tracks-117093-first12s.mp4
+          if-no-files-found: warn
+          retention-days: 3
