@@ -74,6 +74,14 @@ python -m scripts.compare_video_detectors \
 
 Les modèles ne peuvent être départagés **provisoirement** que lorsque >=100 frames et >=30 vrais ballons **indépendamment annotés** figurent dans le benchmark, avec toutes ces frames détectées par chaque modèle. Il s'agit d'un seuil d'échantillon opérationnel, **pas d'une preuve de signification statistique**. Ajouter un lot de plans lointains, des frames sans ballon, le début et la fin des deux périodes, et mesurer aussi les latences CPU réelles. L'outil `scripts.evaluate_video_detections` calcule précision, rappel et F1. L'essai actuel de 3 images **ne satisfait pas** ce critère.
 
+### Couverture réelle des deux mi-temps de SoccerTrack 117093
+
+Le workflow `soccertrack-full-half-cv.yml` traite **séquentiellement** chaque mi-temps (environ 3,35 et 3,48 Go), sur des runners CPU à exécution plafonnée à **25 minutes par mi-temps**. Il contrôle avant téléchargement la taille réelle publiée, la présence d'au moins 11 Gio libres, et la présence du secret `HF_TOKEN`, puis télécharge une seule mi-temps et l'efface avec le répertoire temporaire. Il parcourt à intervalles de 15 secondes la chronologie réelle de chaque période avec deux modèles : YOLOX 4×3 seuil joueurs 0,20 et hybride personnes YOLOX + ballon YOLOv9 dédié (poids sous AGPL-3.0, non redistribués).
+
+Les rapports privés JSON enregistrent tous les instants demandés, les détections candidates par classe et la proportion de frames décodées (objectif 95 %), par tranche de cinq minutes. Chaque résultat est archivé sans vidéo, image ou poids pendant 3 jours. Les 45 minutes de chronologie **échantillonnée** d'une mi-temps ne sont **pas** un suivi continu : à 25 fps, un prélèvement toutes les 15 secondes ne voit que 1 frame sur 375.
+
+Les détections de ballons ne possèdent **pas de boîtes de vérité terrain dans SoccerTrack GSR** ; on ne peut pas calculer leur précision/rappel sur les 90 minutes simplement avec ce dataset. Le choix de modèle pour les ballons se fonde séparément sur les 100 images indépendamment annotées du jeu `skaczylo/Football-Image-Dataset`. Pour une vraie validation 90 minutes de ballons et IDF1/HOTA, il faudra un protocole d'annotation d'images du match ou une autre vérité terrain licite, puis un traitement plus dense.
+
 ## 3. Suivi temporel provisoire
 
 Le module `fpi.video_analysis.tracking` associe des boîtes proches entre images rapprochées, par classe et par géométrie. Il **rompt les identités** après un écart temporel supérieur au seuil : c'est intentionnel pour éviter d'inventer le suivi sur des images espacées de 15 secondes.

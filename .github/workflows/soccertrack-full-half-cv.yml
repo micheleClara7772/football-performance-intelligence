@@ -1,0 +1,55 @@
+name: FPI - deux vraies mi-temps SoccerTrack, couverture CPU échantillonnée
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-full-half-cv.yml'
+      - 'scripts/analyze_soccertrack_full_half.py'
+
+permissions:
+  contents: read
+
+jobs:
+  full-half:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        half: ["1st", "2nd"]
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HOME: ${{ runner.temp }}/fpi-hf-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer CPU et accès dataset privé, jamais de GPU payant
+        run: |
+          python -m pip install -r requirements/video-py311-linux.lock \
+            'huggingface_hub>=0.28,<2' 'pytest>=8,<10'
+          python -m pip check
+      - name: Prouver les règles de couverture sur 45 minutes
+        run: PYTHONPATH=src python -m pytest -q tests/test_full_half_video.py
+      - name: Vérifier espace disque et présence d'authentification
+        run: |
+          test -n "$HF_TOKEN"
+          df -h /tmp
+      - name: Vraies images de 45 minutes, YOLOX 4x3 et YOLOv9 ballon dédié
+        run: |
+          PYTHONPATH=src python -m scripts.analyze_soccertrack_full_half \
+            --half ${{ matrix.half }} \
+            --interval-seconds 15 \
+            --consent-rights \
+            --out outputs/soccertrack-117093-${{ matrix.half }}-full-half.json
+      - name: Archiver le rapport sans vidéo, image, modèles ni jeton
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-soccertrack-117093-${{ matrix.half }}-sampled-full-half
+          path: outputs/soccertrack-117093-${{ matrix.half }}-full-half.json
+          if-no-files-found: warn
+          retention-days: 3
