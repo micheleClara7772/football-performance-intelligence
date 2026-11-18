@@ -204,3 +204,7 @@ def render_video() -> None:
             "Aucun fichier source conservé. Ces observations sont des candidats "
             "visuels, pas des métriques tactiques validées ni une synchronisation StatsBomb."
         )
+
+    st.divider()
+    from fpi.ui.video_pitch_metrics import render_calibrated_video_metrics
+    render_calibrated_video_metrics()
