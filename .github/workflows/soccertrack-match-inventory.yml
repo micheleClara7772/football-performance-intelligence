@@ -1,0 +1,43 @@
+name: FPI - inventaire du match SoccerTrack 117093
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-match-inventory.yml'
+      - 'scripts/inspect_soccertrack_match.py'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory-one-gated-match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer les bibliothèques en environnement éphémère
+        run: |
+          python -m pip install 'huggingface_hub>=0.28,<2' 'pytest>=8,<10'
+          python -m pip check
+      - name: Valider la sélection et la lecture de référence
+        run: PYTHONPATH=src python -m pytest -q tests/test_soccertrack_inventory.py
+      - name: Inventorier un seul match et lire uniquement sa petite annotation MOT
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          PYTHONPATH=src python -m scripts.inspect_soccertrack_match \
+            --match-id 117093 \
+            --download-mot \
+            --out outputs/soccertrack-117093-inventory.json
+      - name: Archiver uniquement les tailles et statistiques, jamais les médias
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-soccertrack-one-match-inventory
+          path: outputs/soccertrack-117093-inventory.json
+          if-no-files-found: warn
+          retention-days: 3
