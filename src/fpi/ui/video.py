@@ -106,8 +106,18 @@ def render_video() -> None:
         "Charge uniquement un fichier pour lequel tu disposes des droits de traitement. "
         "Une URL FIFA+/YouTube/Footballia ne fournit pas automatiquement ces droits."
     )
+    demo = st.checkbox(
+        "Utiliser l'extrait de démonstration libre SoccerTrack v2 (CC BY 4.0)",
+        key="fpi_video_ccby_demo",
+    )
+    if demo:
+        st.caption(
+            "Vidéo : SoccerTrack v2, © Atom Scott et contributeurs, CC BY 4.0. "
+            "Source : https://github.com/AtomScott/SoccerTrack-v2 "
+            "La démonstration montre un match amateur, PAS Maroc–Portugal."
+        )
     permission = st.checkbox(
-        "Je confirme être autorisé à transmettre et analyser ce fichier",
+        "Je confirme être autorisé à transmettre et analyser cette vidéo",
         key="fpi_video_permission",
     )
     upload = st.file_uploader(
@@ -123,18 +133,18 @@ def render_video() -> None:
     )
     if st.button(
         "Détecter les joueurs et ballons candidats", type="primary",
-        disabled=not(permission and upload is not None), key="fpi_video_analyze",
+        disabled=not(permission and (upload is not None or demo)), key="fpi_video_analyze",
     ):
         from pathlib import Path
         import tempfile
         from fpi.video_analysis.detector import YOLOXDetector, download_model
         from fpi.video_analysis.pipeline import analyze_video
 
-        suffix = Path(upload.name).suffix.lower()
+        suffix = ".mp4" if demo else Path(upload.name).suffix.lower()
         if suffix not in (".mp4", ".mov", ".mkv", ".webm", ".avi"):
             st.error("Format vidéo refusé.")
             return
-        if upload.size > 100 * 1024 * 1024:
+        if not demo and upload.size > 100 * 1024 * 1024:
             st.error("Ce fichier dépasse 100 Mo : utiliser la CLI privée.")
             return
         try:
@@ -142,12 +152,27 @@ def render_video() -> None:
                 model = YOLOXDetector(download_model(Path("data/models")))
                 with tempfile.TemporaryDirectory(prefix="fpi-video-") as folder:
                     source = Path(folder) / ("private" + suffix)
-                    source.write_bytes(upload.getvalue())
+                    if demo:
+                        from urllib.request import Request, urlopen
+                        url = (
+                            "https://raw.githubusercontent.com/AtomScott/SoccerTrack-v2/"
+                            "main/docs/assets/demo-tracking.mp4"
+                        )
+                        req = Request(url, headers={"User-Agent": "FPI CC-BY demonstration"})
+                        with urlopen(req, timeout=45) as response, source.open("wb") as dest:
+                            read_bytes = 0
+                            while chunk := response.read(128 * 1024):
+                                read_bytes += len(chunk)
+                                if read_bytes > 8_000_000:
+                                    raise ValueError("Extrait libre supérieur à 8 Mo")
+                                dest.write(chunk)
+                    else:
+                        source.write_bytes(upload.getvalue())
                     summary, previews = analyze_video(
                         source, model, sample_interval_seconds=float(interval),
                         max_frames=maximum, preview_limit=3, tile_columns=2, tile_rows=2,
                     )
-            st.session_state["fpi_video_last_result"] = (upload.name, summary.to_dict(), previews)
+            st.session_state["fpi_video_last_result"] = ("SoccerTrack CC BY 4.0" if demo else upload.name, summary.to_dict(), previews)
         except (OSError, ValueError, RuntimeError, ImportError) as exc:
             st.error(f"Analyse impossible : {exc}")
 
