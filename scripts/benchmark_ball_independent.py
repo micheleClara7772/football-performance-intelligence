@@ -15,7 +15,6 @@ from pathlib import Path
 from time import perf_counter
 
 import cv2
-from huggingface_hub import hf_hub_download
 
 from fpi.video_analysis.detector import YOLOXDetector, download_model
 from fpi.video_analysis.football_ball import FootballBallONNX
@@ -91,6 +90,7 @@ def benchmark(root: Path, *, proof_dir: Path | None = None,
         raise ValueError("Aucune image de validation disponible")
     if any(not (labels / (p.stem + ".txt")).is_file() for p in filenames):
         raise ValueError("Il manque des annotations indépendantes")
+    from huggingface_hub import hf_hub_download
     with tempfile.TemporaryDirectory(prefix="fpi-independent-balls-") as temp:
         weights = Path(temp)
         yolox = YOLOXDetector(download_model(weights / "yolox"))
