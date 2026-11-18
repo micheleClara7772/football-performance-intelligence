@@ -1,61 +1,36 @@
-# Football Performance Intelligence (FPI)
+# Football Performance Intelligence — MVP
 
-## À lire en premier
+**État vérifié le 18 novembre 2026.** Cinq modules intégrés dans `main`, calculés depuis des événements StatsBomb réels du match **Maroc 1–0 Portugal** (10 décembre 2022, match `3869486`). L'import explicite permet de valider **3 381 événements**. Le dépôt est privé ; l'application n'est **pas encore accessible via une URL publique** tant que le propriétaire n'a pas créé l'application Streamlit Cloud.
 
-👉 **[Recette complète : 125 vérifications avant le 17 novembre](docs/recette-pre17.md)** · **[Suivi actuel et prochaines étapes](docs/suivi-actuel.md)** · [GitHub Project](https://github.com/users/micheleClara7772/projects/1/views/1) · [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20)
+## Accès immédiat aux informations
 
+- **[Déploiement gratuit — action du propriétaire](docs/deploiement-gratuit.md)** : connecter GitHub à https://share.streamlit.io/, choisir `main`, `app.py`, Python 3.11 ; recopier seulement une URL effectivement attribuée.
+- **[Dossier de livraison / points à valider](docs/mvp-acceptance-2026-11-18.md)** : tests automatiques, limites, décision de démo.
+- **[Parcours de démonstration](docs/demo.md)** : scénario reproductible et plans de secours.
+- **[Suivi des Issues](docs/suivi-actuel.md)** · **[Recette complète : 125 contrôles](docs/recette-pre17.md)** · [Issue qualité #15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15).
 
-**Statut au 16/11/2026 : version 1 fusionnée dans main ; version 2 fusionnée dans main via PR #20 ; annotations en cours sur PR #21.**
-**Objectif : revue interne 18 novembre 2026 à 16 h, puis revue partenaire envisagée à 22 h, sous réserve des droits.**
+## Modules testés
 
-FPI est un MVP d'analyse de la performance **collective** au football. Le match de référence retenu est **Maroc – Portugal (10 décembre 2022)**. Les droits des données et des vidéos restent à contrôler.
+1. **Tableau de bord collectif** — match, tirs, passes, xG fournisseur, mi-temps et sources.
+2. **Analyse tactique** — indicateurs descriptifs, comparaisons, chronologie, cartes de localisation et annotations par ID d'événement StatsBomb ; export/réimport JSON vérifiés en navigateur.
+3. **Vidéos officielles** — rediffusion **intégrale** Maroc–Portugal sur **FIFA+ via lien externe uniquement**, résumés officiels FIFA/YouTube via lien externe et iframe YouTube facultative **dont la lecture réelle n'est pas garantie**.
+4. **Assistant factuel** — **8 questions guidées**, sans LLM, sans API payante, réponses traçables aux calculs.
+5. **Séances** — quatre objectifs, trois exercices initiaux, matériel/variantes/consignes éditables, contrôle de la durée et des champs avant export JSON, validation humaine nécessaire.
 
-## Modules obligatoires
-1. Dashboard de performance collective.
-2. Analyse tactique par match et période.
-3. Assistant IA contextualisé en français, alimenté par des métriques calculées.
-4. Annotations d'événements et accès aux vidéos FIFA officielles (replay complet externe ; résumé YouTube intégré facultatif).
-5. Générateur de séances d'entraînement révisables et validées par un entraîneur.
+Un bouton « Continuer » permet de parcourir les cinq modules. Les valeurs de référence vérifiées sont : **3 381 événements**, **Maroc 9 / Portugal 12 tirs**, **Maroc 249 / Portugal 731 passes tentées** sur les mi-temps 1/2.
 
-**Parcours principal :** dashboard → match → périodes → preuves chiffrées → vidéo → questions IA → séance.
+## Contrôles techniques
 
-## Principes
-- Stack : Python, Streamlit, Pandas, Plotly, stockage local Parquet/JSON, tests pytest.
-- Le dépôt est privé ; aucune donnée sous licence incertaine, vidéo protégée ou clé API n'y est publiée.
-- Pas d'invention de résultats sportifs ; les conclusions doivent découler de données contrôlées.
-- Le périmètre reste celui du MVP, avec cinq modules intégrés plutôt que cinq démos isolées.
-- FIFA+ interdit l'intégration en iframe ; replay officiel accessible uniquement par lien externe. Tentative d'intégration YouTube limitée aux résumés.
-- **Le socle de calcul et l'ingestion réelle ont été testés ; l'intégration métier finale, la vidéo et les droits commerciaux ne sont pas encore validés.**
+Toutes les PR **#19, #20, #21, #22, #23, #24** sont fusionnées après contrôles GitHub Actions. Dernière tranche : [Python / tests #44277188457](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44277188457) et [StatsBomb réel / Chromium #44277188528](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44277188528), tous deux réussis avant fusion. Les résultats automatiques ne remplacent **ni la recette manuelle ni la vérification du déploiement public**.
 
-## Organisation
-Les Issues GitHub numérotées FPI-I01 à FPI-I18 décrivent les objectifs, critères d'acceptation, dépendances et échéances. Les priorités sont P0 (critique), P1, P2.
-Les branches de développement prévues : `feat/*`, `fix/*` ; intégrer par Pull Request après tests. `main` doit rester stable.
+## Conditions et périmètre
 
-## Calendrier
-- 15 nov. : cadrage GitHub.
-- 16 nov. : environnement et données.
-- 17 nov. : indicateurs et tactique.
-- 18 nov. : intégration des cinq modules.
-- 19 nov. : stabilisation, répétition.
-- 20 nov. : présentation, si confirmée.
+**L'utilisateur a choisi le 18 novembre un MVP sur un match, sans vues 360 ni LLM payant.** Aucune licence commerciale FIFA/StatsBomb n'est confirmée ; la diffusion à un partenaire à 22 h doit rester conditionnée à la clarification des droits et du périmètre. L'autorisation de déployer le code FPI ne donne pas de droits sur des vidéos ou données tierces.
 
-## État d'avancement vérifié (16 novembre 2026)
-- [x] Match Maroc–Portugal du 10/12/2022, identifiant 3869486.
-- [x] Architecture Python / Streamlit et dépôt privé.
-- [x] Version 1 fusionnée : [PR #19](https://github.com/micheleClara7772/football-performance-intelligence/pull/19).
-- [x] Import StatsBomb réel contrôlé par l'utilisateur dans Codespaces : **3 381 événements**.
-- [x] Cinq rubriques navigables et contrôles navigateur/CI sur [PR #20](https://github.com/micheleClara7772/football-performance-intelligence/pull/20) — **fusionnée dans main**.
-- [x] Version 2 intégrée dans main après revue et tests : PR #20.
-- [ ] Annotations d'événements StatsBomb avec export et repères vidéo manuels : PR #21 en préparation.
-- [ ] Corriger l'expérience vidéo : YouTube fonctionne en externe, **erreur 153 en iframe**.
-- [ ] Confirmer les droits commerciaux StatsBomb et FIFA avant tout usage non autorisé.
-- [ ] Intégrer et valider le parcours complet de démonstration ; rendez-vous du 20 à confirmer.
+**FIFA+ interdit l'intégration de sa plateforme dans une iframe tierce :** le match complet doit donc être ouvert sur la plateforme officielle. Ne pas confondre l'existence de l'iframe YouTube des résumés avec une lecture réellement vérifiée.
 
-## Hébergement gratuit
+## Développement
 
-**[Guide de déploiement Streamlit Community Cloud](docs/deploiement-gratuit.md)** : compatible avec dépôt GitHub privé, URL publique possible, dépendances déclarées dans requirements.txt. Le propriétaire doit connecter son compte GitHub à Streamlit Community Cloud et sélectionner Python 3.11. Le code prêt à déployer ne prouve pas que l'application a été publiée. Les droits commerciaux StatsBomb/FIFA restent à examiner avant présentation externe.
+Python 3.11, Streamlit, Pandas, Plotly, Pytest, `src/fpi`, tests sous `tests/`. Dépendances versionnées dans `requirements/py311-linux.lock`, avec `requirements.txt` pour Streamlit Cloud. Voir [DEVELOPMENT.md](DEVELOPMENT.md) et [architecture](docs/architecture.md).
 
-## Vérification
-L'installation isolée et les commandes de lancement sont décrites dans [DEVELOPMENT.md](DEVELOPMENT.md) ; le suivi opérationnel et ses liens de preuves sont dans [docs/suivi-actuel.md](docs/suivi-actuel.md).
-
-**Le parcours complet en sept étapes exige encore une recette humaine.** La navigation des cinq rubriques et les données réelles ont toutefois été vérifiées. Voir le suivi actuel.
+**Échéances demandées :** revue interne mercredi 18 novembre 2026 à **16 h (Paris)** ; partenaire envisagé à **22 h**, **sous réserve des autorisations et des tests réels**. Aucune livraison asynchrone ni disponibilité horaire garantie par une simple fusion GitHub.

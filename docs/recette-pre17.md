@@ -1,14 +1,16 @@
-# Recette FPI — validation complète avant le 17 novembre 2026
+> **Historique des cas de recette du 16 novembre** : les descriptions A01–J10 reflètent parfois l'état antérieur à la fusion des PR #21–#24. Les cases effectivement cochées par l'utilisateur sont conservées dans l'[Issue #15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15), qui fait foi. Lire le [bilan du 18](mvp-acceptance-2026-11-18.md) pour les modifications récentes, notamment schéma v2 et replay FIFA+ externe.
+
+# Recette FPI — contrôles historiques, à actualiser le 18 novembre 2026
 
 **Checklist interactive à cocher dans [l'Issue #15](https://github.com/micheleClara7772/football-performance-intelligence/issues/15).**
 
 ## Recette de validation exhaustive — campagne du 16 novembre 2026 (avant le chantier du 17)
 
-**Versions :** PR #20 fusionnée dans main ; [PR #21 — annotations](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) encore **en brouillon** sur feat/event-annotations. **Toutes les validations humaines sont à faire.**
+**Versions :** PR #20 fusionnée dans main ; [PR #21 — annotations](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) **fusionnée** dans main. **Les validations humaines sont à cocher exclusivement par l'utilisateur dans l'Issue #15 (34/125 cochées au dernier contrôle).**
 
 **Mode d'emploi :** cocher une case uniquement après avoir fait le test. Chaque ligne décrit **l'action** et **le résultat attendu**. Pour toute anomalie, commenter avec code de test, SHA/branche, étapes, attendu, observé, capture et gravité. Ne pas supprimer le cache du Codespace pour forcer un cas d'erreur ; réserver les tests destructifs aux copies ou à la CI.
 
-**Préparation Codespaces :** redémarrer le Codespace existant, faire `git status --short` (ne pas perdre les modifications), `git fetch origin`, puis `git switch --track origin/feat/event-annotations` (si la branche locale existe déjà : `git switch feat/event-annotations`), `git pull --ff-only`, `git rev-parse --short HEAD`. Dans le terminal distant : `.venv/bin/python -m pip install -r requirements/py311-linux.lock`, `.venv/bin/python -m pip install --no-deps -e .`, `.venv/bin/python -m pip check`, `.venv/bin/python -m pytest`. Ensuite `.venv/bin/python -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501`. Ouvrir PORTS/Preview in Editor avec port **Private**, puis arrêter avec Ctrl+C et Stop Codespace.
+**Préparation Codespaces :** redémarrer le Codespace existant, faire `git status --short` (ne pas perdre les modifications), `git fetch origin`, puis `git switch main` (ne pas répéter si déjà sur `main`), `git pull --ff-only`, `git rev-parse --short HEAD`. Dans le terminal distant : `.venv/bin/python -m pip install -r requirements/py311-linux.lock`, `.venv/bin/python -m pip install --no-deps -e .`, `.venv/bin/python -m pip check`, `.venv/bin/python -m pytest`. Ensuite `.venv/bin/python -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501`. Ouvrir PORTS/Preview in Editor avec port **Private**, puis arrêter avec Ctrl+C et Stop Codespace.
 
 **Base de référence :** Maroc–Portugal 10 décembre 2022 ; match_id 3869486 ; 3 381 événements ; résultat 1–0 ; tirs Maroc 9/Portugal 12 ; passes tentées 249/731 (mi-temps 1 et 2).
 
@@ -22,7 +24,7 @@
 
 #### A — Préparer GitHub et Codespaces (10 contrôles)
 
-- [ ] **A01** — Confirmer PR #20 fusionnée et PR #21 brouillon. **Attendu :** Bon statut dans GitHub.
+- [ ] **A01** — Confirmer PR #20 fusionnée et PR #21 fusionnée. **Attendu :** Bon statut dans GitHub.
 - [ ] **A02** — Redémarrer le Codespace existant. **Attendu :** Pas de nouveau serveur créé.
 - [ ] **A03** — Contrôler git status --short avant switch. **Attendu :** Pas de modifications personnelles écrasées.
 - [ ] **A04** — Récupérer feat/event-annotations via git fetch origin. **Attendu :** La branche distante existe.
@@ -139,7 +141,7 @@
 - [ ] **H13** — Saisir 02:43 sans résumé sélectionné. **Attendu :** Erreur indiquant qu'une source est nécessaire.
 - [ ] **H14** — Tester formats 2:99, abc, -1:21, 1:1:2. **Attendu :** Horodatage refusé.
 - [ ] **H15** — Exporter fichier fpi-annotations-maroc-portugal.json. **Attendu :** Notes et références, aucune vidéo.
-- [ ] **H16** — Examiner JSON exporté. **Attendu :** schema_version=1, match_id=3869486, video_sync=manual_summary_clock_only.
+- [ ] **H16** — Examiner JSON exporté. **Attendu :** schema_version=2, match_id=3869486, video_sync=manual_player_clock_only (anciens fichiers v1 importables).
 - [ ] **H17** — Dans session neuve, réimporter JSON. **Attendu :** Notes restaurées sans sauvegarde serveur automatique.
 - [ ] **H18** — Comparer avant/après réimport. **Attendu :** Textes, IDs, minute match et horloge du résumé inchangés.
 - [ ] **H19** — Importer copie de JSON avec mauvais match ou event_id. **Attendu :** Rejet sans perdre notes valides.

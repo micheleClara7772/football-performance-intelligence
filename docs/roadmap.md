@@ -1,19 +1,14 @@
-# Feuille de route FPI — 16 au 20 novembre 2026
+# FPI — feuille de route à jour au 18 novembre 2026
 
-Le suivi opérationnel détaillé et ses preuves sont dans **[Suivi actuel](suivi-actuel.md)**.
+| Créneau (heure de Paris) | Action / responsable | Preuve attendue |
+|---|---|---|
+| **Avant 16 h** | Code MVP cinq modules fusionné (développement FPI) | CI Python et Chromium vertes sur les PR concernées ; dernier lot #24 vert |
+| **Avant 16 h** | **Propriétaire** : connecter GitHub à Streamlit Community Cloud, autoriser le dépôt privé, sélectionner main / app.py / Python 3.11 | Vraie URL `*.streamlit.app`, logs de démarrage sains |
+| **16 h** | Revue interne utilisateur | Import réel et 5 modules, export/réimport notes, séances, lien FIFA+ intégral |
+| **Après retour** | Corriger toute anomalie critique en branche et avec tests avant fusion | Issues liées et CI sur chaque tête de PR |
+| **Avant 22 h** | Répétition de démo 7–10 minutes, test réseau/URL, plan de secours | [Scénario](demo.md), [Issue #16](https://github.com/micheleClara7772/football-performance-intelligence/issues/16) |
+| **22 h envisagé** | Présentation à un partenaire **si usage et droits autorisés** | Décision explicite GO/NO-GO au regard des droits StatsBomb/FIFA |
 
-**Bilan du 16 novembre :** PR #20 stabilisée puis **fusionnée dans main** avec accord du porteur, [CI Python + dépendances verrouillées réussie](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283070), [import réel et parcours navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43947283120). La nouvelle [PR #21](https://github.com/micheleClara7772/football-performance-intelligence/pull/21) prépare les annotations textuelles d'événements (brouillon, non fusionnée).
+**Le code fusionné n'est pas une URL publique déployée.** Le lecteur complet FIFA+ doit s'ouvrir à l'extérieur ; l'iframe facultative YouTube ne garantit pas de lecture des résumés. Assistant factuel, sans LLM. Vues 360, multi-match, suivi vidéo et sync auto hors MVP.
 
-| Date | Prochaine action | Issues | Validation |
-|---|---|---|---|
-| **16 nov.** | Stabiliser PR #20 : avertissements Streamlit, interface française, fallback YouTube, revue CI, dépendances reproductibles | #4, #8, #15 | Tests verts sur la tête de PR, revue avant fusion |
-| **17 nov.** | Revoir les métriques et préparer les annotations horodatées sans confusion avec le replay | #6, #7, #8, #11 | Calculs sourcés, annotations exportables, limites documentées |
-| **18 nov.** | Consolider assistant factuel, séances éditables et parcours des cinq modules | #12, #13, #14 | Démo de bout en bout avec états honnêtes |
-| **19 nov.** | Vérification sécurité/risques, répétition 7–10 min, scénario de secours | #15, #16 | Exécution reproductible, limites et droits explicités |
-| **20 nov.** | Présentation envisagée si date et droits confirmés, puis synthèse des retours | #18 | Décision go/no-go et retours consignés |
-
-**Acquis :** version 1 fusionnée dans `main` (PR #19). PR #20 en brouillon, [tests Python réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993298) et [données réelles + navigateur réussis](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/43778993223). L'utilisateur a vérifié Streamlit via Codespaces et importé 3 381 événements du match Maroc–Portugal.
-
-**Risques à ne pas considérer comme résolus :** droits de démonstration commerciale StatsBomb, droits vidéo FIFA, échec iframe YouTube 153 ; l'extrait officiel reste accessible via le bouton externe. Une IA générative complète n'est pas encore intégrée.
-
-**Priorité P2 :** #17 vues 360 seulement si le chemin critique est sécurisé. Aucune facturation ou abonnement nouveau sans accord.
+[Suivi complet](suivi-actuel.md) · [Guide d'hébergement gratuit](deploiement-gratuit.md) · [Bilan de conformité](mvp-acceptance-2026-11-18.md).
