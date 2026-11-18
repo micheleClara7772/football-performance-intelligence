@@ -1,0 +1,43 @@
+name: FPI - benchmark réel sur clip SoccerTrack MOT
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-mot-benchmark.yml'
+      - 'scripts/benchmark_real_mot_clip.py'
+
+permissions:
+  contents: read
+
+jobs:
+  authentic-soccer-mot-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer uniquement les dépendances CPU nécessaires
+        run: |
+          python -m pip install -r requirements/video-py311-linux.lock \
+            'huggingface_hub>=0.28,<2' 'pytest>=8,<10'
+          python -m pip check
+      - name: Tester les limites et la correspondance des annotations
+        run: PYTHONPATH=src python -m pytest -q tests/test_real_mot_benchmark.py
+      - name: Vraie inférence YOLOX sur extrait autorisé (30 frames maxi, 4 min)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          PYTHONPATH=src python -m scripts.benchmark_real_mot_clip \
+            --interval-seconds 8 \
+            --out outputs/soccertrack-real-mot-benchmark.json
+      - name: Archiver seulement le rapport, aucun média, modèle, token ou image
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-soccertrack-117093-real-mot-benchmark
+          path: outputs/soccertrack-real-mot-benchmark.json
+          if-no-files-found: warn
+          retention-days: 3
