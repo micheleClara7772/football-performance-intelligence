@@ -39,6 +39,22 @@ def main() -> None:
         page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=90_000)
         assert page.locator('[data-testid="stVideo"]').count() >= 1
         assert page.locator('input[type="file"]').count() == 0, "La démo principale doit être sans upload"
+        # A real small H.264 video must be served and decoded by Chromium.
+        # No user-upload or external streaming service is involved.
+        bundled = Path(__file__).resolve().parents[1] / "assets/fpi-video/real-bytetrack-12s.mp4"
+        if bundled.is_file():
+            page.get_by_text("Démo prête sans upload").wait_for(timeout=30_000)
+            page.get_by_text("Identité IDF1").wait_for(timeout=30_000)
+            player = page.locator("video").first
+            player.wait_for(timeout=30_000)
+            page.wait_for_function(
+                "() => { const v = document.querySelector('video'); "
+                "return v && v.readyState >= 1 && v.videoWidth > 0; }",
+                timeout=45_000,
+            )
+            duration = player.evaluate("v => v.duration")
+            assert 11 <= duration <= 13, f"Durée H264 imprévue: {duration}"
+            print("FPI_REAL_BROWSER_VIDEO=DECODABLE_H264_12S", duration)
         page.screenshot(path=str(OUT / "00-demo-video-sans-upload.png"), full_page=True)
         page.locator('[data-testid="stSidebar"]').get_by_text("Tableau de bord", exact=True).click()
         page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
