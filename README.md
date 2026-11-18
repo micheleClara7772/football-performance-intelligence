@@ -2,6 +2,14 @@
 
 **État vérifié le 18 novembre 2026.** Cinq modules intégrés dans `main`, calculés depuis des événements StatsBomb réels du match **Maroc 1–0 Portugal** (10 décembre 2022, match `3869486`). L'import explicite permet de valider **3 381 événements**. Le dépôt est privé ; l'application n'est **pas encore accessible via une URL publique** tant que le propriétaire n'a pas créé l'application Streamlit Cloud.
 
+## Démonstration vidéo sans upload — 18 novembre 2026
+
+La page d'accueil **Démo vidéo** montre directement une **vraie séquence SoccerTrack v2** avec les joueurs annotés par FPI / ByteTrack. Le film H.264 de 12 secondes et son rapport ont été produits dans [l'action réelle #44341672073](https://github.com/micheleClara7772/football-performance-intelligence/actions/runs/44341672073) ; le workflow [publish-video-demo.yml](.github/workflows/publish-video-demo.yml) intègre cette preuve privée au dépôt pour que Streamlit n'ait rien à télécharger à l'ouverture. S'il manque le fichier, une vidéo publique brute se lit, avec un message indiquant honnêtement que le suivi n'est pas disponible.
+
+**Preuves de ce clip** : 60 images à 5 FPS, IDF1 62,99 %, 10 changements d'identifiant, précision des boîtes 87,16 %, rappel 63,79 %. Le ballon n'a pas été détecté dans ce clip ; ce n'est **pas** la vidéo du match Maroc–Portugal. Voir [nouveau script de présentation vidéo en 7 minutes](docs/demo.md). Aucun upload requis pour cette démo.
+
+**Important :** GitHub CI verte ne signifie pas que l'application est déployée. Une URL Streamlit Cloud réelle et vérifiée nécessite une connexion unique du propriétaire du compte à https://share.streamlit.io, sur le dépôt privé `micheleClara7772/football-performance-intelligence`, branche `main`, fichier `app.py`, Python 3.11.
+
 ## Accès immédiat aux informations
 
 - **[Déploiement gratuit — action du propriétaire](docs/deploiement-gratuit.md)** : connecter GitHub à https://share.streamlit.io/, choisir `main`, `app.py`, Python 3.11 ; recopier seulement une URL effectivement attribuée.
