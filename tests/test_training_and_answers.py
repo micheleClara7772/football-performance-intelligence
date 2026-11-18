@@ -38,3 +38,34 @@ def test_fact_explorer_reports_only_observed_values(events):
     assert "aucun modèle IA" in factual_answer(events, TEAMS, "Morocco", QUESTIONS[3])
     with pytest.raises(ValueError):
         factual_answer(events, TEAMS, "Morocco", "Donne un diagnostic tactique certain")
+
+
+def test_extended_factual_questions_use_only_provider_counts(events):
+    entries = factual_answer(events, TEAMS, "Morocco", QUESTIONS[4])
+    assert "première mi-temps" in entries and "deuxième" in entries
+    xg = factual_answer(events, TEAMS, "Morocco", QUESTIONS[5])
+    assert "0.100" in xg and "non disponible" in xg
+    comparison = factual_answer(events, TEAMS, "Morocco", QUESTIONS[6])
+    assert "Morocco 1" in comparison and "Portugal 1" in comparison
+    origins = factual_answer(events, TEAMS, "Morocco", QUESTIONS[7])
+    assert "tiers défensif" in origins and "StatsBomb" in origins
+    assert len(QUESTIONS) == 8
+
+
+def test_training_exercise_validator_rejects_invalid_edits(events):
+    from copy import deepcopy
+    from fpi.training.validation import validate_exercises
+    original = generate_session(events, TEAMS, "Morocco", FOCUSES[1], 60, 18).exercises
+    assert validate_exercises(original, 60) == []
+    assert all("Matériel" in row and "Variante" in row for row in original)
+    rows = deepcopy(original)
+    rows[0]["Durée (min)"] = -5
+    rows[1]["Consigne"] = " "
+    errors = validate_exercises(rows, 60)
+    assert any("durée" in err for err in errors)
+    assert any("Consigne" in err for err in errors)
+    assert any("Total exercices" in err for err in errors)
+    rows = deepcopy(original)
+    rows[0]["Durée (min)"] += 5
+    assert any("objectif" in err for err in validate_exercises(rows, 60))
+    assert validate_exercises([], 60)
