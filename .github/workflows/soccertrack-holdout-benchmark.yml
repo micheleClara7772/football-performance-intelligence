@@ -1,0 +1,47 @@
+name: FPI - confirmation détection sur match SoccerTrack indépendant
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-holdout-benchmark.yml'
+      - 'scripts/benchmark_real_mot_clip.py'
+
+permissions:
+  contents: read
+
+jobs:
+  independent-match-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dépendances CPU isolées sans entraînement ni paiement
+        run: |
+          python -m pip install -r requirements/video-py311-linux.lock \
+            'huggingface_hub>=0.28,<2' 'pytest>=8,<10'
+          python -m pip check
+      - name: Protection des accès, timestamps et volumes
+        run: PYTHONPATH=src python -m pytest -q tests/test_real_mot_benchmark.py
+      - name: YOLOX 2x2 vs 4x3 sur VRAI match distinct non vu lors du réglage
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          PYTHONPATH=src python -m scripts.benchmark_real_mot_clip \
+            --match-id 128057 \
+            --interval-seconds 8 \
+            --preview-dir outputs/holdout-private-previews \
+            --out outputs/soccertrack-holdout-128057-benchmark.json
+      - name: Archiver rapport et 6 vignettes CC BY 4.0, accès privé GitHub
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-holdout-128057-reel-3jours
+          path: |
+            outputs/soccertrack-holdout-128057-benchmark.json
+            outputs/holdout-private-previews/*.jpg
+          if-no-files-found: warn
+          retention-days: 3
