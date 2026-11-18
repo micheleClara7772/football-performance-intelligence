@@ -9,7 +9,8 @@ def test_app_starts_offline():
     at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=15).run()
     assert len(at.exception) == 0
     assert any("Tableau de bord" in s for s in at.sidebar.radio[0].options)
-    assert len(at.sidebar.radio[0].options) == 5
+    assert len(at.sidebar.radio[0].options) == 6
+    assert at.sidebar.radio[0].options[0] == "Démo vidéo"
     for label in at.sidebar.radio[0].options:
         at.sidebar.radio[0].set_value(label).run()
         assert len(at.exception) == 0, label
@@ -64,8 +65,8 @@ def test_guided_navigation_changes_page_without_crash():
     from streamlit.testing.v1 import AppTest
     from pathlib import Path
     at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=15).run()
-    assert at.sidebar.radio[0].value == "Tableau de bord"
+    assert at.sidebar.radio[0].value == "Démo vidéo"
     next_button = next(b for b in at.button if b.label.startswith("Continuer :"))
     next_button.click().run()
-    assert at.sidebar.radio[0].value == "Analyse tactique"
+    assert at.sidebar.radio[0].value == "Tableau de bord"
     assert len(at.exception) == 0
