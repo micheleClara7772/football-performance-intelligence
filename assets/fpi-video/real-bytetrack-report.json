@@ -1,0 +1,40 @@
+{
+  "analysis_type": "real_video_dense_mot_byte_track_eval",
+  "provenance": "SoccerTrack v2 CC BY 4.0 | AtomScott",
+  "source_match_id": "117093",
+  "clip_seconds": 12.0,
+  "output_video_filename": "soccertrack-tracks-117093-first12s.mp4",
+  "video_bytes": 3313328,
+  "original_fps": 25.0,
+  "processed_fps": 5.0,
+  "processed_frames": 60,
+  "real_inference_runtime_seconds": 130.05,
+  "person_candidates": 1689,
+  "ball_candidates_unverified": 0,
+  "tracker": "Roboflow ByteTrack 2.7.0 (real)",
+  "mot_identity_benchmark": {
+    "mot_gt_box_count": 1320,
+    "frames_evaluated": 60,
+    "idf1": 0.6299,
+    "id_precision": 0.7453,
+    "id_recall": 0.5455,
+    "id_switches": 10,
+    "matched_gt_boxes": 832,
+    "box_precision": 0.8716,
+    "box_recall": 0.6379,
+    "iou_threshold": 0.3,
+    "validated_full_match": false,
+    "only_player_ids": true,
+    "warning": "12-second sampled 5 FPS clip; no modelled ball GT, team or referee IDs."
+  },
+  "team_assignment_validated": false,
+  "referee_classification_validated": false,
+  "ball_tracking_accuracy_validated": false,
+  "full_match_90min_tracking_validated": false,
+  "limitations": [
+    "Only first 12 seconds of a real 4-minute MOT clip were evaluated.",
+    "Player track IDs are provisional, not jersey identities.",
+    "Ball detection and ball tracking have no ground truth in this MOT dataset.",
+    "No pitch calibration, team classification, possession or pressing inferred."
+  ]
+}
