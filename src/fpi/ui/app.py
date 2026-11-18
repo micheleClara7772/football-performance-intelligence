@@ -25,7 +25,7 @@ def _banner() -> None:
     st.set_page_config(page_title="FPI · Football Performance Intelligence", page_icon="⚽", layout="wide")
     st.title("Football Performance Intelligence")
     st.caption("Prototype d'analyse collective · Maroc – Portugal · 10 décembre 2022")
-    st.info("MVP en développement. Seuls les indicateurs calculés sur des événements validés peuvent être affichés.")
+    st.info("Démonstration technique : cinq modules sur événements StatsBomb vérifiés. Les droits de diffusion commerciale restent à confirmer.")
 
 
 def _source_panel(metadata: dict | None) -> None:
@@ -62,7 +62,7 @@ def _dashboard(match: dict | None, events: list[dict] | None) -> None:
     st.subheader(f"{team_label(home)} {match['home_score']} – {match['away_score']} {team_label(away)}")
     st.caption("Source : catalogue et événements StatsBomb Open Data (mi-temps réglementaires uniquement)")
     left, middle, right = st.columns(3)
-    left.metric("Événements validés", f"{len(events):,}")
+    left.metric("Événements validés", f"{len(events):,}".replace(",", " "))
     middle.metric(f"Tirs · {team_label(home)}", str(int(metrics.loc[metrics.team == home, "shots"].sum())))
     right.metric(f"Tirs · {team_label(away)}", str(int(metrics.loc[metrics.team == away, "shots"].sum())))
     fig = px.bar(localized_team_frame(metrics), x="period", y="shots", color="team", barmode="group",
@@ -77,15 +77,18 @@ def _dashboard(match: dict | None, events: list[dict] | None) -> None:
     st.caption("Passes réussies : passes sans indication d'échec selon le champ fournisseur pass.outcome. xG affiché uniquement lorsque tous les tirs de la période possèdent une valeur StatsBomb.")
 
 
-def _placeholder(title: str, description: str) -> None:
-    st.header(title)
-    st.warning("Module non implémenté — décision ou développement nécessaire.")
-    st.write(description)
+def _go_to_next_page() -> None:
+    """Navigation de démo guidée, avant l'exécution des widgets au prochain rerun."""
+    current = st.session_state.get("fpi_navigation", PAGES[0])
+    index = PAGES.index(current) if current in PAGES else 0
+    st.session_state["fpi_navigation"] = PAGES[(index + 1) % len(PAGES)]
 
 
 def main() -> None:
     _banner()
-    page = st.sidebar.radio("Navigation", PAGES, index=0)
+    page = st.sidebar.radio("Navigation", PAGES, index=0, key="fpi_navigation")
+    stage = PAGES.index(page)
+    st.sidebar.caption(f"Parcours guidé · étape {stage + 1} / {len(PAGES)}")
     _import_panel()
     try:
         match, events, metadata = load_reference_match()
@@ -105,3 +108,16 @@ def main() -> None:
         render_assistant(match, events)
     else:
         render_training(match, events)
+
+    st.divider()
+    next_name = PAGES[(stage + 1) % len(PAGES)]
+    st.button(
+        f"Continuer : {next_name}",
+        key="fpi_next_step",
+        on_click=_go_to_next_page,
+        width="stretch",
+    )
+    st.caption(
+        "Parcours : tableau de bord → tactique/annotations → vidéo officielle → "
+        "assistant factuel → séance d'entraînement."
+    )

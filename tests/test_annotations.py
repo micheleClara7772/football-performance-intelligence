@@ -78,3 +78,27 @@ def test_reimport_rejects_duplicate_event_and_unapproved_video(events):
     payload["annotations"][0]["video_url"] = "https://evil.example/video"
     with pytest.raises(ValueError, match="non référencée"):
         import_document(payload, 3869486, events)
+
+
+def test_schema_version_2_and_backward_compatibility(events):
+    from fpi.ui.video import OFFICIAL_FIFA_FULL_MATCH
+    official_url = OFFICIAL_FIFA_FULL_MATCH["url"]
+    annotation = build_annotation(
+        events[1], "Saut de l'avant-centre", "Observation", official_url, 5412,
+        allowed_video_urls=[official_url],
+    )
+    payload = json.loads(export_document(3869486, [annotation]))
+    assert payload["schema_version"] == 2
+    assert payload["video_sync"] == "manual_player_clock_only"
+    assert import_document(payload, 3869486, events, allowed_video_urls=[official_url])["b"] == annotation
+    legacy = json.loads(json.dumps(payload))
+    legacy["schema_version"] = 1
+    legacy["video_sync"] = "manual_summary_clock_only"
+    assert import_document(legacy, 3869486, events, allowed_video_urls=[official_url])["b"] == annotation
+    payload["video_sync"] = "automatic_guess"
+    with pytest.raises(ValueError, match="Mode de minutage"):
+        import_document(payload, 3869486, events, allowed_video_urls=[official_url])
+    payload["video_sync"] = "manual_player_clock_only"
+    payload["event_source"] = "Other"
+    with pytest.raises(ValueError, match="Provenance"):
+        import_document(payload, 3869486, events, allowed_video_urls=[official_url])

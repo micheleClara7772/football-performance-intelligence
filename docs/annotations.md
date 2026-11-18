@@ -7,7 +7,7 @@
 - Choisir une équipe, une mi-temps, un type d'action et un intervalle de minutes.
 - Choisir un **événement réel** fourni par StatsBomb avec ID, minute et seconde de match.
 - Rédiger une **observation** ou une **hypothèse** (interprétation non présentée comme fait).
-- Associer facultativement un résumé FIFA **par URL officielle** et son timestamp **saisi manuellement**.
+- Associer facultativement un résumé FIFA **par URL officielle** et son repère manuel **saisi manuellement**.
 - Exporter / réimporter les notes en JSON. Les notes restent en mémoire de session jusqu'à l'export ; elles ne sont pas envoyées à un serveur tiers.
 - Lors du réimport, vérifier l'identifiant du match, l'événement et ses coordonnées temporelles contre les événements du match chargé.
 
@@ -28,3 +28,8 @@
 - [ ] Pull Request distincte de la PR #20, sans fusion automatique.
 
 Ce volet est un sous-ensemble faisable sans vidéo de l'[Issue #11](https://github.com/micheleClara7772/football-performance-intelligence/issues/11), dont le périmètre complet reste bloqué par la synchronisation sur vidéos autorisées.
+
+
+## Compatibilité des exports (version 2)
+
+Les nouveaux exports utilisent `schema_version: 2` et `video_sync: manual_player_clock_only`, car le repère peut être celui du replay intégral FIFA+ ou d'un résumé YouTube. **Ce n'est jamais une synchronisation automatique au match.** Les anciens fichiers version 1 (`manual_summary_clock_only`) restent importables. Le replay FIFA+ est consulté **uniquement via un lien externe**, conformément aux conditions du diffuseur.

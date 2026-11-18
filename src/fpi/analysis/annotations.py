@@ -1,7 +1,7 @@
 """Annotations textuelles reliées aux événements StatsBomb (sans copie de vidéo).
 
 Le minutage de match provient des événements du fournisseur. Le minutage d'un
-résumé FIFA est saisi manuellement ; aucune synchronisation n'est déduite.
+replay ou résumé FIFA est saisi manuellement ; aucune synchronisation n'est déduite.
 """
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def eligible_events(
 
 
 def parse_video_clock(text: str) -> int | None:
-    """MM:SS du montage vidéo, indépendant des minutes du match."""
+    """MM:SS du lecteur officiel, indépendant des minutes du match."""
     value = text.strip()
     if not value:
         return None
@@ -111,10 +111,10 @@ def export_document(match_id: int, annotations: Iterable[dict]) -> str:
     if len(data) > MAX_NOTES:
         raise ValueError("Trop d'annotations")
     return json.dumps({
-        "schema_version": 1,
+        "schema_version": 2,
         "match_id": match_id,
         "event_source": "StatsBomb Open Data",
-        "video_sync": "manual_summary_clock_only",
+        "video_sync": "manual_player_clock_only",
         "annotations": data,
     }, ensure_ascii=False, indent=2)
 
@@ -124,8 +124,13 @@ def import_document(
     allowed_video_urls: Iterable[str] = (),
 ) -> dict[str, dict]:
     """Réimporte des notes en validant chaque ID contre le match chargé."""
-    if not isinstance(payload, dict) or payload.get("schema_version") != 1 or payload.get("match_id") != match_id:
+    if not isinstance(payload, dict) or payload.get("schema_version") not in (1, 2) or payload.get("match_id") != match_id:
         raise ValueError("Fichier d'annotations incompatible avec ce match")
+    if payload.get("event_source") != "StatsBomb Open Data":
+        raise ValueError("Provenance StatsBomb absente ou invalide")
+    expected_clock = "manual_summary_clock_only" if payload["schema_version"] == 1 else "manual_player_clock_only"
+    if payload.get("video_sync") != expected_clock:
+        raise ValueError("Mode de minutage vidéo non reconnu")
     entries = payload.get("annotations")
     if not isinstance(entries, list) or len(entries) > MAX_NOTES:
         raise ValueError("Liste d'annotations absente ou trop volumineuse")
