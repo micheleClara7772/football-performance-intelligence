@@ -1,0 +1,38 @@
+name: FPI - vérification accès SoccerTrack protégé
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/soccertrack-access.yml'
+      - 'scripts/check_soccertrack_access.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gated-dataset-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dépendance d'authentification HF en environnement éphémère
+        run: python -m pip install 'huggingface_hub>=0.28,<2'
+      - name: Vérifier un tout petit fichier gated (aucune vidéo)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python scripts/check_soccertrack_access.py --out outputs/soccertrack-access.json
+          echo "Lire l'artefact : ACCESS_VERIFIED, NEEDS_AUTHENTICATION ou ACCESS_NOT_VERIFIED."
+          echo "Un workflow vert ne prouve PAS à lui seul l'accès aux vidéos."
+      - name: Archiver statut sans clé, vidéo ni données nominatives
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-soccertrack-access-preflight
+          path: outputs/soccertrack-access.json
+          if-no-files-found: warn
+          retention-days: 3
