@@ -49,6 +49,16 @@ jobs:
           .venv/bin/python -m streamlit run app.py --server.headless true --server.port 8501 --server.address 127.0.0.1 > /tmp/fpi-streamlit.log 2>&1 &
           echo $! > /tmp/fpi-streamlit.pid
           .venv/bin/python scripts/browser_smoke.py
+      - name: Recette automatique des 125 cas historiques et limites du contrôle
+        run: .venv/bin/python scripts/auto_acceptance.py
+      - name: Archiver le rapport de recette automatique
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpi-auto-acceptance-125
+          path: outputs/acceptance/*
+          if-no-files-found: warn
+          retention-days: 14
       - name: Journal Streamlit en cas d'échec
         if: failure()
         run: cat /tmp/fpi-streamlit.log || true
