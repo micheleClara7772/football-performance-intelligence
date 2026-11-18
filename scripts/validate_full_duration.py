@@ -9,8 +9,8 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
-import shutil
-import subprocess
+import cv2
+import numpy as np
 
 from fpi.video_analysis.detector import Detection
 from fpi.video_analysis.pipeline import analyze_video
@@ -27,19 +27,25 @@ class ControlledInference:
 
 
 def main():
-    ffmpeg = shutil.which("ffmpeg")
-    if not ffmpeg:
-        raise RuntimeError("ffmpeg requis pour générer le test 92 minutes")
     with TemporaryDirectory(prefix="fpi-full-duration-") as temp:
-        path = Path(temp) / "original-green-pitch.mp4"
-        subprocess.run(
-            [ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
-             "-f", "lavfi", "-i", "color=c=green:s=320x180:r=1",
-             "-t", "5520", "-an", "-c:v", "libx264", "-preset", "ultrafast",
-             "-crf", "46", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-             str(path)],
-            check=True, timeout=120, capture_output=True,
+        path = Path(temp) / "original-green-pitch.avi"
+        writer = cv2.VideoWriter(
+            str(path), cv2.VideoWriter_fourcc(*"MJPG"), 1, (160, 120),
         )
+        if not writer.isOpened():
+            raise RuntimeError("Codec AVI/MJPEG OpenCV indisponible")
+        try:
+            frame = np.zeros((120, 160, 3), dtype=np.uint8)
+            frame[:, :, 1] = 130
+            # 5520 frames at 1 fps => 92 minutes. A watermark changes
+            # regularly to ensure frames are actually encoded/decoded.
+            for index in range(5520):
+                cv2.rectangle(frame, (0, 0), (60, 20), (0, 130, 0), -1)
+                cv2.putText(frame, str(index // 300), (2, 15),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                writer.write(frame)
+        finally:
+            writer.release()
         summary, previews = analyze_video(
             path, ControlledInference(), sample_interval_seconds=300,
             max_frames=0, preview_limit=0, tile_columns=1, tile_rows=1,
