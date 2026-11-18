@@ -91,7 +91,7 @@ def main() -> None:
         ask = page.locator('[data-testid="stChatInput"] textarea')
         ask.fill("Compare les tirs du Maroc et du Portugal")
         ask.press("Enter")
-        page.get_by_text("Morocco : 9").wait_for(timeout=45_000)
+        page.get_by_text("Maroc : 9", exact=False).wait_for(timeout=45_000)
         page.get_by_text("Portugal : 12").wait_for(timeout=45_000)
         page.screenshot(path=str(OUT / "03-assistant-factuel.png"), full_page=True)
 
