@@ -114,66 +114,120 @@ def real_mot_benchmark(*, token, samples_interval=8.0, api=None, downloader=None
         )
         if Path(video).stat().st_size > VIDEO_MAX_BYTES or Path(annotations).stat().st_size > MOT_MAX_BYTES:
             raise ValueError("Taille réelle au-dessus de la limite")
-        start = perf_counter()
         model = YOLOXDetector(download_model(Path(private) / "models"))
-        summary, _ = analyze_video(
-            Path(video), model, sample_interval_seconds=samples_interval,
-            max_frames=0, preview_limit=0, tile_columns=2, tile_rows=2,
-        )
-        elapsed = round(perf_counter() - start, 2)
-        with Path(annotations).open("r", encoding="utf-8-sig", newline="") as handle:
-            ground = reference_for_samples(
-                csv.reader(handle),
-                [x["time_seconds"] for x in summary.per_frame],
-                summary.estimated_fps, summary.width, summary.height,
+
+        class PersonThresholdAdapter:
+            def __init__(self, original, threshold):
+                self.original = original
+                self.threshold = threshold
+
+            def detect_frame(self, frame_bgr, **kwargs):
+                return self.original.detect_frame(
+                    frame_bgr, person_threshold=self.threshold, **kwargs,
+                )
+
+        # Same licensed video, ground truth and sample times in both experiments.
+        # This exploratory comparison MUST be replicated on held-out footage.
+        configurations = [
+            ("baseline_2x2_t025", 2, 2, 0.25),
+            ("fine_4x3_t020", 4, 3, 0.20),
+        ]
+        comparisons = []
+        ground = None
+        expected_timestamps = None
+        for name, columns, rows, threshold in configurations:
+            start = perf_counter()
+            summary, _ = analyze_video(
+                Path(video), PersonThresholdAdapter(model, threshold),
+                sample_interval_seconds=samples_interval,
+                max_frames=0, preview_limit=0,
+                tile_columns=columns, tile_rows=rows,
             )
-        if not ground["frames"]:
-            raise ValueError("Aucune vérité terrain correspondante dans le clip")
-        # MOT ground truth labels only tracked players, not all people or balls;
-        # therefore discard any predicted BALL boxes before measuring persons.
-        clean_predictions = summary.to_dict()
-        for row in clean_predictions["frames"]:
-            row["detections"] = [
-                det for det in row["detections"]
-                if det["label"] == "joueur_candidat"
-            ]
-        metrics = evaluate(clean_predictions, {"frames": ground["frames"]},
-                           iou_threshold=0.3, tolerance_seconds=0.02)
-        scoreable = (
-            ground["geometry_consistent"]
-            and ground["sampled_times_with_reference"] >= 15
-            and metrics["missing_prediction_frames"] == 0
-        )
+            elapsed = round(perf_counter() - start, 2)
+            timestamps = [x["time_seconds"] for x in summary.per_frame]
+            if expected_timestamps is None:
+                expected_timestamps = timestamps
+                with Path(annotations).open(
+                    "r", encoding="utf-8-sig", newline=""
+                ) as handle:
+                    ground = reference_for_samples(
+                        csv.reader(handle), timestamps, summary.estimated_fps,
+                        summary.width, summary.height,
+                    )
+                if not ground["frames"]:
+                    raise ValueError("Aucune vérité terrain correspondante dans le clip")
+            elif timestamps != expected_timestamps:
+                raise ValueError("Comparaison invalide : frames différentes")
+
+            clean_predictions = summary.to_dict()
+            for sample in clean_predictions["frames"]:
+                sample["detections"] = [
+                    det for det in sample["detections"]
+                    if det["label"] == "joueur_candidat"
+                ]
+            metrics = evaluate(
+                clean_predictions, {"frames": ground["frames"]},
+                iou_threshold=0.3, tolerance_seconds=0.02,
+            )
+            scoreable = (
+                ground["geometry_consistent"]
+                and ground["sampled_times_with_reference"] >= 15
+                and metrics["missing_prediction_frames"] == 0
+            )
+            comparisons.append({
+                "name": name, "tile_columns": columns, "tile_rows": rows,
+                "person_threshold": threshold,
+                "sampled_frames": summary.sampled_frames,
+                "covered_until_seconds": summary.covered_until_seconds,
+                "person_detection_runtime_seconds": elapsed,
+                "model_person_candidates": summary.person_candidates_total,
+                "model_ball_candidates_unscored": summary.ball_candidates_total,
+                "person_detection_metrics": (
+                    metrics["metrics"]["person"] if scoreable else None
+                ),
+                "quality_scoreable": scoreable,
+            })
+        recommended = choose_tiling(comparisons)
         return {
-            "validation_type": "real_yolox_video_inference_on_soccertrack_mot_clip",
+            "validation_type": "exploratory_real_yolox_tiling_on_soccertrack_mot_clip",
             "license": "SoccerTrack v2 CC BY 4.0 (attribution required)",
-            "match_id": MATCH_ID,
-            "dataset_revision": REVISION,
+            "match_id": MATCH_ID, "dataset_revision": REVISION,
             "real_clip_inference_executed": True,
             "actual_full_match_inference": False,
             "full_match_detection_validated": False,
             "ball_detection_precision_recall_validated": False,
             "continuous_identity_tracking_validated": False,
-            "video_width": summary.width,
-            "video_height": summary.height,
+            "video_width": summary.width, "video_height": summary.height,
             "video_fps": summary.estimated_fps,
             "clip_duration_seconds": summary.duration_seconds,
             "sample_interval_seconds": samples_interval,
-            "sampled_frames": summary.sampled_frames,
-            "covered_until_seconds": summary.covered_until_seconds,
-            "person_detection_runtime_seconds": elapsed,
-            "model_person_candidates": summary.person_candidates_total,
-            "model_ball_candidates_unscored": summary.ball_candidates_total,
             "ground_truth": {k:v for k,v in ground.items() if k != "frames"},
-            "person_detection_metrics": metrics["metrics"]["person"] if scoreable else None,
-            "quality_scoreable": scoreable,
+            "benchmarks": comparisons,
+            "recommended_config_exploratory": recommended,
+            "quality_scoreable": bool(recommended),
             "caveat": (
-                "4-minute MOT CLIP only. Reference may exclude referees and others; "
-                "no image-space ball ground truth. Evaluation on sparse image samples, "
-                "not full-frame or 90-minute tracking."
+                "Parameter selection on same 4-minute clip is exploratory "
+                "(not held-out validation). Do not infer 90-minute quality. "
+                "Ground truth may omit referees and other COCO persons; "
+                "ball and continuous tracking remain unscored."
             ),
         }
 
+
+
+
+def choose_tiling(comparisons):
+    """Provisional F1-only selection; does not claim statistical significance."""
+    eligible = [x for x in comparisons if x.get("quality_scoreable")
+                and x.get("person_detection_metrics", {}).get("f1") is not None]
+    if not eligible:
+        return None
+    best = max(eligible, key=lambda x: (
+        x["person_detection_metrics"]["f1"],
+        x["person_detection_metrics"]["recall"] or 0,
+        -x["person_detection_runtime_seconds"],
+    ))
+    return best["name"]
 
 def main():
     p = argparse.ArgumentParser(description="FPI — vrai benchmark YOLOX sur clip SoccerTrack privé")
