@@ -8,9 +8,9 @@ def test_app_starts_offline():
     # No source data is shipped. An error on cache absence must not crash the app.
     at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=15).run()
     assert len(at.exception) == 0
-    assert any("Tableau de bord" in s for s in at.sidebar.radio[0].options)
+    assert any("Le match" in s for s in at.sidebar.radio[0].options)
     assert len(at.sidebar.radio[0].options) == 6
-    assert at.sidebar.radio[0].options[0] == "Démo vidéo"
+    assert at.sidebar.radio[0].options[0] == "Le match"
     for label in at.sidebar.radio[0].options:
         at.sidebar.radio[0].set_value(label).run()
         assert len(at.exception) == 0, label
@@ -65,8 +65,25 @@ def test_guided_navigation_changes_page_without_crash():
     from streamlit.testing.v1 import AppTest
     from pathlib import Path
     at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=15).run()
-    assert at.sidebar.radio[0].value == "Démo vidéo"
+    assert at.sidebar.radio[0].value == "Le match"
     next_button = next(b for b in at.button if b.label.startswith("Continuer :"))
     next_button.click().run()
-    assert at.sidebar.radio[0].value == "Tableau de bord"
+    assert at.sidebar.radio[0].value == "Revoir les actions"
+    assert len(at.exception) == 0
+
+
+def test_coach_buttons_navigate_without_session_state_widget_error():
+    from streamlit.testing.v1 import AppTest
+    from pathlib import Path
+    at = AppTest.from_file(Path(__file__).resolve().parents[1] / "app.py", default_timeout=20).run()
+    at.sidebar.radio[0].set_value("Démo technique").run()
+    assert len(at.exception) == 0
+    to_tactics = next(b for b in at.button if b.key == "fpi_video_to_tactics")
+    to_tactics.click().run()
+    assert at.sidebar.radio[0].value == "Analyse tactique"
+    assert len(at.exception) == 0
+    at.sidebar.radio[0].set_value("Démo technique").run()
+    to_actions = next(b for b in at.button if b.key == "fpi_video_to_advanced")
+    to_actions.click().run()
+    assert at.sidebar.radio[0].value == "Revoir les actions"
     assert len(at.exception) == 0
