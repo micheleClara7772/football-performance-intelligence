@@ -42,6 +42,12 @@ def render_assistant(match: dict | None, events: list[dict] | None) -> None:
         messages.append({"role": "assistant", "content": answer})
         st.rerun()
 
+    with st.expander("D'où viennent les réponses ?", expanded=False):
+        st.caption(
+            "L'assistant calcule les réponses à partir des actions enregistrées "
+            "du match. Ce n'est pas un modèle génératif et il ne regarde pas "
+            "automatiquement la vidéo du replay."
+        )
     if messages and st.button("Effacer cette conversation", key="assistant_clear"):
         st.session_state[chat_key] = []
         st.rerun()
