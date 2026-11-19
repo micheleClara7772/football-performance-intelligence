@@ -11,6 +11,17 @@ from fpi.metrics.collective import metrics_by_period
 from fpi.ui.formatting import team_label, event_label, localized_team_frame
 from fpi.ui.annotations import render_annotations
 
+_ADVANCED_COACH_LABELS = {
+    "progressive_passes": "Passes qui font avancer le jeu",
+    "switches_of_play": "Changements de côté",
+    "high_recoveries": "Ballons récupérés dans la moitié adverse",
+    "final_third_recoveries": "Ballons récupérés près du but adverse",
+    "shot_assists": "Passes menant à un tir",
+    "goal_assists": "Passes décisives",
+    "box_shots": "Tirs dans la surface",
+    "pressures_then_recovery_8s": "Récupérations rapides après pression",
+}
+
 _METRIC_LABELS = {
     "shots": "Tirs",
     "passes": "Passes tentées",
@@ -23,7 +34,7 @@ _METRIC_LABELS = {
 
 
 def render_tactical(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Analyse tactique · indicateurs observés")
+    st.header("Analyse tactique · ce que disent les actions")
     if not match or not events:
         st.warning("Pour comparer les mi-temps, importer d'abord les événements réels depuis la barre latérale.")
         return
@@ -34,7 +45,7 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
     detail = tactical_by_period(events, teams)
     combined = basic.merge(detail, on=["team", "period"], validate="one_to_one")
     focus = combined[combined.team == team].sort_values("period").reset_index(drop=True)
-    st.caption("Données : StatsBomb Open Data, uniquement mi-temps réglementaires. Évolution descriptive, sans conclusion causale.")
+    st.caption("Comparaison des deux mi-temps à partir des actions du match. Ces chiffres décrivent ce qui s’est passé, sans expliquer seuls pourquoi.")
 
     comparison, chronology, spatial, annotations, advanced = st.tabs(["Comparaison des mi-temps", "Chronologie", "Emplacements des événements", "Annotations", "Signaux avancés"])
     with comparison:
@@ -87,27 +98,29 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
         render_annotations(match, events, teams)
 
     with advanced:
-        st.subheader("Signaux avancés sur la totalité du match")
+        st.subheader("Ce qui a changé dans le jeu")
         st.caption(
-            "Calculs gratuits à partir des 3 381 événements du match. "
-            "Ce n'est PAS une analyse automatisée des pixels de la vidéo ni du tracking de joueurs."
+            "Ces repères sont calculés à partir des actions réellement enregistrées, "
+            "et non des images du match. Ils aident à formuler des hypothèses "
+            "à vérifier en revoyant les séquences."
         )
         advanced_frame = advanced_metrics_by_period(events, teams)
         metric = st.selectbox(
             "Mesure avancée à explorer", list(ADVANCED_LABELS),
-            format_func=lambda key: ADVANCED_LABELS[key], key="advanced_signal",
+            format_func=lambda key: _ADVANCED_COACH_LABELS[key], key="advanced_signal",
         )
-        st.info(ADVANCED_DESCRIPTIONS[metric])
+        with st.expander("Comment ce chiffre est-il calculé ?", expanded=False):
+            st.write(ADVANCED_DESCRIPTIONS[metric])
         fig = px.bar(
             localized_team_frame(advanced_frame), x="period", y=metric, color="team",
             barmode="group", labels={"period": "Mi-temps", "team": "Équipe", metric: ADVANCED_LABELS[metric]},
-            title=f"{ADVANCED_LABELS[metric]} · événements des deux périodes",
+            title=f"{_ADVANCED_COACH_LABELS[metric]} · comparaison des mi-temps",
         )
         fig.update_xaxes(tickmode="array", tickvals=[1, 2], ticktext=["1re", "2e"])
         st.plotly_chart(fig, width="stretch")
         subset = advanced_frame[advanced_frame.team == team].copy()
         st.dataframe(
-            subset.rename(columns={"team": "Équipe", "period": "Mi-temps", **ADVANCED_LABELS,
+            subset.rename(columns={"team": "Équipe", "period": "Mi-temps", **_ADVANCED_COACH_LABELS,
                                    "possessions_annotated": "Possessions identifiées par fournisseur",
                                    "possessions_with_shot": "Possessions contenant un tir",
                                    "possession_shot_pct": "Possessions avec tir (%)"}),
