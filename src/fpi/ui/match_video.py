@@ -76,7 +76,7 @@ def _load_real_events() -> None:
     try:
         with st.spinner("Récupération des actions du match…"):
             download_reference_match()
-        st.rerun()
+        # Streamlit automatically reruns after the button callback.
     except (OSError, ValueError, RuntimeError) as exc:
         st.error(f"Le chargement a échoué : {exc}")
 
