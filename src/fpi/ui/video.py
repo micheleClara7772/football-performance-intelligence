@@ -95,12 +95,17 @@ def render_video() -> None:
         "https://www.fifa.com/fr/watch/4se3MdPEAeiq5n0e9eT14w",
     )
 
+    render_experimental_video()
+
+
+def render_experimental_video() -> None:
+    """Optional laboratory tool, separate from the Morocco–Portugal coach view."""
     st.divider()
-    st.subheader("4. Détection automatique dans un fichier vidéo autorisé")
+    st.subheader("Analyser une vidéo autorisée (outil expérimental)")
     st.caption(
-        "YOLOX-Nano détecte des personnes et des ballons de sport à partir des pixels. "
-        "Les personnes peuvent être des arbitres ou spectateurs ; les ballons petits "
-        "peuvent ne pas être détectés. Aucun suivi d'identité n'est garanti."
+        "Cet outil sert à tester la reconnaissance des personnes et du ballon "
+        "sur des images vidéo autorisées. Il ne fournit pas encore des mesures "
+        "fiables des déplacements ou de la performance des équipes."
     )
     st.warning(
         "Charge uniquement un fichier pour lequel tu disposes des droits de traitement. "

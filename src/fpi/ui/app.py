@@ -15,26 +15,24 @@ from fpi.metrics.collective import metrics_by_period
 from fpi.ui.tactical import render_tactical
 from fpi.ui.assistant import render_assistant
 from fpi.ui.training import render_training
-from fpi.ui.video import render_video
+from fpi.ui.match_video import render_match_video as render_video
 from fpi.ui.video_showcase import render_video_showcase
 from fpi.ui.formatting import team_label, localized_team_frame
 
-PAGES = ("Démo vidéo", "Tableau de bord", "Analyse tactique", "Assistant IA", "Séances", "Vidéo")
+PAGES = ("Le match", "Revoir les actions", "Analyse tactique", "Questions", "Séances", "Démo technique")
 
 
 def _banner() -> None:
     st.set_page_config(page_title="FPI · Football Performance Intelligence", page_icon="⚽", layout="wide")
     st.title("Football Performance Intelligence")
-    st.caption(
-        "Football assisté par les données · vidéo SoccerTrack v2 autorisée "
-        "et statistiques du match Maroc–Portugal 2022 (sources distinctes)."
-    )
+    st.caption("Maroc – Portugal 2022 · observer les actions, comprendre le match, préparer une séance")
 
 
 def _source_panel(metadata: dict | None) -> None:
     st.sidebar.divider()
-    st.sidebar.caption("Source des données : [StatsBomb Open Data](https://github.com/hudl/open-data)")
-    st.sidebar.caption("Attribution StatsBomb obligatoire pour toute publication/partage ; droits de démonstration commerciale à confirmer.")
+    with st.sidebar.expander("D’où viennent les chiffres ?"):
+        st.caption("Les actions du match sont fournies par [StatsBomb Open Data](https://github.com/hudl/open-data). Ce ne sont pas des analyses automatiques des images.")
+        st.caption("Attribution nécessaire ; droits de réutilisation commerciale à vérifier.")
     if metadata:
         st.sidebar.success(f"Événements contrôlés : {metadata['validated_events']:,}")
         st.sidebar.caption(f"Chargement : {metadata['retrieved_utc']}")
@@ -42,8 +40,8 @@ def _source_panel(metadata: dict | None) -> None:
 
 def _import_panel() -> None:
     st.sidebar.subheader("Données du match")
-    st.sidebar.caption("L'import utilise une requête externe seulement après clic ; aucun téléchargement automatique.")
-    if st.sidebar.button("Importer depuis StatsBomb", type="primary", width="stretch"):
+    st.sidebar.caption("Charge une fois les actions pour activer toutes les analyses.")
+    if st.sidebar.button("Charger les actions du match", type="primary", width="stretch"):
         with st.sidebar.status("Téléchargement et validation…", expanded=False) as status:
             try:
                 match, events, _ = download_reference_match()
@@ -55,10 +53,17 @@ def _import_panel() -> None:
 
 
 def _dashboard(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Tableau de bord collectif")
+    st.header("Maroc 1 – 0 Portugal · Coupe du monde 2022")
     if not events or not match:
-        st.warning("Aucune donnée vérifiée en cache. Utilise « Importer depuis StatsBomb » dans la barre latérale.")
-        st.caption("Aucun nombre de tirs, de passes ou graphique n'est simulé.")
+        st.info("Les actions du match ne sont pas encore chargées.")
+        if st.button("Afficher les actions et statistiques du match", type="primary",
+                     key="fpi_load_from_home"):
+            with st.spinner("Chargement des actions réelles du match…"):
+                try:
+                    download_reference_match()
+                    st.rerun()
+                except (DataValidationError, DownloadError, OSError) as exc:
+                    st.error(f"Le chargement a échoué : {exc}")
         return
     home, away = (match[side][f"{side}_name"] for side in ("home_team", "away_team"))
     metrics = metrics_by_period(events, (home, away))
@@ -89,7 +94,9 @@ def _go_to_next_page() -> None:
 
 def main() -> None:
     _banner()
-    page = st.sidebar.radio("Navigation", PAGES, index=0, key="fpi_navigation")
+    if st.session_state.get("fpi_navigation") not in (None, *PAGES):
+        st.session_state["fpi_navigation"] = PAGES[0]
+    page = st.sidebar.radio("Choisir une rubrique", PAGES, index=0, key="fpi_navigation")
     stage = PAGES.index(page)
     st.sidebar.caption(f"Parcours guidé · étape {stage + 1} / {len(PAGES)}")
     _import_panel()
@@ -101,18 +108,18 @@ def main() -> None:
         st.error(f"Cache invalide : {exc}. Réimporte les données vérifiées pour le réparer.")
         match = events = metadata = None
     _source_panel(metadata)
-    if page == "Démo vidéo":
-        render_video_showcase(match, events)
-    elif page == "Tableau de bord":
+    if page == "Le match":
         _dashboard(match, events)
+    elif page == "Revoir les actions":
+        render_video(match, events)
     elif page == "Analyse tactique":
         render_tactical(match, events)
-    elif page == "Vidéo":
-        render_video()
-    elif page == "Assistant IA":
+    elif page == "Questions":
         render_assistant(match, events)
-    else:
+    elif page == "Séances":
         render_training(match, events)
+    else:
+        render_video_showcase(match, events)
 
     st.divider()
     next_name = PAGES[(stage + 1) % len(PAGES)]
@@ -123,7 +130,7 @@ def main() -> None:
         width="stretch",
     )
     st.caption(
-        "Parcours : démo vidéo réelle → chiffres du match → tactique → "
-        "assistant factuel → séance → outils vidéo avancés."
+        "Parcours : le match → revoir les actions → comprendre le jeu → "
+        "poser une question → préparer une séance. La démo technique reste facultative."
 
     )

@@ -13,8 +13,8 @@ from fpi.ui.formatting import team_label, localized_description
 
 
 def render_training(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Générateur de séances · propositions modifiables")
-    st.caption("Le choix du thème et l'approbation finale relèvent du staff technique. Aucun diagnostic automatique n'est établi.")
+    st.header("Préparer une séance")
+    st.caption("Construis une première proposition, ajuste les exercices, puis valide-la avec ton staff.")
     if not match or not events:
         st.warning("Importer les événements réels pour disposer d'un contexte chiffré avant de générer une proposition.")
         return
