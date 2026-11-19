@@ -8,11 +8,11 @@ from fpi.ui.formatting import team_label, localized_description
 
 
 def render_assistant(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Assistant IA · questions libres")
+    st.header("Questions sur le match")
     st.info(
-        "Pose tes questions en français, sans choisir une liste figée. "
-        "Les réponses sont calculées gratuitement sur StatsBomb : moteur linguistique local, "
-        "non génératif, sans API ni abonnement. Il indique quand une mesure est impossible."
+        "Écris ta question librement, comme si tu interrogeais un analyste. "
+        "FPI répond à partir des actions enregistrées du match et te dit clairement "
+        "quand il ne dispose pas de l'information."
     )
     if not match or not events:
         st.warning("Importer les événements StatsBomb réels pour poser tes questions.")
@@ -31,7 +31,7 @@ def render_assistant(match: dict | None, events: list[dict] | None) -> None:
     for message in messages[-30:]:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-    prompt = st.chat_input("Pose ta question libre sur Maroc–Portugal…", key="fpi_freetext_prompt")
+    prompt = st.chat_input("Ex. : Qui a le plus tiré en deuxième mi-temps ?", key="fpi_freetext_prompt")
     if prompt:
         messages.append({"role": "user", "content": prompt})
         try:
