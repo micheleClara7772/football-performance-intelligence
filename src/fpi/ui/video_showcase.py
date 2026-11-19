@@ -104,7 +104,7 @@ def render_video_showcase(match: dict | None = None,
         )
     with meta:
         st.success("Démo prête sans upload" if video_is_ready()
-                   else "Séquence publique accessible")
+                   else "Démo pré-calculée indisponible")
 
     left, right = st.columns([1.9, 1], gap="large")
     with left:
