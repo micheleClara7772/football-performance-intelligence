@@ -152,7 +152,25 @@ def render_match_video(match: dict | None, events: list[dict] | None) -> None:
                                   start=start, end=end)
             st.metric("Actions trouvées", len(rows))
             if rows:
-                st.dataframe(rows[:60], hide_index=True, use_container_width=True)
+                import pandas as pd
+                import plotly.express as px
+
+                chart = pd.DataFrame(rows)
+                chart["Minute"] = chart["Minute du match"].map(
+                    lambda clock: int(clock.split(":")[0])
+                    + int(clock.split(":")[1])/60
+                )
+                fig = px.scatter(
+                    chart, x="Minute", y="Action", color="Équipe",
+                    hover_data=["Joueur", "Minute du match"],
+                    title="Chronologie des actions à revoir",
+                    labels={"Minute": "Minute du match"},
+                    range_x=[0, max(100, end)],
+                )
+                fig.update_traces(marker={"size": 10, "opacity": 0.75})
+                fig.update_layout(height=350, legend_title_text="Équipe")
+                st.plotly_chart(fig, width="stretch")
+                st.dataframe(rows[:60], hide_index=True, width="stretch")
                 if len(rows) > 60:
                     st.caption("Seules les 60 premières actions s'affichent. Affine la période.")
             else:
