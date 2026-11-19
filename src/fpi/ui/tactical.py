@@ -36,7 +36,7 @@ _METRIC_LABELS = {
 def render_tactical(match: dict | None, events: list[dict] | None) -> None:
     st.header("Analyse tactique · ce que disent les actions")
     if not match or not events:
-        st.warning("Pour comparer les mi-temps, importer d'abord les événements réels depuis la barre latérale.")
+        st.warning("Charge d’abord les actions du match depuis la colonne de gauche.")
         return
 
     teams = (match["home_team"]["home_team_name"], match["away_team"]["away_team_name"])
@@ -106,14 +106,14 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
         )
         advanced_frame = advanced_metrics_by_period(events, teams)
         metric = st.selectbox(
-            "Mesure avancée à explorer", list(ADVANCED_LABELS),
+            "Indicateur à comparer", list(ADVANCED_LABELS),
             format_func=lambda key: _ADVANCED_COACH_LABELS[key], key="advanced_signal",
         )
         with st.expander("Comment ce chiffre est-il calculé ?", expanded=False):
             st.write(ADVANCED_DESCRIPTIONS[metric])
         fig = px.bar(
             localized_team_frame(advanced_frame), x="period", y=metric, color="team",
-            barmode="group", labels={"period": "Mi-temps", "team": "Équipe", metric: ADVANCED_LABELS[metric]},
+            barmode="group", labels={"period": "Mi-temps", "team": "Équipe", metric: _ADVANCED_COACH_LABELS[metric]},
             title=f"{_ADVANCED_COACH_LABELS[metric]} · comparaison des mi-temps",
         )
         fig.update_xaxes(tickmode="array", tickvals=[1, 2], ticktext=["1re", "2e"])
@@ -121,13 +121,13 @@ def render_tactical(match: dict | None, events: list[dict] | None) -> None:
         subset = advanced_frame[advanced_frame.team == team].copy()
         st.dataframe(
             subset.rename(columns={"team": "Équipe", "period": "Mi-temps", **_ADVANCED_COACH_LABELS,
-                                   "possessions_annotated": "Possessions identifiées par fournisseur",
+                                   "possessions_annotated": "Phases de possession enregistrées",
                                    "possessions_with_shot": "Possessions contenant un tir",
                                    "possession_shot_pct": "Possessions avec tir (%)"}),
             hide_index=True, width="stretch",
         )
         st.warning(
-            "Les seuils géométriques et temporels sont des PROXYS, pas des labels fiables de "
-            "pressing efficace, création de danger ou schéma tactique. "
-            "Les possessions reflètent seulement les identifiants fournis par StatsBomb."
+            "Ces indices décrivent des actions, mais ne prouvent pas qu’un pressing "
+            "a été réussi ni qu’une organisation tactique explique le résultat. "
+            "Compare-les aux images et à ton observation d’entraîneur."
         )
