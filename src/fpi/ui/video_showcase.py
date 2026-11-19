@@ -202,3 +202,12 @@ def render_video_showcase(match: dict | None = None,
         "Code : https://github.com/AtomScott/SoccerTrack-v2 · "
         "Aucune image Maroc–Portugal n'est incluse dans cette démonstration."
     )
+    with st.expander("Outil expérimental · analyser une autre vidéo autorisée",
+                     expanded=False):
+        st.info(
+            "Réservé aux essais : cette fonction n'est pas nécessaire pour "
+            "revoir Maroc–Portugal. Les vidéos officielles FIFA+ et YouTube "
+            "ne sont pas téléchargeables ni traitées par cet outil."
+        )
+        from fpi.ui.video import render_experimental_video
+        render_experimental_video()
