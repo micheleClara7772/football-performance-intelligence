@@ -36,31 +36,10 @@ def main() -> None:
         browser = tool.chromium.launch(headless=True, args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1440, "height": 960}, device_scale_factor=1, accept_downloads=True)
         page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
-        page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=90_000)
-        assert page.locator('[data-testid="stVideo"]').count() >= 1
-        assert page.locator('input[type="file"]').count() == 0, "La démo principale doit être sans upload"
-        # A real small H.264 video must be served and decoded by Chromium.
-        # No user-upload or external streaming service is involved.
-        bundled = Path(__file__).resolve().parents[1] / "assets/fpi-video/real-bytetrack-12s.mp4"
-        if bundled.is_file():
-            page.get_by_text("Démo prête sans upload").wait_for(timeout=30_000)
-            page.get_by_text("Identité IDF1").wait_for(timeout=30_000)
-            player = page.locator("video").first
-            player.wait_for(timeout=30_000)
-            page.wait_for_function(
-                "() => { const v = document.querySelector('video'); "
-                "return v && v.readyState >= 1 && v.videoWidth > 0; }",
-                timeout=45_000,
-            )
-            duration = player.evaluate("v => v.duration")
-            assert 11 <= duration <= 13, f"Durée H264 imprévue: {duration}"
-            print("FPI_REAL_BROWSER_VIDEO=DECODABLE_H264_12S", duration)
-        page.screenshot(path=str(OUT / "00-demo-video-sans-upload.png"), full_page=True)
-        page.locator('[data-testid="stSidebar"]').get_by_text("Tableau de bord", exact=True).click()
-        page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
+        page.get_by_role("heading", name="Maroc 1 – 0 Portugal · Coupe du monde 2022").wait_for(timeout=90_000)
         page.get_by_text("Événements validés").first.wait_for(timeout=60_000)
         page.locator('[data-testid="stPlotlyChart"]').first.wait_for(timeout=45_000)
-        assert not page.get_by_text("Aucune donnée vérifiée en cache.").count()
+        assert not page.get_by_text("Les actions du match ne sont pas encore chargées.").count()
         page.screenshot(path=str(OUT / "01-dashboard.png"), full_page=True)
 
         sidebar = page.locator('[data-testid="stSidebar"]')
@@ -97,9 +76,7 @@ def main() -> None:
         fresh = browser.new_context(viewport={"width": 1440, "height": 960}, accept_downloads=True)
         imported_page = fresh.new_page()
         imported_page.goto(BASE, wait_until="domcontentloaded", timeout=60_000)
-        imported_page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=90_000)
-        imported_page.locator('[data-testid="stSidebar"]').get_by_text("Tableau de bord", exact=True).click()
-        imported_page.get_by_role("heading", name="Tableau de bord collectif").wait_for(timeout=90_000)
+        imported_page.get_by_role("heading", name="Maroc 1 – 0 Portugal · Coupe du monde 2022").wait_for(timeout=90_000)
         imported_page.locator('[data-testid="stSidebar"]').get_by_text("Analyse tactique", exact=True).click()
         imported_page.get_by_role("tab", name="Annotations").click()
         imported_page.locator('input[type="file"]').set_input_files(str(output_notes))
@@ -113,8 +90,8 @@ def main() -> None:
         fresh.close()
         output_notes.unlink(missing_ok=True)
 
-        sidebar.get_by_text("Assistant IA", exact=True).click()
-        page.get_by_role("heading", name="Assistant IA · questions libres").wait_for(timeout=60_000)
+        sidebar.get_by_text("Questions", exact=True).click()
+        page.get_by_role("heading", name="Questions sur le match").wait_for(timeout=60_000)
         ask = page.locator('[data-testid="stChatInput"] textarea')
         ask.fill("Compare les tirs du Maroc et du Portugal")
         ask.press("Enter")
@@ -123,33 +100,47 @@ def main() -> None:
         page.screenshot(path=str(OUT / "03-assistant-factuel.png"), full_page=True)
 
         sidebar.get_by_text("Séances", exact=True).click()
-        page.get_by_role("heading", name="Générateur de séances · propositions modifiables").wait_for(timeout=60_000)
+        page.get_by_role("heading", name="Préparer une séance").wait_for(timeout=60_000)
         page.get_by_role("button", name="Proposer une séance").click()
         page.get_by_role("button", name="Exporter la proposition en JSON").wait_for(timeout=60_000)
         page.screenshot(path=str(OUT / "04-seances.png"), full_page=True)
 
-        sidebar.get_by_text("Vidéo", exact=True).click()
-        page.get_by_role("heading", name="Vidéos officielles · Maroc – Portugal").wait_for(timeout=60_000)
-        page.get_by_role("link", name="Ouvrir le match complet sur FIFA+").wait_for(timeout=60_000)
+        sidebar.get_by_text("Revoir les actions", exact=True).click()
+        page.get_by_role("heading", name="Revoir les actions · Maroc – Portugal").wait_for(timeout=60_000)
+        page.get_by_role("link", name="Ouvrir Maroc–Portugal en intégralité sur FIFA+").wait_for(timeout=60_000)
         page.get_by_role("link", name="Regarder ce résumé sur YouTube (solution fiable)").wait_for(timeout=60_000)
-        # La plateforme FIFA+ ne doit jamais être placée dans une iframe.
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
-        page.get_by_text("Détection automatique dans un fichier vidéo autorisé").wait_for(timeout=30_000)
-        page.get_by_text("Utiliser l'extrait de démonstration libre SoccerTrack v2 (CC BY 4.0)").wait_for(timeout=30_000)
-        assert page.get_by_role("button", name="Détecter les joueurs et ballons candidats").is_disabled()
-        page.screenshot(path=str(OUT / "05-video-liens-officiels.png"), full_page=True)
-        # Tentative facultative d'intégration des SEULS résumés YouTube autorisés.
-        page.get_by_text("Essayer le lecteur YouTube intégré (résumés uniquement)", exact=True).click()
-        page.locator('iframe[src*="youtube.com/embed/"]').wait_for(timeout=30_000)
-        assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
-        page.screenshot(path=str(OUT / "05b-youtube-integration-experimentale.png"), full_page=True)
-
+        assert page.locator('input[type="file"]').count() == 0, "L'écran du coach ne demande pas d'upload"
+        page.get_by_role("tab", name="Explorer les actions").click()
+        page.get_by_text("Retrouver les moments importants").wait_for(timeout=45_000)
+        page.get_by_text("Actions trouvées").wait_for(timeout=45_000)
+        page.get_by_role("button", name="Comprendre les différences entre les équipes").click()
+        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
-        page.get_by_role("button", name="Continuer : Démo vidéo").click()
-        page.get_by_text("Voir les joueurs. Conserver leurs trajectoires.", exact=False).wait_for(timeout=45_000)
+        sidebar.get_by_text("Démo technique", exact=True).click()
+        page.get_by_role("heading", name="Démonstration technique · suivi de joueurs").wait_for(timeout=45_000)
+        player = page.locator("video").first
+        player.wait_for(timeout=30_000)
+        page.wait_for_function(
+            "() => { const v = document.querySelector('video'); "
+            "return v && v.readyState >= 1 && v.videoWidth > 0; }",
+            timeout=45_000,
+        )
+        duration = player.evaluate("v => v.duration")
+        assert 11 <= duration <= 13, f"Durée MP4 H264 imprévue: {duration}"
+        print("FPI_REAL_BROWSER_VIDEO=DECODABLE_H264_12S", duration)
+        page.screenshot(path=str(OUT / "00-demo-video-sans-upload.png"), full_page=True)
+        page.get_by_role("button", name="Explorer l'analyse tactique").click()
+        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
+        sidebar.get_by_text("Démo technique", exact=True).click()
+        page.get_by_role("button", name="Revoir les actions Maroc–Portugal").click()
+        page.get_by_role("heading", name="Revoir les actions · Maroc – Portugal").wait_for(timeout=45_000)
+        assert page.locator('[data-testid="stException"]').count() == 0
+        page.get_by_role("button", name="Continuer : Analyse tactique").click()
+        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()
-        print("FPI_BROWSER_SMOKE=PASS, six pages including no-upload video, screenshots in", OUT)
+        print("FPI_BROWSER_SMOKE=PASS, coach actions and both video-demo callbacks, screenshots in", OUT)
 
 
 if __name__ == "__main__":
