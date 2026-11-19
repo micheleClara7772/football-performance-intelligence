@@ -19,16 +19,13 @@ from fpi.ui.video import render_video
 from fpi.ui.video_showcase import render_video_showcase
 from fpi.ui.formatting import team_label, localized_team_frame
 
-PAGES = ("Démo vidéo", "Tableau de bord", "Analyse tactique", "Assistant IA", "Séances", "Vidéo")
+PAGES = ("Le match", "Revoir les actions", "Analyse tactique", "Questions", "Séances", "Démo technique")
 
 
 def _banner() -> None:
     st.set_page_config(page_title="FPI · Football Performance Intelligence", page_icon="⚽", layout="wide")
     st.title("Football Performance Intelligence")
-    st.caption(
-        "Football assisté par les données · vidéo SoccerTrack v2 autorisée "
-        "et statistiques du match Maroc–Portugal 2022 (sources distinctes)."
-    )
+    st.caption("Maroc – Portugal 2022 · observer les actions, comprendre le match, préparer une séance")
 
 
 def _source_panel(metadata: dict | None) -> None:
@@ -55,10 +52,17 @@ def _import_panel() -> None:
 
 
 def _dashboard(match: dict | None, events: list[dict] | None) -> None:
-    st.header("Tableau de bord collectif")
+    st.header("Maroc 1 – 0 Portugal · Coupe du monde 2022")
     if not events or not match:
-        st.warning("Aucune donnée vérifiée en cache. Utilise « Importer depuis StatsBomb » dans la barre latérale.")
-        st.caption("Aucun nombre de tirs, de passes ou graphique n'est simulé.")
+        st.info("Les actions du match ne sont pas encore chargées.")
+        if st.button("Afficher les actions et statistiques du match", type="primary",
+                     key="fpi_load_from_home"):
+            with st.spinner("Chargement des actions réelles du match…"):
+                try:
+                    download_reference_match()
+                    st.rerun()
+                except (DataValidationError, DownloadError, OSError) as exc:
+                    st.error(f"Le chargement a échoué : {exc}")
         return
     home, away = (match[side][f"{side}_name"] for side in ("home_team", "away_team"))
     metrics = metrics_by_period(events, (home, away))
@@ -101,18 +105,18 @@ def main() -> None:
         st.error(f"Cache invalide : {exc}. Réimporte les données vérifiées pour le réparer.")
         match = events = metadata = None
     _source_panel(metadata)
-    if page == "Démo vidéo":
-        render_video_showcase(match, events)
-    elif page == "Tableau de bord":
+    if page == "Le match":
         _dashboard(match, events)
+    elif page == "Revoir les actions":
+        render_video(match, events)
     elif page == "Analyse tactique":
         render_tactical(match, events)
-    elif page == "Vidéo":
-        render_video()
-    elif page == "Assistant IA":
+    elif page == "Questions":
         render_assistant(match, events)
-    else:
+    elif page == "Séances":
         render_training(match, events)
+    else:
+        render_video_showcase(match, events)
 
     st.divider()
     next_name = PAGES[(stage + 1) % len(PAGES)]
@@ -123,7 +127,7 @@ def main() -> None:
         width="stretch",
     )
     st.caption(
-        "Parcours : démo vidéo réelle → chiffres du match → tactique → "
-        "assistant factuel → séance → outils vidéo avancés."
+        "Parcours : le match → revoir les actions → comprendre le jeu → "
+        "poser une question → préparer une séance. La démo technique reste facultative."
 
     )
