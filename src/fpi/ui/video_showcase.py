@@ -71,26 +71,36 @@ def _hero() -> None:
 </style>
 <div class="fpi-film-hero">
  <div class="fpi-film-kicker">FPI / Football Performance Intelligence / Vision</div>
- <div class="fpi-film-headline">Voir les joueurs. Conserver leurs trajectoires. Mesurer les erreurs.</div>
- <div class="fpi-film-sub">Une vraie séquence de football déjà traitée par ordinateur,
- des identifiants suivis dans le temps et une évaluation face aux annotations
- de référence. La démonstration démarre sans fichier à télécharger ni modèle à installer.</div>
+ <div class="fpi-film-headline">Comment FPI repère les joueurs dans une vidéo</div>
+ <div class="fpi-film-sub">Une preuve technique sur 12 secondes d\'un autre match, pour montrer la détection et le suivi.\n Ce n\'est pas une analyse du match Maroc–Portugal ni une recommandation tactique.</div>
 </div>
         """,
         unsafe_allow_html=True,
     )
 
 
+def _navigate_to(page: str) -> None:
+    """Called before Streamlit instantiates the sidebar radio on rerun."""
+    st.session_state["fpi_navigation"] = page
+
+
 def render_video_showcase(match: dict | None = None,
                           events: list[dict] | None = None) -> None:
     """Precomputed, reliable browser demo first; advanced processing elsewhere."""
+    st.header("Démonstration technique · suivi de joueurs")
+    st.info(
+        "Pourquoi cet extrait ? Il permet de vérifier que FPI voit des joueurs et "
+        "essaie de les suivre d'une image à l'autre. Ce match d'essai n'est PAS "
+        "Maroc–Portugal. Les numéros restent imparfaits et ne servent pas encore "
+        "à évaluer la performance d'une équipe."
+    )
     _hero()
     status, meta = st.columns([3, 1])
     with status:
-        st.subheader("01 — Joueurs détectés et suivis sur une vraie vidéo")
+        st.subheader("Des joueurs entourés et suivis pendant 12 secondes")
         st.caption(
-            "SoccerTrack v2 · match amateur de référence 117093 · extrait 12 secondes · "
-            "YOLOX + ByteTrack, à 5 images par seconde. Ce n'est pas Maroc–Portugal."
+            "Vidéo de test SoccerTrack, match n°117093, filmé avec une caméra panoramique. "
+            "Ce n'est pas Maroc–Portugal."
         )
     with meta:
         st.success("Démo prête sans upload" if video_is_ready()
@@ -120,14 +130,14 @@ def render_video_showcase(match: dict | None = None,
         if report:
             quality = report["mot_identity_benchmark"]
             first, second = st.columns(2)
-            first.metric("Joueurs · précision", f"{100*quality['box_precision']:.1f} %")
-            second.metric("Joueurs · rappel", f"{100*quality['box_recall']:.1f} %")
-            first.metric("Identité IDF1", f"{100*quality['idf1']:.1f} %")
-            second.metric("Changements d'ID", quality["id_switches"])
+            first.metric("Personnes correctement repérées", f"{100*quality['box_precision']:.1f} %")
+            second.metric("Joueurs retrouvés", f"{100*quality['box_recall']:.1f} %")
+            first.metric("Continuité du suivi", f"{100*quality['idf1']:.1f} %")
+            second.metric("Confusions de numéros", quality["id_switches"])
             st.caption(
                 f"{report['processed_frames']} images réellement analysées à "
                 f"{report['processed_fps']:g} images/s. Mesures vérifiées sur "
-                "1320 annotations indépendantes. L'IDF1 ne vaut que pour ce segment."
+                "1320 repères vérifiés manuellement. Ces pourcentages ne valent que pour cet extrait."
             )
         else:
             st.info(
@@ -141,20 +151,20 @@ def render_video_showcase(match: dict | None = None,
         )
 
     st.divider()
-    st.subheader("02 — Comprendre ce qui est calculé")
+    st.subheader("Comment lire cette démonstration ?")
     c1, c2, c3 = st.columns(3, gap="medium")
     with c1:
         st.markdown("**1. Observer**")
-        st.caption("YOLOX localise des personnes à partir des pixels de la vidéo.")
+        st.caption("Les cadres verts indiquent les personnes repérées à l’écran.")
     with c2:
         st.markdown("**2. Relier**")
-        st.caption("ByteTrack associe des détections rapprochées et propose des IDs temporaires.")
+        st.caption("Un numéro temporaire essaie de rester avec la même personne au fil des images.")
     with c3:
         st.markdown("**3. Vérifier**")
-        st.caption("Les identifiants et les boîtes sont comparés aux vraies annotations MOT.")
+        st.caption("Des annotations de référence permettent de mesurer les erreurs, sans masquer les échecs.")
 
     st.divider()
-    st.subheader("03 — Passer du film à l'analyse du match cible")
+    st.subheader("Pour étudier le vrai match Maroc–Portugal")
     a, b = st.columns([2, 1], gap="large")
     with a:
         st.markdown("**Maroc 1 – 0 Portugal · Coupe du monde 2022**")
@@ -169,16 +179,23 @@ def render_video_showcase(match: dict | None = None,
             y.metric("Tirs Maroc", "9")
             z.metric("Tirs Portugal", "12")
         else:
-            st.info("Les événements du match sont chargés depuis StatsBomb dans l'onglet Dashboard.")
+            st.info("Les actions du match sont accessibles dans « Le match », après chargement des données.")
     with b:
-        if st.button("Explorer l'analyse tactique →", type="primary",
-                     use_container_width=True, key="fpi_video_to_tactics"):
-            st.session_state["fpi_navigation"] = "Analyse tactique"
-            st.rerun()
-        if st.button("Voir les autres outils vidéo", use_container_width=True,
-                     key="fpi_video_to_advanced"):
-            st.session_state["fpi_navigation"] = "Vidéo"
-            st.rerun()
+        st.button(
+            "Explorer l'analyse tactique",
+            type="primary",
+            use_container_width=True,
+            key="fpi_video_to_tactics",
+            on_click=_navigate_to,
+            args=("Analyse tactique",),
+        )
+        st.button(
+            "Revoir les actions Maroc–Portugal",
+            use_container_width=True,
+            key="fpi_video_to_advanced",
+            on_click=_navigate_to,
+            args=("Revoir les actions",),
+        )
     st.caption(
         "© Atom Scott et contributeurs, SoccerTrack v2 — CC BY 4.0 ; "
         "clip original transformé par détection et annotations FPI. "
