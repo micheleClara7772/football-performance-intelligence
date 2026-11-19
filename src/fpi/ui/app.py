@@ -30,8 +30,9 @@ def _banner() -> None:
 
 def _source_panel(metadata: dict | None) -> None:
     st.sidebar.divider()
-    st.sidebar.caption("Source des données : [StatsBomb Open Data](https://github.com/hudl/open-data)")
-    st.sidebar.caption("Attribution StatsBomb obligatoire pour toute publication/partage ; droits de démonstration commerciale à confirmer.")
+    with st.sidebar.expander("D’où viennent les chiffres ?"):
+        st.caption("Les actions du match sont fournies par [StatsBomb Open Data](https://github.com/hudl/open-data). Ce ne sont pas des analyses automatiques des images.")
+        st.caption("Attribution nécessaire ; droits de réutilisation commerciale à vérifier.")
     if metadata:
         st.sidebar.success(f"Événements contrôlés : {metadata['validated_events']:,}")
         st.sidebar.caption(f"Chargement : {metadata['retrieved_utc']}")
@@ -39,8 +40,8 @@ def _source_panel(metadata: dict | None) -> None:
 
 def _import_panel() -> None:
     st.sidebar.subheader("Données du match")
-    st.sidebar.caption("L'import utilise une requête externe seulement après clic ; aucun téléchargement automatique.")
-    if st.sidebar.button("Importer depuis StatsBomb", type="primary", width="stretch"):
+    st.sidebar.caption("Charge une fois les actions pour activer toutes les analyses.")
+    if st.sidebar.button("Charger les actions du match", type="primary", width="stretch"):
         with st.sidebar.status("Téléchargement et validation…", expanded=False) as status:
             try:
                 match, events, _ = download_reference_match()
