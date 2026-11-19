@@ -94,7 +94,9 @@ def _go_to_next_page() -> None:
 
 def main() -> None:
     _banner()
-    page = st.sidebar.radio("Navigation", PAGES, index=0, key="fpi_navigation")
+    if st.session_state.get("fpi_navigation") not in (None, *PAGES):
+        st.session_state["fpi_navigation"] = PAGES[0]
+    page = st.sidebar.radio("Choisir une rubrique", PAGES, index=0, key="fpi_navigation")
     stage = PAGES.index(page)
     st.sidebar.caption(f"Parcours guidé · étape {stage + 1} / {len(PAGES)}")
     _import_panel()
