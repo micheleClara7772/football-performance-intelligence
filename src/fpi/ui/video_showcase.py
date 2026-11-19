@@ -72,7 +72,7 @@ def _hero() -> None:
 <div class="fpi-film-hero">
  <div class="fpi-film-kicker">FPI / Football Performance Intelligence / Vision</div>
  <div class="fpi-film-headline">Comment FPI repère les joueurs dans une vidéo</div>
- <div class="fpi-film-sub">Une preuve technique sur 12 secondes d\'un autre match, pour montrer la détection et le suivi.\n Ce n\'est pas une analyse du match Maroc–Portugal ni une recommandation tactique.</div>
+ <div class="fpi-film-sub">Une courte séquence issue d’un autre match, utilisée uniquement pour expliquer la détection et le suivi des joueurs. Elle ne représente pas une analyse de Maroc–Portugal.</div>
 </div>
         """,
         unsafe_allow_html=True,
