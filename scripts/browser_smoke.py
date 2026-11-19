@@ -44,13 +44,13 @@ def main() -> None:
 
         sidebar = page.locator('[data-testid="stSidebar"]')
         sidebar.get_by_text("Analyse tactique", exact=True).click()
-        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=90_000)
+        page.get_by_role("heading", name="Analyse tactique · ce que disent les actions").wait_for(timeout=90_000)
         page.get_by_text("Comparaison des mi-temps", exact=True).first.wait_for(timeout=60_000)
         assert page.locator('[data-testid="stPlotlyChart"]').count() >= 1
         page.screenshot(path=str(OUT / "02-analyse-tactique.png"), full_page=True)
         page.get_by_role("tab", name="Signaux avancés").click()
-        page.get_by_text("Signaux avancés sur la totalité du match").wait_for(timeout=45_000)
-        page.get_by_text("Passes progressives (proxy)").first.wait_for(timeout=45_000)
+        page.get_by_text("Ce qui a changé dans le jeu").wait_for(timeout=45_000)
+        page.get_by_text("Passes qui font avancer le jeu").first.wait_for(timeout=45_000)
         page.screenshot(path=str(OUT / "02d-signaux-avances.png"), full_page=True)
         page.get_by_role("tab", name="Annotations").click()
         page.get_by_text("Annotations d'événements vérifiés").wait_for(timeout=45_000)
@@ -115,7 +115,7 @@ def main() -> None:
         page.get_by_text("Retrouver les moments importants").wait_for(timeout=45_000)
         page.get_by_text("Actions trouvées").wait_for(timeout=45_000)
         page.get_by_role("button", name="Comprendre les différences entre les équipes").click()
-        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
+        page.get_by_role("heading", name="Analyse tactique · ce que disent les actions").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         sidebar.get_by_text("Démo technique", exact=True).click()
         page.get_by_role("heading", name="Démonstration technique · suivi de joueurs").wait_for(timeout=45_000)
@@ -131,13 +131,13 @@ def main() -> None:
         print("FPI_REAL_BROWSER_VIDEO=DECODABLE_H264_12S", duration)
         page.screenshot(path=str(OUT / "00-demo-video-sans-upload.png"), full_page=True)
         page.get_by_role("button", name="Explorer l'analyse tactique").click()
-        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
+        page.get_by_role("heading", name="Analyse tactique · ce que disent les actions").wait_for(timeout=45_000)
         sidebar.get_by_text("Démo technique", exact=True).click()
         page.get_by_role("button", name="Revoir les actions Maroc–Portugal").click()
         page.get_by_role("heading", name="Revoir les actions · Maroc – Portugal").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         page.get_by_role("button", name="Continuer : Analyse tactique").click()
-        page.get_by_role("heading", name="Analyse tactique · indicateurs observés").wait_for(timeout=45_000)
+        page.get_by_role("heading", name="Analyse tactique · ce que disent les actions").wait_for(timeout=45_000)
         assert page.locator('[data-testid="stException"]').count() == 0
         browser.close()
         print("FPI_BROWSER_SMOKE=PASS, coach actions and both video-demo callbacks, screenshots in", OUT)
