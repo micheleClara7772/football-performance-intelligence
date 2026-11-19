@@ -15,7 +15,7 @@ def render_assistant(match: dict | None, events: list[dict] | None) -> None:
         "quand il ne dispose pas de l'information."
     )
     if not match or not events:
-        st.warning("Importer les événements StatsBomb réels pour poser tes questions.")
+        st.warning("Charge les actions du match depuis la colonne de gauche pour poser tes questions.")
         return
 
     teams = (match["home_team"]["home_team_name"], match["away_team"]["away_team_name"])
