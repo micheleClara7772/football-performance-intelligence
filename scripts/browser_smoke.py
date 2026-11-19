@@ -111,6 +111,7 @@ def main() -> None:
         page.get_by_role("link", name="Regarder ce résumé sur YouTube (solution fiable)").wait_for(timeout=60_000)
         assert page.locator('iframe[src*="plus.fifa.com"]').count() == 0
         assert page.locator('input[type="file"]').count() == 0, "L'écran du coach ne demande pas d'upload"
+        page.screenshot(path=str(OUT / "05-video-liens-officiels.png"), full_page=True)
         page.get_by_role("tab", name="Explorer les actions").click()
         page.get_by_text("Retrouver les moments importants").wait_for(timeout=45_000)
         page.get_by_text("Actions trouvées").wait_for(timeout=45_000)
