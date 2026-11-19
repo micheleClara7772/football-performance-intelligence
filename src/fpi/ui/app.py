@@ -15,7 +15,7 @@ from fpi.metrics.collective import metrics_by_period
 from fpi.ui.tactical import render_tactical
 from fpi.ui.assistant import render_assistant
 from fpi.ui.training import render_training
-from fpi.ui.video import render_video
+from fpi.ui.match_video import render_match_video as render_video
 from fpi.ui.video_showcase import render_video_showcase
 from fpi.ui.formatting import team_label, localized_team_frame
 
