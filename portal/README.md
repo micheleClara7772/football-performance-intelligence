@@ -27,3 +27,9 @@ Fonction Node sur Vercel, ressources statiques dans public, état en Vercel Blob
 Configurer BLOB_READ_WRITE_TOKEN avec le projet Blob privé. Pour une installation vierge, fournir uniquement le SHA-256 d’un code aléatoire dans FPI_BOOTSTRAP_HASH et remettre ce code en privé à l’administrateur. Le code initial ne fonctionne que lorsque le magasin est vide. Les secrets ne sont pas stockés dans Git.
 
 Dans portal, lancer npm ci, npm test, node --check public/app.js et python3 scripts/check_evidence.py. Les tests couvrent les deux modes, les deux équipes, les deux scénarios, les permissions, le conflit de version, le rejet et la conservation du publié. Le contrôle direct sur l’URL de production a confirmé le refus du brouillon par les routes de consultation, de recherche et de publication, puis la visibilité d’une seule action retenue après publication.
+
+### Recette du 21 novembre 2026, heure de Paris
+
+Le parcours a également été exécuté sur le site en production avec deux navigateurs Chromium séparés. Le staff a lancé les transitions du Maroc, retenu et annoté une action, validé puis publié. Le coach a ouvert le dossier, comparé les pertes entre mi-temps et téléchargé un JSON contenant uniquement l’action retenue. Les vues Staff et Entraîneur ont été contrôlées à 375, 768, 1024 et 1440 pixels avec vérification de la largeur et captures dans docs/recette. Le rejeu par requêtes API a testé séparément la progression du Portugal et le maintien du publié pendant une correction. Les dossiers de recette sont archivés en fin de test.
+
+Le socle gratuit de démonstration utilise une seule rencontre et un magasin Blob privé. La base PostgreSQL gratuite préparée sur Render pendant la vérification d’hébergement reste vide et indépendante de l’application. La conformité WCAG complète et la montée en charge ne sont pas certifiées.

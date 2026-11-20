@@ -38,12 +38,18 @@ function render(){
  html+=pitch(items);
  if(d.edit&&items.length){const counts=Object.entries(items.reduce((a,e)=>{const k=side(e.y);a[k]=(a[k]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]);html+='<p class="result"><b>À examiner</b> · '+counts[0][1]+' des '+items.length+' actions sélectionnées commencent dans la zone « '+counts[0][0]+' ». Vérifiez les situations de cette zone avant de retenir une observation.</p>'}
  if(d.validation)html+='<p>Validé par '+esc(d.validation.author)+' · '+new Date(d.validation.date).toLocaleString('fr-FR')+'</p>';
+ if(d.edit&&home.role==='Administrateur')html+=btn('Archiver le dossier','archive',true);
  if(d.edit){html+='<p>'+d.items.filter(e=>e.decision==='Retenue').length+' observation(s) retenue(s) pour publication.</p><div class="row">'+(d.status==='En revue'?btn('Valider les observations retenues','validate')+btn('Rejeter le dossier','reject',true):d.status==='Validée'?btn('Publier pour l’entraîneur','publish')+btn('Reprendre la revue','review',true):btn(d.status==='Publiée'?'Préparer une nouvelle version':'Ouvrir la revue','review'))+'</div>'}
  else html+=btn('Exporter le dossier JSON','export');
  html+='</section><section class="assistant"><h2>Interroger les actions</h2><form id="ask"><label>Recherche factuelle dans ce dossier<input name="q" maxlength="300" placeholder="Compare les entrées dans le dernier tiers" required></label><button>Rechercher</button></form><p id="answer"></p></section><section><h2>Preuves événementielles</h2><div class="filters"><label>Mi-temps<select id="period"><option value="">Les deux</option>'+opt(['1','2'])+'</select></label><label>Zone de départ<select id="zone"><option value="">Tout le terrain</option>'+opt(['Gauche','Axe','Droite'])+'</select></label>'+btn('Réinitialiser','reset',true)+'</div><div>'+items.slice(page*12,page*12+12).map(evidence).join('')+(items.length?'':'Aucune action dans cette sélection.')+'</div><div class="row">'+(page?btn('Précédent','prev',true):'')+(items.length>(page+1)*12?btn('Suivant','next',true):'')+'</div></section><section><h2>Revoir le match</h2><p>Replay externe. Les horodatages ci-dessus correspondent aux événements de match. Le suivi vidéo intégral reste expérimental.</p><a class="link" target="_blank" rel="noreferrer" href="https://www.plus.fifa.com/it/content/marocco-portogallo-quarti-di-finale-coppa-del-mondo-fifa-qatar-2022-match-completo/5f1b5797-25d0-4e10-b723-5072b470bae8">Ouvrir le replay FIFA+</a></section>';
  app.innerHTML=html;document.querySelector('#period').value=period;document.querySelector('#zone').value=zone;
 }
-function listen(type,fn){document.addEventListener(type,async ev=>{try{notice.textContent='';await fn(ev)}catch(e){notice.textContent=e.message;if(e.status===401)auth()}})}
+function listen(type,fn){document.addEventListener(type,async ev=>{
+ const busy=type==='submit'||(type==='click'&&ev.target.closest('[data-action]'));
+ if(busy){app.inert=true;nav.inert=true;app.setAttribute('aria-busy','true')}
+ try{notice.textContent='';await fn(ev)}catch(e){notice.textContent=e.message;if(e.status===401)auth()}
+ finally{if(busy){app.inert=false;nav.inert=false;app.removeAttribute('aria-busy')}}
+})}
 listen('change',ev=>{if(ev.target.id==='period'||ev.target.id==='zone'){period=document.querySelector('#period').value;zone=document.querySelector('#zone').value;page=0;render()}});
 listen('click',async ev=>{
  const a=ev.target.closest('[data-action]')?.dataset.action;if(!a)return;
@@ -57,6 +63,7 @@ listen('click',async ev=>{
  if(['review','validate','reject','publish'].includes(action)){await api(action,{id:d.id,version:d.version});await open(d.id,false,false)}
  if(action==='next'||action==='prev'){page+=action==='next'?1:-1;render()}
  if(action==='reset'){ids=null;page=0;zone='';period='';render()}
+ if(action==='archive'&&confirm('Archiver le dossier et le retirer des espaces actifs ?')){await api('archive',{id:d.id,version:d.version});await dashboard()}
  if(action==='export'){const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));link.download='FPI-Maroc-Portugal.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),2000)}
 });
 listen('submit',async ev=>{

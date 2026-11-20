@@ -29,12 +29,18 @@ function openSession(state,user){
 }
 function answer(input,items){
   const q=normalize(input);
+  const words=q.match(/[a-z0-9]+/g)||[];
+  const known=/^(retrouve|rechercher?|cherche|trouve|montre|affiche|compare[rz]?|combien|quels?|quelles?|quelle|ou|y|a|t|il|les?|la|l|d|du|de|des|un|une|en|au|aux|dans|dans|par|sur|ce|cette|ces|celles|sont|ont|est|ete|entre|et|aussi|apres|avec|pour|moi|nous|toutes?|tous|deux|1|2|1re|2e|premiere|seconde|deuxieme|mi|temps|periodes?|entrees?|dernier|tiers|renversements?|changements?|cotes?|droite?s?|gauche?s?|axe|pertes?|balle|ballon|transitions?|passes?|conduites?|progressions?|progressives?|offensives?|actions?|situations?|observations?|correspondent|match|dossier|selection|nombre|total)$/;
+  const clarification={message:'Précisez une action (perte, passe, conduite, renversement, entrée), une zone ou une mi-temps dans ce dossier.',ids:[]};
+  if(words.some(word=>!known.test(word)))return clarification;
   const tags=[[/entree/,'Entrée dans le dernier tiers'],[/renversement|changement de cote/,'Renversement'],[/perte|transition/,'Perte candidate'],[/passe/,'Passe progressive'],[/conduite/,'Conduite progressive']];
   const keys=tags.filter(([re])=>re.test(q)).map(t=>t[1]);
   const compare=/compar|mi.temps|periode/.test(q);
   const right=/droit/.test(q), left=/gauche/.test(q);
-  if((right&&left)||(!keys.length&&!compare&&!right&&!left&&!/progression|action|situation|observation/.test(q))||/pourquoi|pressing|xg|score|brouillon|vitesse|butteur|buteur|distance|bless|possession|hors.jeu/.test(q)) return {message:'Cette question dépasse les preuves disponibles. Précisez une action, un côté ou une mi-temps.',ids:[]};
+  if((right&&left)||(!keys.length&&!compare&&!right&&!left&&!/axe/.test(q)&&!/progression|action|situation|observation/.test(q))||/pourquoi|pressing|xg|score|brouillon|vitesse|butteur|buteur|distance|bless|possession|hors.jeu/.test(q)) return {message:'Cette question dépasse les preuves disponibles. Précisez une action, un côté ou une mi-temps.',ids:[]};
   let selected=items.filter(e=>(!keys.length||keys.some(k=>e.tags.includes(k)))&&(!right||e.y>=160/3)&&(!left||e.y<80/3));
+  if(/progression/.test(q)&&!keys.length)selected=selected.filter(e=>e.tags.some(t=>t.endsWith('progressive')));
+  if(/axe/.test(q))selected=selected.filter(e=>e.y>=80/3&&e.y<160/3);
   if(/dernier tiers/.test(q)&&!keys.includes('Entrée dans le dernier tiers'))selected=selected.filter(e=>e.x>=80);
   if(/premiere|1re/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===1);
   if(/seconde|deuxieme|2e/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===2);
@@ -82,7 +88,7 @@ export function serve(state,body,sessionKey,bootstrapHash){
     target.disabled=true;state.sessions=state.sessions.filter(s=>s.user!==target.id);return result({},true);
   }
   if(action==='home')return result({name:user.name,role:user.role,modes,scenarios,
-    dossiers:state.dossiers.filter(d=>(staff&&mine(d))||d.published).map(d=>({id:d.id,team:d.team,mode:d.mode,scenario:d.scenario,status:staff&&mine(d)?d.status:'Publié',published:!!d.published})),
+    dossiers:state.dossiers.filter(d=>!d.archived&&((staff&&mine(d))||d.published)).map(d=>({id:d.id,team:d.team,mode:d.mode,scenario:d.scenario,status:staff&&mine(d)?d.status:'Publié',published:!!d.published})),
     users:admin?state.users.map(({id,name,role,disabled})=>({id,name,role,disabled})):[]});
   if(action==='create'){
     requireThat(staff&&modes.includes(body.mode)&&scenarios.includes(body.scenario)&&['Maroc','Portugal'].includes(body.team));
@@ -92,7 +98,7 @@ export function serve(state,body,sessionKey,bootstrapHash){
     state.dossiers.push(d);return result({id:d.id},true);
   }
   const d=state.dossiers.find(d=>d.id===body.id);
-  requireThat(d,'Dossier inaccessible.',404);
+  requireThat(d&&!d.archived,'Dossier inaccessible.',404);
   const edit=staff&&mine(d)&&body.view!=='coach';
   requireThat(edit||d.published,'Dossier inaccessible.',404);
   const record=edit?d:d.published;
@@ -100,7 +106,8 @@ export function serve(state,body,sessionKey,bootstrapHash){
   if(action==='ask'){requireThat(safe(body.q,300),'Question invalide.',400);return result(answer(body.q,record.items))}
   requireThat(edit);
   requireThat(d.version===body.version,'Ce dossier a changé. Rouvrez-le.',409);
-  if(action==='review'&&['Proposée','Publiée','Validée','Rejetée'].includes(d.status)){d.status='En revue';delete d.validation}
+  if(action==='archive'&&admin){d.archived=true}
+  else if(action==='review'&&['Proposée','Publiée','Validée','Rejetée'].includes(d.status)){d.status='En revue';delete d.validation}
   else if(action==='reject'&&d.status==='En revue'){d.status='Rejetée'}
   else if(action==='mark'&&d.status==='En revue'){
     const e=d.items.find(e=>e.id===body.event);
