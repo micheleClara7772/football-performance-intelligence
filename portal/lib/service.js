@@ -88,7 +88,7 @@ export function serve(state,body,sessionKey,bootstrapHash){
     target.disabled=true;state.sessions=state.sessions.filter(s=>s.user!==target.id);return result({},true);
   }
   if(action==='home')return result({name:user.name,role:user.role,modes,scenarios,
-    dossiers:state.dossiers.filter(d=>!d.archived&&((staff&&mine(d))||d.published)).map(d=>({id:d.id,team:d.team,mode:d.mode,scenario:d.scenario,status:staff&&mine(d)?d.status:'Publié',published:!!d.published})),
+    dossiers:state.dossiers.filter(d=>!d.archived&&((staff&&mine(d))||d.published)).map(d=>({id:d.id,author:state.users.find(u=>u.id===d.owner)?.name,team:d.team,mode:d.mode,scenario:d.scenario,status:staff&&mine(d)?d.status:'Publié',published:!!d.published})),
     users:admin?state.users.map(({id,name,role,disabled})=>({id,name,role,disabled})):[]});
   if(action==='create'){
     requireThat(staff&&modes.includes(body.mode)&&scenarios.includes(body.scenario)&&['Maroc','Portugal'].includes(body.team));
