@@ -27,3 +27,11 @@ Les liens de résumé sont externes. Pour associer une source HTTPS vidéo direc
 Fonction Node, Vercel Blob privé, écritures conditionnelles avec ETag. La racine du projet est portal. Le projet est déployé à partir des fichiers de ce dossier. Le jeton de stockage et le condensat SHA-256 du code initial sont des variables de projet. Les codes d’invitation individuels expirent après 24 heures ; les sessions durent huit heures. Les rôles et accès directs sont contrôlés côté serveur.
 
 Vérifications : npm ci, npm test, node --check public/app.js et python scripts/check_evidence.py. Pour tester l’interface avec deux comptes de recette, utiliser scripts/browser_smoke.py avec les identifiants dédiés et l’URL dans les variables FPI_TEST_URL, FPI_STAFF_NAME, FPI_STAFF_PASSWORD, FPI_COACH_NAME, FPI_COACH_PASSWORD. Ce test crée et publie un dossier.
+
+## Lecture par possession
+
+La chronologie regroupe les actions par possession StatsBomb et par période. Les étapes du terrain suivent les événements offensifs horodatés et localisés de l’équipe en possession. L’issue distingue un tir dans la même possession, la dernière action documentée et l’équipe à laquelle appartient la possession suivante. Le score avant l’action respecte l’ordre des événements et exclut les tirs au but. Les annotations du staff restent associées à leur événement. Les possessions illustrant une sélection sont figées avec la publication. Les publications historiques conservent leurs anciennes preuves jusqu’à une nouvelle revue.
+
+Le menu de comparaison propose une autre possession de la même équipe, dans la même bande latérale et avec un critère de sélection commun. Sur mobile, les deux terrains sont consultables par balayage horizontal. La fiche de briefing reproduit jusqu’aux cinq premières étapes de l’action choisie. Le PDF de recette docs/recette/briefing-maroc.pdf illustre l’entrée marocaine à 54:57.
+
+Les boutons Supprimer sont accessibles depuis la liste ou le dossier pour son auteur et les administrateurs. La confirmation précise l’effet sur le lien d’une publication. Les dossiers archivés peuvent également être supprimés par ces rôles. Les tests de suppression utilisent des dossiers temporaires.

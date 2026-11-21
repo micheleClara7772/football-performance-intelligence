@@ -1,4 +1,5 @@
 """Prepare evidence from StatsBomb Open Data match 3869486, in provider order."""
+from possessions import enrich
 import math
 import gzip
 import json
@@ -69,6 +70,8 @@ if __name__ == "__main__":
         ends = {e["period"]:e["minute"]*60+e["second"] for e in events if e["type"]["name"]=="Half End" and e["period"]<=4}
         teams = [TEAMS[meta[k][k+"_name"]] for k in ("home_team","away_team")]
         penalties = [sum(e["period"]==5 and TEAMS[e["team"]["name"]]==t and e.get("shot",{}).get("outcome",{}).get("name")=="Goal" for e in events) for t in teams]
-        output.append(dict(id=match_id,teams=teams,score=[meta["home_score"],meta["away_score"]],date=meta["match_date"],stage={"Quarter-finals":"Quart de finale","Final":"Finale"}[meta["competition_stage"]["name"]],penalties=penalties,ends=ends,count=len(events),items=candidates(events,ends)))
+        rows=candidates(events,ends)
+        phases,goals=enrich(events,rows,[meta[k][k+"_name"] for k in ("home_team","away_team")])
+        output.append(dict(phases=phases,goals=goals,id=match_id,teams=teams,score=[meta["home_score"],meta["away_score"]],date=meta["match_date"],stage={"Quarter-finals":"Quart de finale","Final":"Finale"}[meta["competition_stage"]["name"]],penalties=penalties,ends=ends,count=len(events),items=rows))
     raw=json.dumps(output,ensure_ascii=False,separators=(",",":")).encode()
     (ROOT/"lib/catalog.json.gz").write_bytes(gzip.compress(raw,mtime=0))

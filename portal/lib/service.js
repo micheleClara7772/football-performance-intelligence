@@ -3,15 +3,16 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { join } from 'node:path';
 const catalog = JSON.parse(gunzipSync(readFileSync(join(process.cwd(),'lib/catalog.json.gz'))));
-const matches = catalog.map(({items,...metadata})=>metadata);
+const matches = catalog.map(({items,phases,...metadata})=>metadata);
 const indexed = new Map(catalog.flatMap(m=>m.items.map(e=>[e.id,e])));
 const matchOf = d=>catalog.find(m=>m.id===(d.matchId||'3869486'));
 const fullRange = m=>({fromPeriod:1,from:0,toPeriod:Object.keys(m.ends).length,to:Object.values(m.ends).at(-1)});
-function expand(record){
+function expand(record,staff=false){
   return record.items.map(e=>{
     const source=indexed.get(e.id);
     if(!e.clock)return {...source,...e};
     // Historical snapshots predate observation windows. Preserve the evidence staff published.
+    if(staff)return {...source,...e};
     return {start:source?.start,finish:source?.finish,kind:source?.kind,...e};
   });
 }
@@ -50,7 +51,7 @@ function openSession(state,user){
   state.sessions.push({user:user.id,key:hash(raw),expires:Date.now()+8*3600000});
   return {cookie:raw,body:{success:true},write:true};
 }
-function answer(input,items,context={}){
+function answer(input,items,context={},phases={},range={fromPeriod:1,toPeriod:2}){
   let q=normalize(input);
   if(/\bcelles?\b/.test(q)&&Array.isArray(context?.ids)){
     const previous=new Set(context.ids);items=items.filter(e=>previous.has(e.id));
@@ -66,6 +67,21 @@ function answer(input,items,context={}){
   if(/autres/.test(q)&&anchor)items=items.filter(e=>e.id!==anchor.id);
   if(anchor&&/de ce type|cette passe/.test(normalize(input))){
     items=items.filter(e=>anchor.tags.every(t=>e.tags.includes(t)));
+  }
+  const phaseFor=e=>phases[e.phase];
+  const after=e=>{const steps=phaseFor(e)?.steps||[];const i=steps.findIndex(s=>s.id===e.id);return i<0?[]:steps.slice(i+1)};
+  if(/a qui|qui recoit|destinataire/.test(q)){
+    const passes=items.filter(e=>e.recipient);
+    const counts=new Map();for(const e of passes)counts.set(e.recipient,(counts.get(e.recipient)||0)+1);
+    return {message:passes.length?'Destinataires dans cette sélection : '+[...counts].map(([n,c])=>n+' ('+c+')').join(', ')+'.':'Aucun destinataire documenté dans cette sélection.',ids:passes.map(e=>e.id)};
+  }
+  if(/entree/.test(q)&&/tir/.test(q)){
+    const hits=items.filter(e=>e.tags.includes('Entrée dans le dernier tiers')&&after(e).some(s=>s.kind==='Tir'));
+    return {message:hits.length+' entrée(s) suivie(s) d’un tir dans la même possession. '+hits.map(e=>e.clock+' · '+e.player).join(' ; '),ids:hits.map(e=>e.id)};
+  }
+  if(/ensuite|se termine|apres la reception|suite de/.test(q)&&anchor&&phaseFor(anchor)){
+    const steps=after(anchor);
+    return {message:(steps.slice(0,4).map(s=>s.kind+' · '+s.player+(s.result?' ('+s.result+')':'')).join(' → ')||'Aucune étape offensive suivante enregistrée')+'. '+phaseFor(anchor).outcome,ids:[anchor.id]};
   }
   const previousKind=context?.kind||anchor?.kind;
   const kind=/passe/.test(q)?'Passe':/conduite/.test(q)?'Conduite':follow?previousKind:null;
@@ -86,7 +102,9 @@ function answer(input,items,context={}){
   if(/dernier tiers/.test(q)&&!keys.includes('Entrée dans le dernier tiers'))selected=selected.filter(e=>e.x>=80);
   if(/premiere|1re/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===1);
   if(/seconde|deuxieme|2e/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===2);
-  return {message:selected.length+' action(s) dans la sélection. Première mi-temps : '+selected.filter(e=>e.p===1).length+' · Seconde : '+selected.filter(e=>e.p===2).length+'.',ids:selected.map(e=>e.id),context:{player:player||null,kind:kind||null,event:anchor?.id,ids:selected.map(e=>e.id)}};
+  const labels=['','Première mi-temps','Seconde mi-temps','Prolongation 1','Prolongation 2'];
+  const counts=labels.slice(range.fromPeriod,range.toPeriod+1).map((label,i)=>label+' : '+selected.filter(e=>e.p===range.fromPeriod+i).length);
+  return {message:selected.length+' action(s) dans la sélection. '+counts.join(' · ')+'.',ids:selected.map(e=>e.id),context:{player:player||null,kind:kind||null,event:anchor?.id,ids:selected.map(e=>e.id)}};
 }
 export function serve(state,body,sessionKey,bootstrapHash){
   const {action}=body;
@@ -132,8 +150,9 @@ export function serve(state,body,sessionKey,bootstrapHash){
   if(action==='home')return result({name:user.name,role:user.role,modes,scenarios,matches,
     dossiers:state.dossiers.filter(d=>!d.archived&&((staff&&mine(d))||d.published)).map(d=>{
       const owned=staff&&mine(d),r=owned?d:d.published;
-      return {id:d.id,range:d.range||fullRange(matchOf(d)),matchId:matchOf(d).id,title:r.title||d.team+' · '+d.scenario,summary:r.summary||'',date:r.publication?.date||d.published?.publication?.date||r.created||r.validation?.date||d.history?.[0]?.date,author:state.users.find(u=>u.id===d.owner)?.name,team:d.team,mode:d.mode,scenario:d.scenario,status:owned?d.status:'Publié',published:!!d.published}
+      return {id:d.id,canDelete:owned,version:owned?d.version:undefined,range:d.range||fullRange(matchOf(d)),matchId:matchOf(d).id,title:r.title||d.team+' · '+d.scenario,summary:r.summary||'',date:r.publication?.date||d.published?.publication?.date||r.created||r.validation?.date||d.history?.[0]?.date,author:state.users.find(u=>u.id===d.owner)?.name,team:d.team,mode:d.mode,scenario:d.scenario,status:owned?d.status:'Publié',published:!!d.published}
     }),
+    archives:staff?state.dossiers.filter(d=>d.archived&&mine(d)).map(d=>({id:d.id,title:d.title||d.team+' · '+d.scenario,version:d.version,published:!!d.published})):[],
     users:admin?state.users.map(({id,name,role,disabled})=>({id,name,role,disabled})):[]});
   if(action==='create'){
     const m=catalog.find(m=>m.id===(body.matchId||matches[0].id));
@@ -146,15 +165,18 @@ export function serve(state,body,sessionKey,bootstrapHash){
     state.dossiers.push(d);return result({id:d.id},true);
   }
   const d=state.dossiers.find(d=>d.id===body.id);
-  requireThat(d&&!d.archived,'Dossier inaccessible.',404);
+  requireThat(d&&(!d.archived||(action==='delete'&&staff&&mine(d))),'Dossier inaccessible.',404);
   const edit=staff&&mine(d)&&body.view!=='coach';
   requireThat(edit||d.published,'Dossier inaccessible.',404);
   const record=edit?d:d.published;
-  if(action==='detail')return result({id:d.id,matchId:matchOf(d).id,range:d.range||fullRange(matchOf(d)),team:d.team,mode:d.mode,scenario:d.scenario,status:edit?d.status:'Publié',edit,version:record.version,items:expand(record),title:record.title||d.team+' · '+d.scenario,summary:record.summary||'',discussion:record.discussion||'',includeTotal:!!record.includeTotal,total:edit?d.items.length:record.total,published:!!d.published,thirdSeconds:edit?d.thirdSeconds:undefined,validation:record.validation,publication:record.publication});
-  if(action==='ask'){requireThat(safe(body.q,300),'Question invalide.',400);return result(answer(body.q,expand(record).filter(e=>!body.preview||e.decision==='Retenue'),body.context))}
+  const items=expand(record,edit);
+  const match=matchOf(d),range=d.range||fullRange(match);
+  const phases=edit?Object.fromEntries([...new Set(items.map(e=>e.phase))].filter(k=>match.phases[k]).map(k=>[k,match.phases[k]])):record.phases||{};
+  if(action==='detail')return result({id:d.id,matchId:matchOf(d).id,range:d.range||fullRange(matchOf(d)),team:d.team,mode:d.mode,scenario:d.scenario,status:edit?d.status:'Publié',edit,version:record.version,items,phases,title:record.title||d.team+' · '+d.scenario,summary:record.summary||'',discussion:record.discussion||'',includeTotal:!!record.includeTotal,total:edit?d.items.length:record.total,published:!!d.published,thirdSeconds:edit?d.thirdSeconds:undefined,validation:record.validation,publication:record.publication});
+  if(action==='ask'){requireThat(safe(body.q,300),'Question invalide.',400);return result(answer(body.q,items.filter(e=>!body.preview||e.decision==='Retenue'),body.context,phases,range))}
   requireThat(edit);
   requireThat(d.version===body.version,'Ce dossier a changé. Rouvrez-le.',409);
-  if(action==='delete'&&!d.published){state.dossiers=state.dossiers.filter(x=>x!==d);return result({},true)}
+  if(action==='delete'&&(!d.published||body.confirmPublished===true)){state.dossiers=state.dossiers.filter(x=>x!==d);return result({},true)}
   if(action==='archive'&&d.published){d.archived=true}
   else if(action==='metadata'&&d.status==='En revue'){
     requireThat(safe(body.title?.trim(),120)&&typeof body.summary==='string'&&body.summary.length<=1500&&typeof body.discussion==='string'&&body.discussion.length<=500,'Vérifiez le titre et les champs du briefing.',400);
@@ -184,7 +206,8 @@ export function serve(state,body,sessionKey,bootstrapHash){
   }else if(action==='validate'&&d.status==='En revue'&&d.items.some(e=>e.decision==='Retenue')){
     d.validation={author:user.name,date:now()};d.status='Validée';
   }else if(action==='publish'&&d.status==='Validée'){
-    d.status='Publiée';d.published={title:d.title,summary:d.summary,discussion:d.discussion,includeTotal:d.includeTotal,total:d.includeTotal?d.items.length:undefined,version:d.version+1,validation:{...d.validation},publication:{author:user.name,date:now()},items:structuredClone(expand(d).filter(e=>e.decision==='Retenue'))};
+    const kept=items.filter(e=>e.decision==='Retenue');
+    d.status='Publiée';d.published={phases:Object.fromEntries(kept.filter(e=>phases[e.phase]).map(e=>[e.phase,phases[e.phase]])),title:d.title,summary:d.summary,discussion:d.discussion,includeTotal:d.includeTotal,total:d.includeTotal?d.items.length:undefined,version:d.version+1,validation:{...d.validation},publication:{author:user.name,date:now()},items:structuredClone(kept)};
   }else requireThat(false,'Transition impossible. Retenez au moins une observation avant validation.',400);
   d.version++;d.history.push({action,author:user.name,date:now(),version:d.version,event:body.event});return result({},true);
 }
