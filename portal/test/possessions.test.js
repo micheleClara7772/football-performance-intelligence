@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {serve,modes,scenarios} from '../lib/service.js';
+test('Possessions marocaines, périodes françaises, droits et suppression',()=>{
+ const state={users:[],sessions:[],dossiers:[]},hash=createHash('sha256').update('qa').digest('hex');
+ const login=code=>serve(state,{action:'activate',code,password:'test-password-321'},null,hash).cookie;
+ const admin=login('qa'),call=(action,body={},key=admin)=>serve(state,{action,...body},key).body;
+ const coach=login(call('invite',{name:'Coach',role:'Entraîneur'}).code);
+ const create=(team,matchId,range)=>call('create',{team,matchId,scenario:scenarios[0],mode:modes[1],range}).id;
+ const id=create('Maroc','3869486');const detail=()=>call('detail',{id});
+ const ask=q=>call('ask',{id,q});
+ const rec=detail(),early=rec.items.find(e=>e.clock==='05:12'),late=rec.items.find(e=>e.clock==='54:57');
+ assert.equal(early.recipient,'Yahia Attiyat allah');assert.equal(late.recipient,'Youssef En-Nesyri');
+ assert.ok(ask('À qui Amallah passe-t-il le ballon ?').message.includes('Yahia Attiyat allah'));
+ const ids=ask('Quelles entrées dans le dernier tiers débouchent sur un tir ?').ids;
+ assert.ok(ids.includes(late.id));assert.ok(!ids.includes(early.id));
+ const portugal=call('detail',{id:create('Portugal','3869486')});assert.equal(portugal.items.length,150);assert.equal(Object.keys(portugal.phases).length,66);
+ const fr=create('France','3869685');
+ assert.match(call('ask',{id:fr,q:'Compare les périodes'}).message,/128.*45.*65.*12.*6/);
+ const extra=create('France','3869685',{fromPeriod:3,from:5400,toPeriod:4,to:7447});
+ assert.match(call('ask',{id:extra,q:'Compare les périodes'}).message,/18.*Prolongation 1 : 12.*Prolongation 2 : 6/);
+ const change=(action,body={})=>call(action,{id,version:detail().version,...body});
+ change('review');change('mark',{event:late.id,decision:'Retenue',note:'Une remise précède le tir.'});change('validate');change('publish');
+ const pub=call('detail',{id},coach);assert.deepEqual(Object.keys(pub.phases),[late.phase]);
+ assert.throws(()=>call('delete',{id,confirmPublished:true,version:detail().version},coach));
+ assert.throws(()=>change('delete'));change('delete',{confirmPublished:true});assert.throws(()=>call('detail',{id},coach));
+});

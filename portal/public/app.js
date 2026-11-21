@@ -36,7 +36,7 @@ async function dashboard(){
  nav.innerHTML=btn('Mes dossiers','home',true)+btn('Déconnexion','logout',true);
  const staff=home.role!=='Entraîneur';
  const list=home.dossiers.filter(x=>!activeMatch||x.matchId===activeMatch).reverse();
- app.innerHTML='<section class="banner"><small>'+esc(home.role)+' / '+esc(home.name)+'</small><h1>'+(staff?'Atelier tactique':'Briefings de match')+'</h1><p>'+(staff?'Préparer, illustrer et transmettre une lecture du jeu.':'Les observations et situations retenues par votre staff.')+'</p></section><div class="sectionhead"><h2>Bibliothèque de matchs</h2>'+ (activeMatch?btn('Tous les matchs','all',true):'')+'</div><div class="grid">'+home.matches.map(matchCard).join('')+'</div><div class="sectionhead"><h2>'+(staff?'Dossiers tactiques':'Publications du staff')+'</h2>'+(staff?btn('＋ Créer un dossier','new'):'')+'</div><div class="grid">'+(list.map(x=>'<article class="card"><small>'+esc(matchName(matchBy(x.matchId)))+' · '+esc(x.status)+'</small><h3>'+esc(x.title)+'</h3><p>'+esc(x.summary||x.mode)+'</p><small>'+esc(x.author)+' · '+esc(date(x.date))+'<br>'+span(x.range)+'</small><div class="row">'+btn('Ouvrir le dossier','open:'+x.id)+(x.published&&staff?btn('Vue entraîneur','coach:'+x.id,true):'')+'</div></article>').join('')||'<p>Aucun dossier pour cette sélection.</p>')+'</div>'+adminPanel();
+ app.innerHTML='<section class="banner"><small>'+esc(home.role)+' / '+esc(home.name)+'</small><h1>'+(staff?'Atelier tactique':'Briefings de match')+'</h1><p>'+(staff?'Préparer, illustrer et transmettre une lecture du jeu.':'Les observations et situations retenues par votre staff.')+'</p></section><div class="sectionhead"><h2>Bibliothèque de matchs</h2>'+ (activeMatch?btn('Tous les matchs','all',true):'')+'</div><div class="grid">'+home.matches.map(matchCard).join('')+'</div><div class="sectionhead"><h2>'+(staff?'Dossiers tactiques':'Publications du staff')+'</h2>'+(staff?btn('＋ Créer un dossier','new'):'')+'</div><div class="grid">'+(list.map(x=>'<article class="card"><small>'+esc(matchName(matchBy(x.matchId)))+' · '+esc(x.status)+'</small><h3>'+esc(x.title)+'</h3><p>'+esc(x.summary||x.mode)+'</p><small>'+esc(x.author)+' · '+esc(date(x.date))+'<br>'+span(x.range)+'</small><div class="row">'+btn('Ouvrir le dossier','open:'+x.id)+(x.canDelete?btn('Supprimer','remove:'+x.id,true):'')+(x.published&&staff?btn('Vue entraîneur','coach:'+x.id,true):'')+'</div></article>').join('')||'<p>Aucun dossier pour cette sélection.</p>')+'</div>'+(home.archives?.length?'<details class="card"><summary>Dossiers archivés · '+home.archives.length+'</summary>'+home.archives.map(x=>'<p>'+esc(x.title)+' '+btn('Supprimer','remove:'+x.id,true)+'</p>').join('')+'</details>':'')+adminPanel();
 }
 function createForm(){
  const m=matchBy(activeMatch)||home.matches[0];
@@ -50,7 +50,7 @@ function setMatch(id){
 }
 async function open(id,coach=false,reset=true){
  view=coach?'coach':'';d=await api('detail',{id,view});
- if(reset){ids=null;selection={};response='';conversation={};focusId='';preview=false;window.scrollTo(0,0)}
+ if(reset){comparisonId='';phaseFocus='';phaseStep=null;ids=null;selection={};response='';conversation={};focusId='';preview=false;window.scrollTo(0,0)}
  render();
 }
 function field(e){
@@ -59,8 +59,13 @@ function field(e){
  return '<svg class="pitch" viewBox="0 0 128 89" role="img" aria-label="'+esc(e.player+' · '+e.tags.join(', ')+' · attaque vers la droite')+'"><defs><marker id="'+marker+'" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#ffdf72"/></marker></defs><rect width="128" height="89" rx="3" fill="#133f3d"/><path fill="#1b5150" d="M4 4h20v80H4z M44 4h20v80H44z M84 4h20v80H84z"/><g fill="none" stroke="#82aaa1" stroke-width=".55"><rect x="4" y="4" width="120" height="80"/><path d="M64 4v80 M4 23h18v42H4 M124 23h-18v42h18 M4 34h6v20H4 M124 34h-6v20h6"/><circle cx="64" cy="44" r="9.15"/></g><path d="M84 4v80" stroke="#c3e8ad" stroke-width=".65" stroke-dasharray="2 1.6"/><text x="85" y="9" fill="#e6f4d9" font-size="2.8">DERNIER TIERS</text>'+(hasEnd?'<line x1="'+x+'" y1="'+y+'" x2="'+(4+e.end[0])+'" y2="'+(4+e.end[1])+'" stroke="#ffdf72" stroke-width="1.3" '+(e.kind==='Conduite'?'stroke-dasharray="2 1"':'')+' marker-end="url(#'+marker+')"/>':'')+'<circle cx="'+x+'" cy="'+y+'" r="2.2" fill="#fff" stroke="#102434" stroke-width=".8"/></svg>';
 }
 function excerpt(s,n){return s.length>n?s.slice(0,n-1)+'…':s}
+function briefingField(e){
+ const steps=d.phases?.[e.phase]?.steps||[];
+ const index=steps.findIndex(s=>s.id===e.id);
+ return index>=0?trajectory(e,steps.slice(index,index+5)):field(e);
+}
 function printSheet(items){
- return '<div id="sheet"><small>FPI · Briefing du staff</small><h1>'+esc(d.title)+'</h1><p>'+esc(matchName(matchBy(d.matchId)))+' · '+esc(span(d.range))+'</p><h2>'+esc(excerpt(d.summary||items[0]?.note||d.scenario,350))+'</h2><div class="printgrid">'+items.slice(0,3).map(e=>'<article>'+field(e)+'<b>'+esc(e.player)+'</b><p>'+bounds(e)+'</p><p>'+esc(excerpt(e.note||e.tags.join(' · '),190))+'</p></article>').join('')+'</div><h3>Point à discuter</h3><p>'+esc(d.discussion||question(d.mode))+'</p></div>';
+ return '<div id="sheet"><small>FPI · Briefing du staff</small><h1>'+esc(d.title)+'</h1><p>'+esc(matchName(matchBy(d.matchId)))+' · '+esc(span(d.range))+'</p><h2>'+esc(excerpt(d.summary||items[0]?.note||d.scenario,350))+'</h2><div class="printgrid">'+items.slice(0,3).map(e=>'<article>'+briefingField(e)+'<b>'+esc(e.player)+'</b><p>'+bounds(e)+'</p><p>'+esc(excerpt(e.note||e.tags.join(' · '),190))+'</p></article>').join('')+'</div><h3>Point à discuter</h3><p>'+esc(d.discussion||question(d.mode))+'</p></div>';
 }
 function editor(){
  return '<details class="card"><summary>Modifier le titre et le briefing</summary><form id="meta"><label>Titre métier<input required maxlength="120" name="title" value="'+esc(d.title)+'"></label><label>Conclusion du staff<textarea name="summary" maxlength="1500">'+esc(d.summary)+'</textarea></label><label>Point à discuter<textarea name="discussion" maxlength="500">'+esc(d.discussion)+'</textarea></label><label class="check"><input type="checkbox" name="includeTotal" '+(d.includeTotal?'checked':'')+'> Publier aussi le nombre de situations candidates</label><button>Enregistrer le briefing</button></form></details>';
@@ -70,6 +75,54 @@ function actionDetail(e,editing){
  const events=[...(e.before||[]),...(e.after||[])];
  return '<div class="tactical"><div class="pitchhead"><b>'+esc(e.kind)+' · '+e.clock+'</b><span>Attaque →</span></div>'+field(e)+'<p class="caption">Départ ● · '+(e.kind==='Conduite'?'Conduite en pointillés':e.end.length?'Flèche vers l’arrivée':'Lieu de la perte candidate')+'</p></div><div class="reading"><small>'+bounds(e)+' · fenêtre d’observation</small><h2>'+esc(e.player)+'</h2><b>'+esc(e.tags.join(' · '))+'</b><p>'+esc(e.note||'')+'</p>'+(events.length?'<details><summary>Événements autour de l’action</summary><ol>'+events.map(a=>'<li>'+clock(Number(e.clock.split(':')[0])*60+Number(e.clock.split(':')[1])+a.s)+' · '+esc(a.team)+' · '+esc(a.action)+'</li>').join('')+'</ol></details>':'')+(e.clip?btn('Voir la séquence','clip'):'<small>Preuve événementielle · vidéo synchronisée indisponible</small>')+'<div id="video"></div><details><summary>Source de la situation</summary><small>StatsBomb Open Data · '+esc(e.id)+'</small></details></div>'+(editing?'<form class="mark card" data-id="'+e.id+'"><label>Observation du staff<textarea name="note" maxlength="1200">'+esc(e.note)+'</textarea></label><label>Décision<select name="decision">'+options(['Retenue','Écartée','À examiner'],e.decision)+'</select></label><label class="check"><input name="featured" type="checkbox" '+(e.featured?'checked':'')+'> Illustration principale pour le briefing (3 maximum)</label><details><summary>Associer une vidéo autorisée et synchronisée</summary><label>URL HTTPS du fichier vidéo<input type="url" name="clipUrl" value="'+esc(e.clip?.url)+'"></label><label>Seconde vidéo correspondant au début de la fenêtre<input type="number" min="0" step=".01" name="clipStart" value="'+(e.clip?.start||0)+'"></label><label class="check"><input type="checkbox" name="checked" '+(e.clip?'checked':'')+'> Source autorisée et synchronisation vérifiée par le staff</label></details><button>Enregistrer la décision</button></form>':'');
 }
+let phaseStep=null, comparisonId='', phaseFocus='';
+const rules={'Entrée dans le dernier tiers':'Franchissement de x=80 sur un terrain StatsBomb de 120 unités.','Passe progressive':'Passe réussie depuis x<80 avec au moins 15 unités gagnées.','Conduite progressive':'Conduite depuis x<80 avec au moins 15 unités gagnées.','Renversement':'Passe réussie avec au moins 35 unités de déplacement latéral.','Perte candidate':'Contrôle manqué ou dépossession enregistré pendant la possession.'};
+function downstream(e){
+ const phase=d.phases?.[e.phase], i=phase?.steps.findIndex(s=>s.id===e.id)??-1;
+ return i<0?[]:phase.steps.slice(i+1);
+}
+function ending(e){
+ const steps=downstream(e),shot=steps.find(s=>s.kind==='Tir');
+ if(shot)return 'Tir '+(shot.result||'enregistré')+' à '+clock(shot.t);
+ const last=steps.at(-1);
+ return last?last.kind+(last.result?' '+last.result:'')+' à '+clock(last.t):d.phases?.[e.phase]?.outcome||'Suite non documentée';
+}
+function trajectory(e,steps){
+ let svg=field(e);
+ const markers=steps.map((s,i)=>{
+   const [x,y]=s.xy;
+   const line=s.end?.length?'<line x1="'+(4+x)+'" y1="'+(4+y)+'" x2="'+(4+s.end[0])+'" y2="'+(4+s.end[1])+'" stroke="'+(s.kind==='Tir'?'#ffaf78':'#ffdf72')+'" stroke-width="1" '+(s.kind==='Conduite'?'stroke-dasharray="1 1"':'')+'/>':'';
+   return line+'<circle cx="'+(4+x)+'" cy="'+(4+y)+'" r="2.6" fill="#102434"/><text x="'+(4+x)+'" y="'+(5+y)+'" text-anchor="middle" fill="white" font-size="3">'+(i+1)+'</text>';
+ }).join('');
+ return svg.replace('</svg>',markers+'</svg>');
+}
+const stepText=s=>clock(s.t)+' · '+s.player+' · '+s.kind+(s.recipient?' → '+s.recipient:'')+(s.result?' ('+s.result+')':'');
+function comparePanel(e){
+ const steps=d.phases[e.phase].steps;const i=steps.findIndex(s=>s.id===e.id);
+ const trail=steps.slice(i,i+5);
+ return '<article><small>'+bounds(e)+' · '+side(e.y)+'</small><h3>'+esc(e.player)+'</h3>'+trajectory(e,trail)+'<p><b>'+esc(ending(e))+'</b></p><ol>'+trail.map(s=>'<li>'+esc(stepText(s))+'</li>').join('')+'</ol></article>';
+}
+function phaseView(e,items){
+ const phase=d.phases?.[e?.phase];if(!phase)return '';
+ if(phaseFocus!==e.id){phaseStep=null;phaseFocus=e.id}
+ const steps=phase.steps,index=Math.max(0,steps.findIndex(s=>s.id===e.id));
+ const n=Math.min(steps.length-1,phaseStep??index),s=steps[n];
+ const similar=items.filter(x=>x.phase!==e.phase&&d.phases?.[x.phase]&&side(x.y)===side(e.y)&&x.tags.some(t=>e.tags.includes(t)));
+ const comparison=similar.find(x=>x.id===comparisonId);
+ const annotation=d.items.find(x=>x.id===s?.id)?.note;
+ return '<section id="phaseview" class="card"><small>Possession '+esc(phase.id)+' · '+periodNames[e.p]+' · '+clock(phase.start)+' – '+clock(phase.finish)+'</small><h2>Lire la possession</h2><p>Score avant l’action : '+(e.score||[]).join(' – ')+' · '+esc(matchName(matchBy(d.matchId)))+'</p><p><b>Pourquoi cette action ?</b> '+esc(e.tags.map(t=>rules[t]).filter(Boolean).join(' '))+'</p>'+(s?field({...e,player:s.player,kind:s.kind,x:s.xy[0],y:s.xy[1],end:s.end})+'<label>Étape '+(n+1)+' / '+steps.length+'<select id="step">'+steps.map((v,i)=>'<option value="'+i+'" '+(i===n?'selected':'')+'>'+(i+1)+'. '+esc(stepText(v))+'</option>').join('')+'</select></label><div class="row">'+btn('Étape précédente','backstep',true)+btn('Étape suivante','forwardstep',true)+'</div><p>'+esc(annotation||'')+'</p>':'')+'<p><b>Après cette action</b> · '+esc(ending(e))+'<br>'+esc(phase.outcome)+'</p><p><b>Lecture du staff</b> · '+esc(e.note||'Aucune annotation renseignée.')+'</p><label>Comparer dans la même zone<select id="compare"><option value="">Choisir une autre situation</option>'+similar.map(x=>'<option value="'+x.id+'" '+(x.id===comparisonId?'selected':'')+'>'+esc(x.clock+' · '+x.player+' · '+ending(x))+'</option>').join('')+'</select></label>'+(comparison?'<div class="comparison">'+comparePanel(e)+comparePanel(comparison)+'</div>':'')+'</section>';
+}
+function phaseNav(items,m){
+ const phases=new Map();
+ for(const e of items)if(d.phases?.[e.phase]&&!phases.has(e.phase))phases.set(e.phase,e);
+ if(!phases.size)return '';
+ return '<section class="card"><h2>Chronologie du match</h2><p>'+phases.size+' possessions · '+items.length+' actions dans la sélection</p>'+Object.keys(m.ends).map(p=>{
+   const markers=[...phases.values()].filter(e=>String(e.p)===p).map(e=>({t:d.phases[e.phase].start,html:btn(clock(d.phases[e.phase].start)+(e.decision==='Retenue'||items.some(x=>x.phase===e.phase&&x.decision==='Retenue')?' ★':''),'phase:'+e.id,true)}));
+   for(const g of m.goals.filter(g=>String(g.p)===p))markers.push({t:g.t,html:'<strong>⚽ '+clock(g.t)+' · '+g.score.join('–')+'</strong>'});
+   return '<details '+(p===String(items.find(e=>e.id===focusId)?.p)?'open':'')+'><summary>'+periodNames[p]+'</summary><div class="markers">'+markers.sort((a,b)=>a.t-b.t).map(v=>v.html).join('')+'</div></details>';
+ }).join('')+'<small>★ Situation retenue · ⚽ But</small></section>';
+}
+
 function render(){
  const m=matchBy(d.matchId), retained=d.items.filter(e=>e.decision==='Retenue'), editing=d.edit&&d.status==='En revue'&&!preview;
  const source=(preview||!d.edit)?[...retained].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)):d.items;
@@ -79,18 +132,23 @@ function render(){
  const metric=(!d.edit||preview)?retained.length+(retained.length===1?' situation retenue':' situations retenues')+' par le staff'+(d.includeTotal?' parmi '+d.total+' candidates':''):d.items.length+' situations candidates · '+retained.length+' retenues';
  const controls=d.edit?'<div class="row">'+(d.status==='En revue'?(preview?btn('Valider les observations retenues','validate')+btn('Revenir à la revue','preview',true):btn('Relire avant validation','preview')+btn('Rejeter le dossier','reject',true)):d.status==='Validée'?btn('Publier pour l’entraîneur','publish')+btn('Reprendre la revue','review',true):btn(d.published?'Préparer une nouvelle version':'Ouvrir la revue','review'))+'</div>':'';
  const groups=new Map();
- for(const item of items){const key=values[groupBy](item);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item)}
+ for(const item of items){if(e?.phase&&item.phase!==e.phase)continue;const key=values[groupBy](item);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item)}
  const grouped=[...groups].sort(([a],[b])=>a.localeCompare(b,'fr')).map(([key,rows])=>'<optgroup label="'+esc(key)+' · '+rows.length+'">'+rows.map(a=>'<option value="'+a.id+'" '+(a.id===focusId?'selected':'')+'>'+a.clock+' · '+esc(a.player)+' · '+esc(a.kind)+'</option>').join('')+'</optgroup>').join('');
  const totalByPeriod=Object.keys(m.ends).map(p=>[periodNames[p],items.filter(e=>e.p===Number(p)).length]).filter(x=>x[1]);
  const video=replay[m.id];
+ const phaseRows=new Map();
+ for(const x of items){if(!x.phase)continue;const rows=phaseRows.get(x.phase)||[];rows.push(x);phaseRows.set(x.phase,rows)}
+ const phaseSelect=phaseRows.size?'<label>Choisir une possession<select id="phasepick">'+[...phaseRows].map(([k,rows])=>{const ph=d.phases[k];return '<option value="'+rows[0].id+'" '+(k===e?.phase?'selected':'')+'>'+clock(ph.start)+' – '+clock(ph.finish)+' · '+rows.length+' action(s) · '+esc(ph.outcome)+'</option>'}).join('')+'</select></label>':'';
  let html='<div class="sectionhead">'+btn('← Dossiers','home',true)+'<small>'+esc(d.mode)+'</small></div><section class="lead"><small>'+esc(matchName(m))+' · '+m.score.join(' – ')+(m.penalties.some(Boolean)?' ('+m.penalties.join('–')+' t.a.b.)':'')+' · '+esc(d.status)+'</small><h1>'+esc(d.title)+'</h1><p>'+esc(d.summary||(!d.edit&&retained[0]?.note)||question(d.mode))+'</p><small>Intervalle analysé · '+span(d.range)+'</small></section><div class="sectionhead"><div><strong>'+esc(metric)+'</strong>'+(d.edit&&d.thirdSeconds!==undefined?'<small> · 3 situations retenues en '+clock(d.thirdSeconds)+' (temps écoulé)</small>':'')+'</div>'+controls+'</div>';
  if((!d.edit||preview)&&e)html+='<div class="spotlight"><div><small>Situation à montrer · '+bounds(e)+'</small><h2>'+esc(e.player)+'</h2><p>'+esc(e.note||e.tags.join(' · '))+'</p>'+btn('Explorer cette action','jump',true)+'</div>'+field(e)+'</div>';
  if(editing)html+=editor();
- if(preview)html+='<p class="result">Aperçu entraîneur · seuls les éléments retenus seront publiés.</p>';
- html+='<section class="card"><div class="sectionhead"><h2>Explorer les situations</h2>'+btn('Réinitialiser','reset',true)+'</div><div class="filters">'+Object.entries(values).map(([k,fn],i)=>'<label>'+['Joueur','Zone de départ','Type d’action','Période'][i]+'<select data-filter="'+k+'"><option value="">Tout afficher</option>'+options([...new Set(source.map(fn))].sort(),selection[k])+'</select></label>').join('')+'</div><div class="work"><aside><label>Regrouper par<select id="group">'+Object.entries({player:'Joueur',zone:'Zone',kind:'Type d’action',period:'Période'}).map(([k,v])=>'<option value="'+k+'" '+(groupBy===k?'selected':'')+'>'+v+'</option>').join('')+'</select></label><label>Situations similaires · '+items.length+'<select size="7" id="events">'+grouped+'</select></label><div class="row">'+btn('← Précédente','prev',true)+btn('Suivante →','next',true)+'</div></aside><div id="observation">'+actionDetail(e,editing)+'</div></div></section>';
+ if(preview)html+='<p class="result">Aperçu entraîneur · les actions retenues et le déroulé factuel de leurs possessions seront publiés.</p>';
+ html+=phaseNav(items,m);
+ html+='<section class="card"><div class="sectionhead"><h2>Explorer les situations</h2>'+btn('Réinitialiser','reset',true)+'</div><div class="filters">'+Object.entries(values).map(([k,fn],i)=>'<label>'+['Joueur','Zone de départ','Type d’action','Période'][i]+'<select data-filter="'+k+'"><option value="">Tout afficher</option>'+options([...new Set(source.map(fn))].sort(),selection[k])+'</select></label>').join('')+'</div>'+phaseSelect+'<div class="work"><aside><label>Regrouper par<select id="group">'+Object.entries({player:'Joueur',zone:'Zone',kind:'Type d’action',period:'Période'}).map(([k,v])=>'<option value="'+k+'" '+(groupBy===k?'selected':'')+'>'+v+'</option>').join('')+'</select></label><label>Situations similaires · '+items.length+'<select size="7" id="events">'+grouped+'</select></label><div class="row">'+btn('← Précédente','prev',true)+btn('Suivante →','next',true)+'</div></aside><div id="observation">'+actionDetail(e,editing)+'</div></div></section>';
+ html+=phaseView(e,items);
  if(totalByPeriod.length>1)html+='<details class="card"><summary>Comparer les périodes de la sélection</summary>'+totalByPeriod.map(([label,n])=>'<p>'+label+' · '+n+' <meter value="'+n+'" max="'+items.length+'"></meter></p>').join('')+'</details>';
  html+='<section class="card"><h2>Interroger le dossier</h2><form id="ask"><label>Recherche factuelle · '+(d.edit&&!preview?'situations candidates':'actions publiées par le staff')+'<input name="q" maxlength="300" required placeholder="Montre-moi ses autres passes"></label><button>Rechercher</button></form><p role="status">'+esc(response)+'</p></section><section class="card"><h2>Briefing</h2><p>'+esc(d.discussion||question(d.mode))+'</p><div class="row">'+(!d.edit||preview?btn('Imprimer la fiche · PDF','print'):'')+(!d.edit?btn('Exporter le dossier JSON','export',true):'')+(d.published?btn('Copier le lien privé','share',true):'')+(m.id==='3869486'?'<a href="https://www.plus.fifa.com/it/content/marocco-portogallo-quarti-di-finale-coppa-del-mondo-fifa-qatar-2022-match-completo/5f1b5797-25d0-4e10-b723-5072b470bae8" target="_blank" rel="noreferrer">Replay externe FIFA+</a>':'')+'<a href="'+video[1]+'" target="_blank" rel="noreferrer">'+video[0]+'</a></div></section>';
- if(d.edit)html+='<details class="card"><summary>Gérer ce dossier</summary>'+btn(d.published?'Archiver le dossier':'Supprimer le brouillon',d.published?'archive':'delete',true)+'</details>';
+ if(d.edit)html+='<section class="card row">'+btn('Supprimer le dossier','remove:'+d.id,true)+(d.published?btn('Archiver le dossier','archive',true):'')+'</section>';
  app.innerHTML=html+printSheet([...retained].sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)));
 }
 function listen(type,fn){document.addEventListener(type,async ev=>{
@@ -115,12 +173,23 @@ listen('change',ev=>{
    document.querySelector(first?'[name=from]':'[name=to]').value=clock(first?[0,0,2700,5400,6300][el.value]:m.ends[el.value]);
  }
  if(el.dataset.filter){selection[el.dataset.filter]=el.value;focusId='';render()}
+ if(el.id==='phasepick'){focusId=el.value;phaseFocus='';render();phaseStep=0;render()}
+ if(el.id==='step'){phaseStep=Number(el.value);render()}
+ if(el.id==='compare'){comparisonId=el.value;render()}
  if(el.id==='group'){groupBy=el.value;render()}
  if(el.id==='events'){focusId=el.value;conversation={};render()}
 });
 listen('click',async ev=>{
  const a=ev.target.closest('[data-action]')?.dataset.action;if(!a)return;
  const [action,id]=a.split(':');
+ if(action==='remove'){
+   const target=d?.id===id?d:[...home.dossiers,...(home.archives||[])].find(x=>x.id===id);
+   if(target&&confirm('Supprimer définitivement « '+target.title+' » ?'+(target.published?' Le briefing et son lien seront retirés pour les entraîneurs.':''))){
+     await api('delete',{id,version:target.version,confirmPublished:!!target.published});navigationReset();await dashboard();notice.textContent='Dossier supprimé.';
+   }
+ }
+ if(action==='phase'){focusId=id;phaseFocus='';render();phaseStep=0;render();document.querySelector('#phaseview')?.scrollIntoView()}
+ if(action==='backstep'||action==='forwardstep'){const select=document.querySelector('#step');phaseStep=Math.max(0,Math.min(select.length-1,Number(select.value)+(action==='backstep'?-1:1)));render()}
  if(action==='toggle'){activation=!activation;auth()}
  if(action==='home'){navigationReset();await dashboard()}
  if(action==='logout'){await api('logout');activation=false;d=null;home=null;app.innerHTML='';auth()}
