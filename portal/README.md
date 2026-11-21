@@ -1,35 +1,29 @@
-# FPI · Portail privé
+# FPI · Bibliothèque de matchs et briefings du staff
 
-Application de démonstration déployée sur https://fpi-staff.vercel.app. Le répertoire portal est la racine du déploiement Vercel. L’ancienne application Streamlit reste disponible dans le dépôt. Le projet Vercel reçoit les fichiers sources directement, la connexion Git automatique n’est pas configurée.
+Accès privé : https://fpi-staff.vercel.app. Les comptes et les publications antérieures utilisent le même stockage et les mêmes sessions. Les anciens dossiers sont associés à Maroc–Portugal. Le serveur récupère les preuves temporelles par identifiant StatsBomb. Chaque correction d’un dossier déjà publié conserve la dernière version approuvée jusqu’à la publication suivante.
 
-## Accès et utilisation
+## Utiliser le portail
 
-Lors de la première connexion, saisir le code individuel à usage unique et choisir un mot de passe de 12 caractères minimum. Les invitations ordinaires expirent après 24 heures. L’administrateur peut créer une invitation, renouveler l’accès, modifier le rôle ou révoquer un utilisateur. Les sessions durent huit heures.
+Depuis la bibliothèque, sélectionner une rencontre puis Créer un dossier. Donner un titre métier, choisir l’équipe, l’objectif, le scénario et les bornes de l’analyse. Les deux périodes et les deux temps sont obligatoires. Par défaut l’analyse couvre le match jusqu’à la fin réellement enregistrée (hors tirs au but). Ouvrir la revue pour modifier le titre, la conclusion, le point à discuter et l’option de publication du nombre de candidats.
 
-Depuis le compte Staff, choisir le mode, l’équipe et le scénario, puis lancer l’analyse. Ouvrir la revue, déplier les événements, saisir une observation, la retenir et enregistrer chaque décision. Valider la sélection puis publier. Une publication ne contient que les événements retenus. La version précédente reste accessible pendant les corrections. Depuis le compte Entraîneur, ouvrir le dossier, explorer la carte et les preuves, interroger les actions, filtrer et exporter le dossier JSON.
+Regrouper les situations par joueur, zone, type ou période, ou filtrer ces dimensions. Le terrain montre la situation sélectionnée, le sens de l’attaque et le dernier tiers. Un trait continu indique une passe, un tracé discontinu une conduite. La source événementielle et les événements de contexte sont accessibles dans la fiche. Retenir des observations et désigner jusqu’à trois illustrations principales. Après trois décisions positives simultanées, le staff voit le temps écoulé depuis la création, pauses comprises.
 
-## Périmètre
+Relire avant validation, valider puis publier. Le coach suit le lien privé après connexion. La fiche imprimable (A4 paysage) contient le message du staff, jusqu’à trois illustrations et le point à discuter. Les dossiers de test historiques restent identifiables par leur auteur. Supprimer un brouillon et archiver une publication sont des commandes distinctes, avec confirmation. Une publication archivée quitte les espaces actifs.
 
-Maroc–Portugal, quart de finale du 10 décembre 2022. Les 3 381 événements de StatsBomb Open Data donnent 254 situations distinctes. L’extraction reprend les seuils de progression et de renversement de src/fpi/analysis/advanced.py et étend les situations aux conduites et contrôles manqués. Les coordonnées sont propres à l’équipe agissante. Les candidats après perte sont limités aux dépossessions et contrôles manqués en possession. Une passe ratée n’est pas systématiquement une perte en jeu ouvert. Les événements suivants sur huit secondes sont des éléments de contexte.
+## Horloges et données
 
-Les libellés des scénarios, la carte, les compteurs et la recherche sont déterministes. Les comparaisons de mi-temps et de zones portent sur les actions sélectionnées. Les hypothèses tactiques et leurs annotations sont du ressort du staff. Une recherche libre est limitée aux termes pris en charge. Aucun LLM n’est déployé.
+Source : StatsBomb Open Data, Coupe du monde 2022, compétition 43 saison 106. Maroc–Portugal (3869486) et Argentine–France (3869685). Chaque intervalle d’analyse est une paire (période, minute:seconde) de début et de fin. Les événements sont inclus selon leur instant de départ, bornes incluses. Le temps additionnel et les prolongations sont traités dans leur période respective. Les séances de tirs au but sont exclues de l’analyse tactique. Le résultat des tirs au but est indiqué à part.
 
-Le lien FIFA+ est externe. Aucun traitement des images du match professionnel, découpage de séquences, entraînement ou synchronisation vidéo n’est livré ici. Aucun contenu SoccerTrack n’est servi par le portail. La PR expérimentale #50 et l’issue #29 poursuivent un chantier distinct.
+La fenêtre d’observation s’étend de huit secondes avant l’événement à huit secondes après, ou jusqu’à la fin mesurée de l’action si elle est plus longue. Les bornes restent dans la période. L’instant de l’action, la fenêtre de contexte, la période d’analyse et le minutage vidéo sont des informations distinctes.
 
-## Source et reproductibilité
+Depuis portal, régénérer le catalogue avec python scripts/prepare.py /chemin/106.json /chemin/3869486.json /chemin/3869685.json. Les fichiers proviennent de https://github.com/statsbomb/open-data . Les 254 et 309 situations reposent sur les définitions de passes ou conduites progressives, entrées dans le dernier tiers, renversements et pertes candidates (dépossessions et contrôles manqués). L’assistant factuel interroge le périmètre autorisé. Il utilise le joueur nommé ou celui de la situation et traite les questions de suivi.
 
-Source : https://github.com/statsbomb/open-data – données événementielles de StatsBomb. Fichier data/events/3869486.json, SHA-256 455127b456021593874476ee8b5dad01b0166b8da814c095300b6ed608a08993. Métadonnées vérifiées dans data/matches/43/106.json. Télécharger le fichier source puis exécuter python scripts/prepare.py /chemin/3869486.json. Les données condensées restent côté serveur.
+## Vidéo et présentation
 
-## Architecture et vérifications
+Les liens de résumé sont externes. Pour associer une source HTTPS vidéo directe, l’analyste indique la seconde du média correspondant au début de la fenêtre d’observation et confirme ses vérifications d’usage et de synchronisation. Le coach voit le bouton de séquence uniquement si l’action et la source ont été publiées ensemble. Aucun suivi intégral des joueurs et du ballon sur ces rencontres n’est certifié. L’image de stade du portail est une illustration générique (Unsplash, photo-1522778119026-d647f0596c20).
 
-Fonction Node sur Vercel, ressources statiques dans public, état en Vercel Blob privé à Francfort. L’état contient comptes, sessions hachées, invitations hachées, brouillons, validations, historique de décisions et dernière publication. Une écriture conditionnelle sur l’ETag évite d’écraser une mise à jour concurrente. Le serveur vérifie les rôles et propriétaires pour chaque action. Le navigateur reçoit uniquement les données autorisées. Ce stockage monofichier est destiné à un petit staff en démonstration.
+## Exploitation
 
-Configurer BLOB_READ_WRITE_TOKEN avec le projet Blob privé. Pour une installation vierge, fournir uniquement le SHA-256 d’un code aléatoire dans FPI_BOOTSTRAP_HASH et remettre ce code en privé à l’administrateur. Le code initial ne fonctionne que lorsque le magasin est vide. Les secrets ne sont pas stockés dans Git.
+Fonction Node, Vercel Blob privé, écritures conditionnelles avec ETag. La racine du projet est portal. Le projet est déployé à partir des fichiers de ce dossier. Le jeton de stockage et le condensat SHA-256 du code initial sont des variables de projet. Les codes d’invitation individuels expirent après 24 heures ; les sessions durent huit heures. Les rôles et accès directs sont contrôlés côté serveur.
 
-Dans portal, lancer npm ci, npm test, node --check public/app.js et python3 scripts/check_evidence.py. Les tests couvrent les deux modes, les deux équipes, les deux scénarios, les permissions, le conflit de version, le rejet et la conservation du publié. Le contrôle direct sur l’URL de production a confirmé le refus du brouillon par les routes de consultation, de recherche et de publication, puis la visibilité d’une seule action retenue après publication.
-
-### Recette du 21 novembre 2026, heure de Paris
-
-Le parcours a également été exécuté sur le site en production avec deux navigateurs Chromium séparés. Le staff a lancé les transitions du Maroc, retenu et annoté une action, validé puis publié. Le coach a ouvert le dossier, comparé les pertes entre mi-temps et téléchargé un JSON contenant uniquement l’action retenue. Les vues Staff et Entraîneur ont été contrôlées à 375, 768, 1024 et 1440 pixels avec vérification de la largeur et captures dans docs/recette. Le rejeu par requêtes API a testé séparément la progression du Portugal et le maintien du publié pendant une correction. Les cinq dossiers de recette restent visibles à l’administrateur, dont trois publications. Leur auteur « Recette staff » est affiché dans la liste. Les comptes techniques de recette restent actifs.
-
-Le socle gratuit de démonstration utilise une seule rencontre et un magasin Blob privé. La base PostgreSQL gratuite préparée sur Render pendant la vérification d’hébergement reste vide et indépendante de l’application. La conformité WCAG complète et la montée en charge ne sont pas certifiées.
+Vérifications : npm ci, npm test, node --check public/app.js et python scripts/check_evidence.py. Pour tester l’interface avec deux comptes de recette, utiliser scripts/browser_smoke.py avec les identifiants dédiés et l’URL dans les variables FPI_TEST_URL, FPI_STAFF_NAME, FPI_STAFF_PASSWORD, FPI_COACH_NAME, FPI_COACH_PASSWORD. Ce test crée et publie un dossier.
