@@ -50,7 +50,7 @@ function setMatch(id){
 }
 async function open(id,coach=false,reset=true){
  view=coach?'coach':'';d=await api('detail',{id,view});
- if(reset){comparisonId='';phaseFocus='';phaseStep=null;ids=null;selection={};response='';conversation={};focusId='';preview=false;window.scrollTo(0,0)}
+ if(reset){goalNote='';comparisonId='';phaseFocus='';phaseStep=null;ids=null;selection={};response='';conversation={};focusId='';preview=false;window.scrollTo(0,0)}
  render();
 }
 function field(e){
@@ -75,7 +75,7 @@ function actionDetail(e,editing){
  const events=[...(e.before||[]),...(e.after||[])];
  return '<div class="tactical"><div class="pitchhead"><b>'+esc(e.kind)+' · '+e.clock+'</b><span>Attaque →</span></div>'+field(e)+'<p class="caption">Départ ● · '+(e.kind==='Conduite'?'Conduite en pointillés':e.end.length?'Flèche vers l’arrivée':'Lieu de la perte candidate')+'</p></div><div class="reading"><small>'+bounds(e)+' · fenêtre d’observation</small><h2>'+esc(e.player)+'</h2><b>'+esc(e.tags.join(' · '))+'</b><p>'+esc(e.note||'')+'</p>'+(events.length?'<details><summary>Événements autour de l’action</summary><ol>'+events.map(a=>'<li>'+clock(Number(e.clock.split(':')[0])*60+Number(e.clock.split(':')[1])+a.s)+' · '+esc(a.team)+' · '+esc(a.action)+'</li>').join('')+'</ol></details>':'')+(e.clip?btn('Voir la séquence','clip'):'<small>Preuve événementielle · vidéo synchronisée indisponible</small>')+'<div id="video"></div><details><summary>Source de la situation</summary><small>StatsBomb Open Data · '+esc(e.id)+'</small></details></div>'+(editing?'<form class="mark card" data-id="'+e.id+'"><label>Observation du staff<textarea name="note" maxlength="1200">'+esc(e.note)+'</textarea></label><label>Décision<select name="decision">'+options(['Retenue','Écartée','À examiner'],e.decision)+'</select></label><label class="check"><input name="featured" type="checkbox" '+(e.featured?'checked':'')+'> Illustration principale pour le briefing (3 maximum)</label><details><summary>Associer une vidéo autorisée et synchronisée</summary><label>URL HTTPS du fichier vidéo<input type="url" name="clipUrl" value="'+esc(e.clip?.url)+'"></label><label>Seconde vidéo correspondant au début de la fenêtre<input type="number" min="0" step=".01" name="clipStart" value="'+(e.clip?.start||0)+'"></label><label class="check"><input type="checkbox" name="checked" '+(e.clip?'checked':'')+'> Source autorisée et synchronisation vérifiée par le staff</label></details><button>Enregistrer la décision</button></form>':'');
 }
-let phaseStep=null, comparisonId='', phaseFocus='';
+let phaseStep=null, comparisonId='', phaseFocus='',goalNote='';
 const rules={'Entrée dans le dernier tiers':'Franchissement de x=80 sur un terrain StatsBomb de 120 unités.','Passe progressive':'Passe réussie depuis x<80 avec au moins 15 unités gagnées.','Conduite progressive':'Conduite depuis x<80 avec au moins 15 unités gagnées.','Renversement':'Passe réussie avec au moins 35 unités de déplacement latéral.','Perte candidate':'Contrôle manqué ou dépossession enregistré pendant la possession.'};
 function downstream(e){
  const phase=d.phases?.[e.phase], i=phase?.steps.findIndex(s=>s.id===e.id)??-1;
@@ -89,10 +89,14 @@ function ending(e){
 }
 function trajectory(e,steps){
  let svg=field(e);
+ const labels=[];
  const markers=steps.map((s,i)=>{
    const [x,y]=s.xy;
    const line=s.end?.length?'<line x1="'+(4+x)+'" y1="'+(4+y)+'" x2="'+(4+s.end[0])+'" y2="'+(4+s.end[1])+'" stroke="'+(s.kind==='Tir'?'#ffaf78':'#ffdf72')+'" stroke-width="1" '+(s.kind==='Conduite'?'stroke-dasharray="1 1"':'')+'/>':'';
-   return line+'<circle cx="'+(4+x)+'" cy="'+(4+y)+'" r="2.6" fill="#102434"/><text x="'+(4+x)+'" y="'+(5+y)+'" text-anchor="middle" fill="white" font-size="3">'+(i+1)+'</text>';
+   const lx=4+x;let ly=4+y;
+   while(labels.some(([px,py])=>Math.hypot(lx-px,ly-py)<5.8))ly+=y>55?-6:6;
+   labels.push([lx,ly]);
+   return line+'<path d="M'+lx+' '+(4+y)+' V'+ly+'" stroke="#cee2d6" stroke-width=".55"/><circle cx="'+lx+'" cy="'+ly+'" r="2.6" fill="#102434"/><text x="'+(4+x)+'" y="'+(ly+1)+'" text-anchor="middle" fill="white" font-size="3">'+(i+1)+'</text>';
  }).join('');
  return svg.replace('</svg>',markers+'</svg>');
 }
@@ -118,9 +122,9 @@ function phaseNav(items,m){
  if(!phases.size)return '';
  return '<section class="card"><h2>Chronologie du match</h2><p>'+phases.size+' possessions · '+items.length+' actions dans la sélection</p>'+Object.keys(m.ends).map(p=>{
    const markers=[...phases.values()].filter(e=>String(e.p)===p).map(e=>({t:d.phases[e.phase].start,html:btn(clock(d.phases[e.phase].start)+(e.decision==='Retenue'||items.some(x=>x.phase===e.phase&&x.decision==='Retenue')?' ★':''),'phase:'+e.id,true)}));
-   for(const g of m.goals.filter(g=>String(g.p)===p))markers.push({t:g.t,html:'<strong>⚽ '+clock(g.t)+' · '+g.score.join('–')+'</strong>'});
+   for(const g of m.goals.filter(g=>String(g.p)===p))markers.push({t:g.t,html:btn('⚽ '+clock(g.t)+' · '+g.score.join('–'),'goal:'+m.goals.indexOf(g),true)});
    return '<details '+(p===String(items.find(e=>e.id===focusId)?.p)?'open':'')+'><summary>'+periodNames[p]+'</summary><div class="markers">'+markers.sort((a,b)=>a.t-b.t).map(v=>v.html).join('')+'</div></details>';
- }).join('')+'<small>★ Situation retenue · ⚽ But</small></section>';
+ }).join('')+'<small>★ Situation retenue · ⚽ But</small><p role="status">'+esc(goalNote)+'</p></section>';
 }
 
 function render(){
@@ -187,6 +191,13 @@ listen('click',async ev=>{
    if(target&&confirm('Supprimer définitivement « '+target.title+' » ?'+(target.published?' Le briefing et son lien seront retirés pour les entraîneurs.':''))){
      await api('delete',{id,version:target.version,confirmPublished:!!target.published});navigationReset();await dashboard();notice.textContent='Dossier supprimé.';
    }
+ }
+ if(action==='goal'){
+   const m=matchBy(d.matchId),g=m.goals[Number(id)];if(!g)return;
+   const team=({'Argentina':'Argentine','Morocco':'Maroc'})[g.team]||g.team;
+   const event=d.items.find(x=>x.phase===g.phase&&(!preview||x.decision==='Retenue'));
+   goalNote=periodNames[g.p]+' · '+clock(g.t)+' · But de '+team+' · '+g.score.join(' – ')+(event?' · Possession ouverte.':' · Aucune situation accessible de cette possession dans le dossier.');
+   if(event){ids=null;selection={};focusId=event.id;phaseFocus='';render();phaseStep=0}render();
  }
  if(action==='phase'){focusId=id;phaseFocus='';render();phaseStep=0;render();document.querySelector('#phaseview')?.scrollIntoView()}
  if(action==='backstep'||action==='forwardstep'){const select=document.querySelector('#step');phaseStep=Math.max(0,Math.min(select.length-1,Number(select.value)+(action==='backstep'?-1:1)));render()}
