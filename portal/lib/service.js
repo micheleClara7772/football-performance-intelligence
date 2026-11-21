@@ -7,7 +7,14 @@ const matches = catalog.map(({items,...metadata})=>metadata);
 const indexed = new Map(catalog.flatMap(m=>m.items.map(e=>[e.id,e])));
 const matchOf = d=>catalog.find(m=>m.id===(d.matchId||'3869486'));
 const fullRange = m=>({fromPeriod:1,from:0,toPeriod:Object.keys(m.ends).length,to:Object.values(m.ends).at(-1)});
-const expand = record=>record.items.map(e=>({...indexed.get(e.id),...e}));
+function expand(record){
+  return record.items.map(e=>{
+    const source=indexed.get(e.id);
+    if(!e.clock)return {...source,...e};
+    // Historical snapshots predate observation windows. Preserve the evidence staff published.
+    return {start:source?.start,finish:source?.finish,kind:source?.kind,...e};
+  });
+}
 function inRange(e,r){
   const [min,sec]=e.clock.split(':').map(Number);
   const position=e.p*100000+min*60+sec;
@@ -45,6 +52,9 @@ function openSession(state,user){
 }
 function answer(input,items,context={}){
   let q=normalize(input);
+  if(/\bcelles?\b/.test(q)&&Array.isArray(context?.ids)){
+    const previous=new Set(context.ids);items=items.filter(e=>previous.has(e.id));
+  }
   const wordsOf=s=>normalize(s).match(/[a-z0-9]+/g)||[];
   const players=[...new Set(items.map(e=>e.player))];
   const named=players.filter(name=>wordsOf(name).some(w=>w.length>=4&&wordsOf(q).includes(w)));
@@ -54,6 +64,9 @@ function answer(input,items,context={}){
   const player=named.find(n=>q.includes(normalize(n)))||named[0]||(follow&&(players.includes(context?.player)?context.player:anchor?.player));
   if(player){items=items.filter(e=>e.player===player);q=wordsOf(q).filter(w=>!wordsOf(player).includes(w)).join(' ')}
   if(/autres/.test(q)&&anchor)items=items.filter(e=>e.id!==anchor.id);
+  if(anchor&&/de ce type|cette passe/.test(normalize(input))){
+    items=items.filter(e=>anchor.tags.every(t=>e.tags.includes(t)));
+  }
   const previousKind=context?.kind||anchor?.kind;
   const kind=/passe/.test(q)?'Passe':/conduite/.test(q)?'Conduite':follow?previousKind:null;
   if(kind)items=items.filter(e=>e.kind===kind);
@@ -73,7 +86,7 @@ function answer(input,items,context={}){
   if(/dernier tiers/.test(q)&&!keys.includes('Entrée dans le dernier tiers'))selected=selected.filter(e=>e.x>=80);
   if(/premiere|1re/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===1);
   if(/seconde|deuxieme|2e/.test(q)&&!/compar/.test(q))selected=selected.filter(e=>e.p===2);
-  return {message:selected.length+' action(s) dans la sélection. Première mi-temps : '+selected.filter(e=>e.p===1).length+' · Seconde : '+selected.filter(e=>e.p===2).length+'.',ids:selected.map(e=>e.id),context:{player:player||null,kind:kind||null,event:anchor?.id}};
+  return {message:selected.length+' action(s) dans la sélection. Première mi-temps : '+selected.filter(e=>e.p===1).length+' · Seconde : '+selected.filter(e=>e.p===2).length+'.',ids:selected.map(e=>e.id),context:{player:player||null,kind:kind||null,event:anchor?.id,ids:selected.map(e=>e.id)}};
 }
 export function serve(state,body,sessionKey,bootstrapHash){
   const {action}=body;
@@ -171,7 +184,7 @@ export function serve(state,body,sessionKey,bootstrapHash){
   }else if(action==='validate'&&d.status==='En revue'&&d.items.some(e=>e.decision==='Retenue')){
     d.validation={author:user.name,date:now()};d.status='Validée';
   }else if(action==='publish'&&d.status==='Validée'){
-    d.status='Publiée';d.published={title:d.title,summary:d.summary,discussion:d.discussion,includeTotal:d.includeTotal,total:d.includeTotal?d.items.length:undefined,version:d.version+1,validation:{...d.validation},publication:{author:user.name,date:now()},items:structuredClone(d.items.filter(e=>e.decision==='Retenue'))};
+    d.status='Publiée';d.published={title:d.title,summary:d.summary,discussion:d.discussion,includeTotal:d.includeTotal,total:d.includeTotal?d.items.length:undefined,version:d.version+1,validation:{...d.validation},publication:{author:user.name,date:now()},items:structuredClone(expand(d).filter(e=>e.decision==='Retenue'))};
   }else requireThat(false,'Transition impossible. Retenez au moins une observation avant validation.',400);
   d.version++;d.history.push({action,author:user.name,date:now(),version:d.version,event:body.event});return result({},true);
 }
