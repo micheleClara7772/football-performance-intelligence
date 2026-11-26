@@ -1,0 +1,20 @@
+name: Audit independent SoccerTrack ball GT
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit_soccertrack_ball_gt.py'
+      - 'tests/test_audit_soccertrack_ball_gt.py'
+      - '.github/workflows/audit-soccertrack-ball-gt.yml'
+  workflow_dispatch:
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test annotation audit (no video, no secrets)
+        run: python -m unittest discover -s tests -p 'test_audit_soccertrack_ball_gt.py' -v
